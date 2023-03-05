@@ -30,10 +30,10 @@ export const LeftContent = styled.div`
     }
 `;
 export const InfoIMG = styled.img`
-    width: 400px;
-    height: 300px;
+    width: 600px;
+    height: 400px;
     margin: auto;
-    @media screen and (max-width: 400px){
+    @media screen and (max-width: 1200px){
         width: 100%;
         margin: 0;
         height: auto;
