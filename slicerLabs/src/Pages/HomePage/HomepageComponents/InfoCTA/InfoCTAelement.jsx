@@ -4,7 +4,7 @@ import styled from "styled-components";
 export const InfoCTAContainer = styled.div`
     width: 1200px;
     padding: 40px;
-    margin: 80px auto;
+    margin: 0px auto;
     display: flex;
     align-items:center;
     justify-content: center;
