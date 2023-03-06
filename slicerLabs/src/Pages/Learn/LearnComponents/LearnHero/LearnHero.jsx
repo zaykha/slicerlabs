@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react';
 import { CTABtn } from '../../../../globalcomponents/Buttons/CtaBtn'
 import { 
     LHcontainer, 
@@ -11,8 +11,24 @@ import {
 } from './LearnHeroelement'
 
 const LearnHero = () => {
+  const aboveDivRef = useRef(null);
+  const belowDivRef = useRef(null);
+
+  useEffect(() => {
+    const updatePosition = () => {
+      const aboveHeight = aboveDivRef.current.getBoundingClientRect().height;
+      belowDivRef.current.style.top = `${aboveHeight+50}px`;
+    };
+    
+    updatePosition(); // Set initial position on page load
+    window.addEventListener('resize', updatePosition);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, []);
   return (
-    <LHcontainer>
+    <LHcontainer ref={aboveDivRef}>
         <LHcontents>
             <LHheader>Learn more about 3D printing!</LHheader>
             <LHsubHeader>-SLA & FDM</LHsubHeader>
@@ -24,7 +40,7 @@ const LearnHero = () => {
         </LHcontents>
         
 
-        <ScrollLinks>
+        <ScrollLinks ref={belowDivRef}>
             <SLCard>OUR TECHNOLOGIES</SLCard>
             <SLCard>OUR MATERIALS</SLCard>
             <SLCard>OUR SERVICES</SLCard>

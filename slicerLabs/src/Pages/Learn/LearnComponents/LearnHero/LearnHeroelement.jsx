@@ -6,9 +6,13 @@ export const LHcontainer = styled.div`
     // border: 1px solid red;
     margin: 0 auto 60px auto;
 
-    background: linear-gradient(184.57deg, #001018 5.89%, rgba(72, 178, 229, 0) 96.3%);`;
+    background: linear-gradient(184.57deg, #001018 5.89%, rgba(72, 178, 229, 0) 96.3%);
+    // background: blue;
+    `;
+    
 export const LHcontents = styled.div`
     width: 1200px;
+    height: 80%;
     margin: 20px auto 60px auto;
     display: flex;
     justify-content: center;
@@ -44,7 +48,7 @@ export const ScrollLinks = styled.div`
     justify-content: space-evenly;
     align-items: center;
     position: absolute;
-    top: 47%;
+    top: ${props => props.top}px;
     transform: translateY(-50%);
     left: 0;
     right: 0;
@@ -53,7 +57,7 @@ export const ScrollLinks = styled.div`
         width: 100%;
     }
     @media screen and (max-width: 686px){
-    top: 56%;
+    // top: 56%;
        
     }
 `;
