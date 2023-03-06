@@ -8,6 +8,7 @@ export const TBcontainer = styled.div`
     align-items:center;
     flex-direction: column;
     border-bottom: 1px solid white;
+    padding-bottom: 20px;
     @media screen and (max-width: 1200px){
         width: 80%;
     }
