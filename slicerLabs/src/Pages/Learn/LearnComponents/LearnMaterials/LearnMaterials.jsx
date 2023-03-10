@@ -12,12 +12,12 @@ const LearnMaterials = () => {
 
         <LMContainer>
             <LMNAV>
-                <LMlist>Acrylonitrile Butadiene Styrene (ABS)</LMlist>
-                <LMlist>Polylactic Acid (PLA)</LMlist>
-                <LMlist>Thermoplastic Polyurethane(TPU)</LMlist>
-                <LMlist>Nylon</LMlist>
-                <LMlist>Polyethylene Terephthalate Glycol (PETG)</LMlist>
-                <LMlist>Resins</LMlist>
+                <LMlist><p>Acrylonitrile Butadiene Styrene (ABS)</p></LMlist>
+                <LMlist><p>Polylactic Acid (PLA)</p></LMlist>
+                <LMlist><p>Thermoplastic Polyurethane(TPU)</p></LMlist>
+                <LMlist><p>Nylon</p></LMlist>
+                <LMlist><p>Polyethylene Terephthalate Glycol (PETG)</p></LMlist>
+                <LMlist><p>Resins</p></LMlist>
             </LMNAV>
 
             <LMcontentContainer>

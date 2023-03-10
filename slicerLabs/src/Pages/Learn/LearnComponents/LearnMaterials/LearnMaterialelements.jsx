@@ -17,13 +17,20 @@ export const LMNAV = styled.div`
 `;
 export const LMlist = styled.div`
     width: 220px;
-    height: 40px;
-    padding: 0 12px;
+    height: 42px;
+    padding: 2px 12px;
     background: white;
     text-align: center;
     cursor: pointer;
     border-radius: 10px;
-    vertical-align: center;
+    display: flex;
+    align-items: center;
+
+    &:hover{
+        color: white;
+        background: black;
+        border: 1px solid white;
+    }
 `;
 export const LMcontentContainer = styled.div`
     width: 700px;

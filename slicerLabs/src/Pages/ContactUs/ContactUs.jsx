@@ -1,8 +1,15 @@
 import React from 'react'
+import Footer from '../../globalcomponents/Footer/footer'
+import Navbar from '../../globalcomponents/navbar/navbar'
+import ContactUsHero from './ContactUsComponents/ContactUsHero/ContactUsHero'
 
 const ContactUs = () => {
   return (
-    <div>ContactUs</div>
+    <>
+      <Navbar/>
+      <ContactUsHero/>
+      <Footer/>
+    </>
   )
 }
 
