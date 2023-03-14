@@ -12,3 +12,23 @@ html{
 a{
     text-decoration: none;
 }
+/* width */
+::-webkit-scrollbar {
+    width: 7px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #000018;
+  }
+  
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #166083;
+    border-radius:5px;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }

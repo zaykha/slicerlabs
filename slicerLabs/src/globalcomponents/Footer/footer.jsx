@@ -68,7 +68,7 @@ const Footer = () => {
                 <Flinks>
                     <Flink>Contact</Flink>
                     <Flink>FAQ</Flink>
-                    <Flink>MAterial Guide</Flink>
+                    <Flink>Material Guide</Flink>
                     <Flink>Service Update</Flink>
                 </Flinks>
             </FooterContent>

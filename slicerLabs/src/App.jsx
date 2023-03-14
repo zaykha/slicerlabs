@@ -5,6 +5,7 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import Cartpage from './Pages/Cart/cartpage';
 import ContactUs from './Pages/ContactUs/ContactUs';
 import HomePage from './Pages/HomePage/HomePage';
 import Learn from './Pages/Learn/Learn';
@@ -35,8 +36,11 @@ function App() {
       path:"/Login",
       element: <Login/>
     },{
-      path:"/StartPrinting",
+      path:"/Start3dPrinting",
       element: <StartPrinting/>
+    },{
+      path:"/cart",
+      element: <Cartpage/>
     }
   ]);
 

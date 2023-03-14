@@ -1,6 +1,7 @@
 import React from 'react'
 import Footer from '../../globalcomponents/Footer/footer'
 import Navbar from '../../globalcomponents/navbar/navbar'
+import ContactUsForm from './ContactUsComponents/ContactUSForm/ContactUsForm'
 import ContactUsHero from './ContactUsComponents/ContactUsHero/ContactUsHero'
 
 const ContactUs = () => {
@@ -8,6 +9,7 @@ const ContactUs = () => {
     <>
       <Navbar/>
       <ContactUsHero/>
+      <ContactUsForm/>
       <Footer/>
     </>
   )
