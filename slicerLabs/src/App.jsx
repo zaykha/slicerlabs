@@ -28,13 +28,26 @@ export function useCartCount() {
 function App() {
   const [cart, setCart] = useState([]);
   const [cartCount, setCartCount] = useState(JSON.parse(localStorage.getItem('cart')).length || 0);
-
+  const handleCartStorageChange = (event) => {
+    if (event.key === "cart") {
+      const cartData = JSON.parse(event.newValue);
+      setCart(cartData || []);
+      setCartCount(cartData ? cartData.length : 0);
+    }
+  };
+  
   useEffect(() => {
     const cartFromLocalStorage = JSON.parse(localStorage.getItem('cart'));
     if (cartFromLocalStorage) {
       setCart(cartFromLocalStorage);
       setCartCount(cartFromLocalStorage.length); // update cartCount
     }
+     // Listen for changes to cart data in local storage
+  window.addEventListener("storage", handleCartStorageChange);
+
+  // Clean up the event listener when the component unmounts
+  return () => {
+    window.removeEventListener("storage", handleCartStorageChange); };
   }, []);
 
   useEffect(() => {
