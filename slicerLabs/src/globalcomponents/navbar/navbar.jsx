@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useEffect} from 'react';
 
 import {FaBars} from 'react-icons/fa';
 import { 
@@ -24,7 +24,15 @@ import cart from '../../assets/shopping-cart1.png';
 import { useCartCount } from '../../App';
 
 const Navbar = ({togglesidebar}) => {
-  const { cartCount } = useCartCount();
+  const { cartCount,setCartCount } = useCartCount();
+  useEffect(() => {
+    const cart = JSON.parse(localStorage.getItem('cart'));
+    // setCart(cart || []);
+  
+    // Update cart count
+    const count = cart ? cart.length : 0;
+    setCartCount(count);
+  }, [setCartCount]);
   return (
      <>
      <Nav>

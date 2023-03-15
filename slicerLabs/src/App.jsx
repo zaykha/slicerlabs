@@ -27,7 +27,7 @@ export function useCartCount() {
 
 function App() {
   const [cart, setCart] = useState([]);
-  const [cartCount, setCartCount] = useState(0);
+  const [cartCount, setCartCount] = useState(JSON.parse(localStorage.getItem('cart')).length || 0);
 
   useEffect(() => {
     const cartFromLocalStorage = JSON.parse(localStorage.getItem('cart'));
