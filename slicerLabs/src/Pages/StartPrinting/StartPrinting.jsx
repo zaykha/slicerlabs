@@ -7,7 +7,7 @@ import Dropfile from './StartPrintingComponents/Dropfile/Dropfile'
 import MaterialsOptions from './StartPrintingComponents/MaterialsOptions/MaterialsOptions'
 import { PMAlertBox, PMButton, PMContainer } from './StartPrintingComponents/MaterialsOptions/MaterialsOptionselements'
 
-const StartPrinting = ({ cartCount, setCartCount }) => {
+const StartPrinting = () => {
   const [showPrompt, setShowPrompt] = useState(false);
 
   const handleBeforeUnload = (e) => {
@@ -51,7 +51,7 @@ const StartPrinting = ({ cartCount, setCartCount }) => {
       <CUheader>UPLOAD <SSpan>FILE</SSpan></CUheader>
         <CUsubheader>to get instant quote!</CUsubheader>
       <Dropfile/>
-      <MaterialsOptions cartCount={cartCount} setCartCount={setCartCount}/>
+      <MaterialsOptions />
       <Footer/>
     </>
   )

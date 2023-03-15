@@ -2,10 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { LoginContainer, LoginFlexdiv, LoginFromcontainer } from '../../../Login/LoginComponents/LoginForm/LoginFormelements'
 import { Mdropdownlabel, MinP, Minputqtt, MOdropdown, Moption, PMAlertBox, PMButton, PMContainer, TocartCTABtn, Tocartflexdiv } from './MaterialsOptionselements'
 import { useNavigate } from 'react-router-dom';
+import { useCartCount } from '../../../../App';
 
 
-const MaterialsOptions = ({ cartCount, setCartCount }) => {
-
+const MaterialsOptions = () => {
+  const { count, setCount } = useCartCount();
   const aboveDivRef = useRef(null);
   const belowDivRef = useRef(null);
 
@@ -46,7 +47,7 @@ const MaterialsOptions = ({ cartCount, setCartCount }) => {
       setFinishing("");
       setDimension("");
       setQuantity(0);
-      setCartCount(cartCount +1);
+      setCount(newCart.length)
     }
     
     

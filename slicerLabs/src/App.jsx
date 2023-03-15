@@ -26,22 +26,22 @@ export function useCartCount() {
 }
 
 function App() {
+  const [cart, setCart] = useState([]);
   const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
-   // Listen for changes in the cart array in localStorage
-   const handleStorageChange = () => {
-    const newCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCartCount(newCart.length);
-  };
+    const cartFromLocalStorage = JSON.parse(localStorage.getItem('cart'));
+    if (cartFromLocalStorage) {
+      setCart(cartFromLocalStorage);
+      setCartCount(cartFromLocalStorage.length); // update cartCount
+    }
+  }, []);
 
-  window.addEventListener("storage", handleStorageChange);
-
-  // Remove the event listener when the component unmounts
-  return () => {
-    window.removeEventListener("storage", handleStorageChange);
-  };
-}, []);
+  useEffect(() => {
+    setCartCount(cart.length); // update cartCount whenever the cart changes
+    localStorage.setItem('cart', JSON.stringify(cart));
+    console.log(localStorage.getItem('cart'))
+  }, [cart]);
 
   const [showPrompt, setShowPrompt] = useState(false);
 
