@@ -99,7 +99,7 @@ function App() {
 
   return (
     <CartCountContext.Provider value={{ cartCount, setCartCount }}>
-    <RouterProvider router={router} />
+        <RouterProvider router={router} />
     </CartCountContext.Provider>
   )
 }

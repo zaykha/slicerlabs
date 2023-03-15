@@ -24,7 +24,7 @@ import cart from '../../assets/shopping-cart1.png';
 import { useCartCount } from '../../App';
 
 const Navbar = ({togglesidebar}) => {
-  const {cartCount} = useCartCount();
+  const { cartCount } = useCartCount();
   return (
      <>
      <Nav>

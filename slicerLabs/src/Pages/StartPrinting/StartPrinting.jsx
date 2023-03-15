@@ -47,7 +47,7 @@ const StartPrinting = ({ cartCount, setCartCount }) => {
           </PMAlertBox>
         </PMContainer>
       )}
-      <Navbar cartCount={cartCount} setCartCount={setCartCount}/>
+      <Navbar/>
       <CUheader>UPLOAD <SSpan>FILE</SSpan></CUheader>
         <CUsubheader>to get instant quote!</CUsubheader>
       <Dropfile/>
