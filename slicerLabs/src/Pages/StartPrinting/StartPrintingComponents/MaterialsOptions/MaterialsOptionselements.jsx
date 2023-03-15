@@ -101,3 +101,35 @@ export const TocartCTABtn = styled.div`
         border: 1px solid white; 
     }
 `
+
+
+export const PMContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+`;
+
+export const PMAlertBox = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  text-align: center;
+`;
+
+export const PMButton = styled.button`
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: ${props => props.cancel ? 'red' : 'green'};
+  color: white;
+  border: none;
+  cursor: pointer;
+`;

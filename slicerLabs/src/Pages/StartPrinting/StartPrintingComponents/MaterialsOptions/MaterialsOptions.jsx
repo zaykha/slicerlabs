@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LoginContainer, LoginFlexdiv, LoginFromcontainer } from '../../../Login/LoginComponents/LoginForm/LoginFormelements'
-import { Mdropdownlabel, MinP, Minputqtt, MOdropdown, Moption, TocartCTABtn, Tocartflexdiv } from './MaterialsOptionselements'
+import { Mdropdownlabel, MinP, Minputqtt, MOdropdown, Moption, PMAlertBox, PMButton, PMContainer, TocartCTABtn, Tocartflexdiv } from './MaterialsOptionselements'
 import { useNavigate } from 'react-router-dom';
-const MaterialsOptions = () => {
+
+
+const MaterialsOptions = ({ cartCount, setCartCount }) => {
 
   const aboveDivRef = useRef(null);
   const belowDivRef = useRef(null);
@@ -13,12 +15,20 @@ const MaterialsOptions = () => {
   const [quantity, setQuantity] = useState(0);
   const [cart, setCart] = useState([]);
   const Navigate = useNavigate();
+
   
+
   useEffect(() => {
-    console.log("Cart:", cart);
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) {
+      setCart(JSON.parse(storedCart));
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log(JSON.parse(localStorage.getItem('cart')));
   }, [cart]);
-  
-  
+
   const handleAddToCart = () => {
     const item = {
       material,
@@ -26,17 +36,49 @@ const MaterialsOptions = () => {
       dimension,
       quantity,
     };
-    setCart((prevCart) => [...prevCart, item]);
-    setMaterial("");
-    setFinishing("");
-    setDimension("");
-    setQuantity(0);
+    if(!material ||!finishing || !dimension || !quantity){
+      alert('please fill in empty fields')
+    } else{
+      const newCart = [...cart, item];
+      setCart(newCart);
+      localStorage.setItem('cart', JSON.stringify(newCart));
+      setMaterial("");
+      setFinishing("");
+      setDimension("");
+      setQuantity(0);
+      setCartCount(cartCount +1);
+    }
+    
     
   };
 
   const handleCheckOut = () => {
-    const cartString = encodeURIComponent(JSON.stringify(cart));
-    Navigate(`/cart?cart=${cartString}`);
+    const item = {
+      material,
+      finishing,
+      dimension,
+      quantity,
+    };
+
+    if(cart.length>0){
+      const cartString = encodeURIComponent(JSON.stringify(cart));
+      Navigate(`/cart?cart=${cartString}`);
+    }else{
+      alert('please add to cart');
+      if(!material ||!finishing || !dimension || !quantity ){
+        alert('please fill in empty fields')
+      } else{
+        const newCart = [...cart, item];
+        setCart(newCart);
+        localStorage.setItem('cart', JSON.stringify(newCart));
+        setMaterial("");
+        setFinishing("");
+        setDimension("");
+        setQuantity(0);
+        const cartString = encodeURIComponent(JSON.stringify(cart));
+        Navigate(`/cart?cart=${cartString}`);
+      }
+    }
   }
 
   useEffect(() => {
@@ -54,6 +96,7 @@ const MaterialsOptions = () => {
   }, []);
   return (
     <>
+   
     <LoginFromcontainer ref={aboveDivRef} >
     <LoginContainer >
         <Mdropdownlabel htmlFor="material">Materials</Mdropdownlabel>
@@ -118,8 +161,16 @@ const MaterialsOptions = () => {
 </LoginFromcontainer>
 <Tocartflexdiv ref={belowDivRef}>
         <TocartCTABtn onClick={handleAddToCart}>ADD TO CART</TocartCTABtn>
-        <TocartCTABtn onClick={handleCheckOut}>CHECK OUT</TocartCTABtn>
+
+      {cart.length>0?
+      <TocartCTABtn onClick={handleCheckOut}>CHECK OUT</TocartCTABtn>:
+      <></>  
+      }
+        
     </Tocartflexdiv>
+
+
+    
 </>
   )
 }

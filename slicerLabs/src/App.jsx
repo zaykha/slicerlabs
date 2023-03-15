@@ -1,5 +1,5 @@
 
-import React from 'react'
+import React, { useEffect, useState, useContext } from 'react';
 // import { Route, Routes } from 'react-router-dom';
 import {
   createBrowserRouter,
@@ -14,8 +14,62 @@ import Materials from './Pages/Materials/Materials';
 import Services from './Pages/Services/Services';
 import StartPrinting from './Pages/StartPrinting/StartPrinting';
 
+// Create a context object with default values
+const CartCountContext = React.createContext({
+  cartCount: 0,
+  setCartCount: () => {},
+});
+
+// Create a custom hook to make accessing the context easier
+export function useCartCount() {
+  return useContext(CartCountContext);
+}
 
 function App() {
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+   // Listen for changes in the cart array in localStorage
+   const handleStorageChange = () => {
+    const newCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCartCount(newCart.length);
+  };
+
+  window.addEventListener("storage", handleStorageChange);
+
+  // Remove the event listener when the component unmounts
+  return () => {
+    window.removeEventListener("storage", handleStorageChange);
+  };
+}, []);
+
+  const [showPrompt, setShowPrompt] = useState(false);
+
+  const handleUnload = (e) => {
+    if (showPrompt) {
+      e.preventDefault();
+      e.returnValue = 'Are you sure you want to leave? Your cart will be emptied.';
+    }
+  }
+
+  const handleHidePrompt = () => {
+    setShowPrompt(false);
+  }
+
+  const handleOk = () => {
+    localStorage.removeItem('cart');
+    window.location.reload();
+  }
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', handleUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+    }
+  }, [showPrompt]);
+
+
   const router = createBrowserRouter([
     {
       path: "/",
@@ -37,16 +91,16 @@ function App() {
       element: <Login/>
     },{
       path:"/Start3dPrinting",
-      element: <StartPrinting/>
+      element: <StartPrinting cartCount={cartCount} setCartCount={setCartCount}/>
     },{
       path:"/cart",
-      element: <Cartpage/>
-    }
+      element: <Cartpage showPrompt={showPrompt} handleOk={handleOk} handleHidePrompt={handleHidePrompt} />    }
   ]);
 
   return (
+    <CartCountContext.Provider value={{ cartCount, setCartCount }}>
     <RouterProvider router={router} />
-   
+    </CartCountContext.Provider>
   )
 }
 

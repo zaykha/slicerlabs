@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState} from 'react';
 
 import {FaBars} from 'react-icons/fa';
 import { 
@@ -21,8 +21,10 @@ import {
   } from './navbarelement';
 import logo from '../../assets/Asset 4.png';
 import cart from '../../assets/shopping-cart1.png';
+import { useCartCount } from '../../App';
 
 const Navbar = ({togglesidebar}) => {
+  const {cartCount} = useCartCount();
   return (
      <>
      <Nav>
@@ -72,12 +74,13 @@ const Navbar = ({togglesidebar}) => {
             <Commerce>
 
                   <ActionItems>
-                      <NavLinks1 to='/Start3dPrinting'>Start 3D Printing</NavLinks1>
+                      <NavLinks1 to='/Start3dPrinting' >Start 3D Printing</NavLinks1>
                   </ActionItems>
 
                   <ActionItems>
                       <NavLinks to='/cart'>
                         <IMGTAG1 src={cart} alt='cart' />
+                        {cartCount > 0 && <span>{cartCount}</span>}
                       </NavLinks>
                   </ActionItems>
 
