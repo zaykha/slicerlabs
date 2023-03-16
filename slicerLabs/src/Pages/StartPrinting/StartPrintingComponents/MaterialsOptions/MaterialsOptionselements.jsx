@@ -95,13 +95,22 @@ export const TocartCTABtn = styled.div`
     border: 1px solid #006B9E;
     transition: all 0.2s ease-in;
     cursor:pointer;
+    
     &:hover{
         color: #fff;
         background: #006B9E;
         border: 1px solid white; 
     }
 `
-
+export const NotiPrompt = styled.div`
+    position:absolute;
+    top:-5px;
+    background: red;
+    width: 20px;
+    border-radius: 50%;
+    color: white;
+    right: 15px;
+`
 
 export const PMContainer = styled.div`
   position: fixed;

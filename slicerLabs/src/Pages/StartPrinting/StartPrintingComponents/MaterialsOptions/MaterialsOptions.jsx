@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LoginContainer, LoginFlexdiv, LoginFromcontainer } from '../../../Login/LoginComponents/LoginForm/LoginFormelements'
-import { Mdropdownlabel, MinP, Minputqtt, MOdropdown, Moption, PMAlertBox, PMButton, PMContainer, TocartCTABtn, Tocartflexdiv } from './MaterialsOptionselements'
+import { Mdropdownlabel, MinP, Minputqtt, MOdropdown, Moption, NotiPrompt, PMAlertBox, PMButton, PMContainer, TocartCTABtn, Tocartflexdiv } from './MaterialsOptionselements'
 import { useNavigate } from 'react-router-dom';
 import { useCartCount } from '../../../../App';
 
 
 const MaterialsOptions = () => {
-  const { count, setCount } = useCartCount();
+  const { cartCount, setCartCount } = useCartCount();
   const aboveDivRef = useRef(null);
   const belowDivRef = useRef(null);
 
@@ -47,7 +47,7 @@ const MaterialsOptions = () => {
       setFinishing("");
       setDimension("");
       setQuantity(0);
-      setCount(newCart.length)
+      setCartCount(newCart.length)
     }
     
     
@@ -62,8 +62,24 @@ const MaterialsOptions = () => {
     };
 
     if(cart.length>0){
-      const cartString = encodeURIComponent(JSON.stringify(cart));
-      Navigate(`/cart?cart=${cartString}`);
+      if(!material && !finishing && !dimension && !quantity ){
+        const cartString = encodeURIComponent(JSON.stringify(cart));
+        Navigate(`/cart?cart=${cartString}`);
+      } else{
+        if(!material ||!finishing || !dimension || !quantity ){
+          alert('please fill all in empty fields or empty the field to proceed')
+        } else{
+          const newCart = [...cart, item];
+          setCart(newCart);
+          localStorage.setItem('cart', JSON.stringify(newCart));
+          setMaterial("");
+          setFinishing("");
+          setDimension("");
+          setQuantity(0);
+          const cartString = encodeURIComponent(JSON.stringify(cart));
+          Navigate(`/cart?cart=${cartString}`);
+        }
+      }
     }else{
       alert('please add to cart');
       if(!material ||!finishing || !dimension || !quantity ){
@@ -164,11 +180,17 @@ const MaterialsOptions = () => {
         <TocartCTABtn onClick={handleAddToCart}>ADD TO CART</TocartCTABtn>
 
       {cart.length>0?
-      <TocartCTABtn onClick={handleCheckOut}>CHECK OUT</TocartCTABtn>:
+      <>
+      <TocartCTABtn onClick={handleCheckOut}>
+        CHECK OUT
+        {cart && <NotiPrompt>{cart.length}</NotiPrompt>}
+      </TocartCTABtn>
+      
+      </>:
       <></>  
       }
         
-    </Tocartflexdiv>
+</Tocartflexdiv>
 
 
     

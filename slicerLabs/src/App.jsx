@@ -35,7 +35,7 @@ function App() {
       setCartCount(cartData ? cartData.length : 0);
     }
   };
-  
+
   useEffect(() => {
     const cartFromLocalStorage = JSON.parse(localStorage.getItem('cart'));
     if (cartFromLocalStorage) {
@@ -53,6 +53,7 @@ function App() {
   useEffect(() => {
     setCartCount(cart.length); // update cartCount whenever the cart changes
     localStorage.setItem('cart', JSON.stringify(cart));
+    // setCount(cart.length);
     console.log(localStorage.getItem('cart'))
   }, [cart]);
 
@@ -104,7 +105,7 @@ function App() {
       element: <Login/>
     },{
       path:"/Start3dPrinting",
-      element: <StartPrinting cartCount={cartCount} setCartCount={setCartCount}/>
+      element: <StartPrinting />
     },{
       path:"/cart",
       element: <Cartpage showPrompt={showPrompt} handleOk={handleOk} handleHidePrompt={handleHidePrompt} />    }

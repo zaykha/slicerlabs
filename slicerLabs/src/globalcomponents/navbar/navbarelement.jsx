@@ -147,6 +147,17 @@ export const NavLinks = styled(LinkR)`
     &.active{
         border-bottom: 3px solid #fbae1a;
     }
+
+    ${({ isActive }) =>
+    isActive &&
+    `
+    background: #E6E6E6;
+    border-radius: 11px;
+    padding: 3px 20px;
+    color:#275E78;
+    border: 1px solid #275E78;
+    transition: background-color 1s ease-in-out, border-radius 0.4s ease-in-out;
+  `}
 `
 export const NavLinks1 = styled(LinkR)`
     color:#006B9E;
@@ -174,6 +185,19 @@ export const NavLinks1 = styled(LinkR)`
     &.active{
         border-bottom: 3px solid #fbae1a;
     }
+
+    ${({ isActive }) =>
+    isActive &&
+    `
+    width: auto;
+    height: 32px;
+    padding:5px 15px;
+    background: #48B2E5;
+    color: #1E1E1E;
+    box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 50px;
+    transition: background-color 1s ease-in-out, border-radius 0.4s ease-in-out;
+  `}
 `
 export const Commerce = styled.div`
     display: flex;

@@ -43,3 +43,9 @@ cursor:pointer;
     border: 1px solid white; 
 }
 `;
+export const NoitemCart = styled.div`
+    width: 100%;
+    height: 60vh;
+    display:flex;
+    align-items:center;
+`;

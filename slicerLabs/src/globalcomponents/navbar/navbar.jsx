@@ -1,5 +1,5 @@
 import React,{useEffect} from 'react';
-
+import { useLocation } from 'react-router-dom';
 import {FaBars} from 'react-icons/fa';
 import { 
   IMGTAG,
@@ -23,8 +23,19 @@ import logo from '../../assets/Asset 4.png';
 import cart from '../../assets/shopping-cart1.png';
 import { useCartCount } from '../../App';
 
+
+const NavLinksarray = [  
+  {    title: 'Home',    path: '/',  },  
+  {    title: 'Services',    path: '/services',  },  
+  {    title: 'Materials',    path: '/materials',  },  
+  {    title: 'Learn',    path: '/learn',  },  
+  {    title: 'Contact',    path: '/ContactUs',  },  
+  {    title: 'Login',    path: '/login',  },];
+
+
 const Navbar = ({togglesidebar}) => {
-  const { cartCount,setCartCount } = useCartCount();
+  const { pathname } = useLocation();
+  const { cartCount ,setCartCount } = useCartCount();
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem('cart'));
     // setCart(cart || []);
@@ -33,6 +44,9 @@ const Navbar = ({togglesidebar}) => {
     const count = cart ? cart.length : 0;
     setCartCount(count);
   }, [setCartCount]);
+
+
+
   return (
      <>
      <Nav>
@@ -40,7 +54,6 @@ const Navbar = ({togglesidebar}) => {
 
       
      <NavLogo to='/'>
-              {/* <Imgicon></Imgicon> */}
                 <IMGTAG src={logo} alt='logo' />
                 
             </NavLogo>
@@ -51,38 +64,22 @@ const Navbar = ({togglesidebar}) => {
                 </MobileIcon>
 
                   <NavMenu>
-                    <NavItem>
-                      <NavLinks to='/'>Home</NavLinks>
+                    {NavLinksarray.map((link) => (
+                      <NavItem>
+                    <NavLinks key={link.title} to={link.path} isActive={pathname === link.path}>
+                      {link.title}
+                    </NavLinks>
                     </NavItem>
-
-                    <NavItem>
-                      <NavLinks to='/Services'>Services</NavLinks>
-                    </NavItem>
-
-                    <NavItem>
-                      <NavLinks to='/Materials'>Materials</NavLinks>
-                    </NavItem>
-
-                    <NavItem>
-                      <NavLinks to='/Learn'>Learn</NavLinks>
-                    </NavItem>
-                    
-                    <NavItem>
-                      <NavLinks to='/ContactUs'>Contact</NavLinks>
-                    </NavItem>
-
-                    <NavItem>
-                      <NavLinks to='/Login'>Login</NavLinks>
-                    </NavItem>
-                    
-
+                    ))}
                   </NavMenu>   
                          
         </NavbarContainer>
             <Commerce>
 
                   <ActionItems>
-                      <NavLinks1 to='/Start3dPrinting' >Start 3D Printing</NavLinks1>
+                      <NavLinks1 to='/Start3dPrinting' isActive={pathname === '/Start3dPrinting' } >
+                          {pathname === '/Start3dPrinting' ? '3D Printing' : 'Start 3D Printing'}
+                      </NavLinks1>
                   </ActionItems>
 
                   <ActionItems>
