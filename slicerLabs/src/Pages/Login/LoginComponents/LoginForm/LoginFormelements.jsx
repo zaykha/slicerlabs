@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import usericon from '../../../../assets/login.png'
 import lockicon from '../../../../assets/lock.png'
-
+import { Link as LinkR } from "react-router-dom";
 
 export const Welcometext = styled.div`
     font-size:1.8rem;
@@ -140,7 +140,7 @@ export const LoginBTN = styled.div`
         border: 1px solid white; 
     }
 `;
-export const LoginLink = styled.div`
+export const LoginLink = styled(LinkR)`
     color:#48B2E5;
     cursor:pointer;
 

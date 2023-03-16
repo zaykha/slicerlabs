@@ -1,6 +1,7 @@
 import React,{useState, useEffect} from 'react'
 import Footer from '../../globalcomponents/Footer/footer'
 import Navbar from '../../globalcomponents/navbar/navbar'
+import Sidebar from '../../globalcomponents/SidebarMenu/Sidebar'
 import { CUheader, CUsubheader } from '../ContactUs/ContactUsComponents/ContactUsHero/ContactUsHeroelemements'
 import { SSpan } from '../Services/Serviceselement'
 import Dropfile from './StartPrintingComponents/Dropfile/Dropfile'
@@ -8,6 +9,12 @@ import MaterialsOptions from './StartPrintingComponents/MaterialsOptions/Materia
 import { PMAlertBox, PMButton, PMContainer } from './StartPrintingComponents/MaterialsOptions/MaterialsOptionselements'
 
 const StartPrinting = () => {
+
+  const [isOpen, setIsOpen] = useState(false);
+    const togglesidebar = () => {
+       setIsOpen(!isOpen);
+    }
+
   const [showPrompt, setShowPrompt] = useState(false);
 
   const handleBeforeUnload = (e) => {
@@ -47,7 +54,8 @@ const StartPrinting = () => {
           </PMAlertBox>
         </PMContainer>
       )}
-      <Navbar/>
+      <Sidebar isOpen={isOpen} togglesidebar={togglesidebar}/>
+        <Navbar togglesidebar={togglesidebar}/>
       <CUheader>UPLOAD <SSpan>FILE</SSpan></CUheader>
         <CUsubheader>to get instant quote!</CUsubheader>
       <Dropfile/>

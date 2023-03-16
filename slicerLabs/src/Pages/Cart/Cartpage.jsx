@@ -4,9 +4,45 @@ import Navbar from '../../globalcomponents/navbar/navbar'
 import { CUheader, CUsubheader } from '../ContactUs/ContactUsComponents/ContactUsHero/ContactUsHeroelemements'
 import { SSpan } from '../Services/Serviceselement'
 import { useLocation } from 'react-router-dom';
-import { ItemBtn, Itemdiv, ItemHeader, ItemStats, NoitemCart } from './Cartpageelement'
+import { 
+  ItemBtn,
+  Itemdiv, 
+  ItemHeader, 
+  ItemStats, 
+  NoitemCart, 
+  ProgressBarBall, 
+  ProgressBarContainer, 
+  ProgressBarStep, 
+  ProgressBarText
+} from './Cartpageelement'
+import Sidebar from '../../globalcomponents/SidebarMenu/Sidebar'
+
+
+const ProgressBar = ({ step }) => {
+  return (
+    <ProgressBarContainer>
+      <ProgressBarStep>
+        <ProgressBarBall active={step >= 1} />
+        <ProgressBarText active={step >= 1}>Final Check</ProgressBarText>
+      </ProgressBarStep>
+      <ProgressBarStep>
+        <ProgressBarBall active={step >= 2} />
+        <ProgressBarText active={step >= 2}>Payment</ProgressBarText>
+      </ProgressBarStep>
+      <ProgressBarStep>
+        <ProgressBarBall active={step >= 3} />
+        <ProgressBarText active={step >= 3}>Post Payment</ProgressBarText>
+      </ProgressBarStep>
+    </ProgressBarContainer>
+  );
+};
 
 const Cartpage = () => {
+  const [step, setStep] = useState(1);
+  const [isOpen, setIsOpen] = useState(false);
+  const togglesidebar = () => {
+     setIsOpen(!isOpen);
+  }  
 
   const [cart, setCart] = useState(() => {
     const storedCart = localStorage.getItem('cart');
@@ -24,10 +60,11 @@ const Cartpage = () => {
   }
   return (
     <>
-    
-        <Navbar/>
+    <Sidebar isOpen={isOpen} togglesidebar={togglesidebar}/>
+    <Navbar togglesidebar={togglesidebar}/>
         <CUheader>CHECKOUT <SSpan>PROCESS</SSpan></CUheader>
         <CUsubheader>Fast and Smooth Processing</CUsubheader>
+        {cart.length ===0 ?<></>:(<ProgressBar step={step}/>)}
         {cart.length === 0 ? (
           <NoitemCart>
               <CUheader>No Items In Cart</CUheader>
@@ -54,4 +91,4 @@ const Cartpage = () => {
   )
 }
 
-export default Cartpage
+export default Cartpage;

@@ -36,6 +36,7 @@ const NavLinksarray = [
 const Navbar = ({togglesidebar}) => {
   const { pathname } = useLocation();
   const { cartCount ,setCartCount } = useCartCount();
+
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem('cart'));
     // setCart(cart || []);
@@ -50,6 +51,9 @@ const Navbar = ({togglesidebar}) => {
   return (
      <>
      <Nav>
+     <MobileIcon onClick={togglesidebar}>
+                  <FaBars />
+      </MobileIcon>
       <NavController>
 
       
@@ -59,9 +63,7 @@ const Navbar = ({togglesidebar}) => {
             </NavLogo>
         <NavbarContainer>
             
-                <MobileIcon onClick={togglesidebar}>
-                  <FaBars />
-                </MobileIcon>
+                
 
                   <NavMenu>
                     {NavLinksarray.map((link) => (
@@ -91,7 +93,7 @@ const Navbar = ({togglesidebar}) => {
 
             </Commerce>
         </NavController>
-
+                
         </Nav>
      </>
   );

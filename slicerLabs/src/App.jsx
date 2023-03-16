@@ -5,12 +5,16 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import Footer from './globalcomponents/Footer/footer';
+import Navbar from './globalcomponents/navbar/navbar';
+import Sidebar from './globalcomponents/SidebarMenu/Sidebar';
 import Cartpage from './Pages/Cart/Cartpage';
 import ContactUs from './Pages/ContactUs/ContactUs';
 import HomePage from './Pages/HomePage/HomePage';
 import Learn from './Pages/Learn/Learn';
 import Login from './Pages/Login/Login';
 import Materials from './Pages/Materials/Materials';
+import RegisterPage from './Pages/Register/RegisterPage';
 import Services from './Pages/Services/Services';
 import StartPrinting from './Pages/StartPrinting/StartPrinting';
 
@@ -26,6 +30,12 @@ export function useCartCount() {
 }
 
 function App() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleSidebar = () => {
+     setIsOpen(!isOpen);
+  }
+
   const cartData = JSON.parse(localStorage.getItem('cart')) || [];
   const cartDataLength = cartData.length || 0;
   const [cart, setCart] = useState(cartData);
@@ -106,6 +116,9 @@ function App() {
       path:"/Login",
       element: <Login/>
     },{
+      path:"/registerPage",
+      element: <RegisterPage/>
+    },{
       path:"/Start3dPrinting",
       element: <StartPrinting />
     },{
@@ -115,7 +128,9 @@ function App() {
 
   return (
     <CartCountContext.Provider value={{ cartCount, setCartCount }}>
+      
         <RouterProvider router={router} />
+   
     </CartCountContext.Provider>
   )
 }

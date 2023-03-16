@@ -71,15 +71,17 @@ export const Imgicon= styled.div`
 export const MobileIcon = styled.div`
     display: none;
 
-    @media screen and (max-width: 768px){
+    @media screen and (max-width: 1000px){
+        width: auto;
         display: block;
         position: absolute;
         top: 0;
         right: 0;
-        transform: translate(-100%, 60%);
+        transform: translate(-100%, 40%);
         font-size: 1.8rem;
         cursor: pointer;
         color: white;
+        z-index: 99;
     }
 `
 export const NavMenu = styled.ul`
@@ -91,7 +93,7 @@ export const NavMenu = styled.ul`
 
    
 
-    @media screen and (max-width: 768px){
+    @media screen and (max-width: 1000px){
         display: none;
     }
 `
@@ -209,7 +211,7 @@ export const Commerce = styled.div`
     // margin-right: 22px;
     // text-shadow: 1px 2px black;
 
-    @media screen and (max-width: 768px){
+    @media screen and (max-width: 1000px){
         display: none;
     }
 `

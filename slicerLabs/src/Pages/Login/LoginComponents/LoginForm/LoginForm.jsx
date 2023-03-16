@@ -38,7 +38,7 @@ const LoginForm = () => {
           </LoginFlexdiv>
 
           <LoginFlexdiv>
-            <LoginLink>Register Now</LoginLink>
+            <LoginLink to='/registerPage'>Register Now</LoginLink>
             <LoginLink2>Forget Password?</LoginLink2>
           </LoginFlexdiv>
         </LoginContainer>
