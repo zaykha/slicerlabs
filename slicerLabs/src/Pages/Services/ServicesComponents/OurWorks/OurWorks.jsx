@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import proto1 from "../../../../assets/proto1.png"
 import proto2 from "../../../../assets/proto2.png"
-import proto3 from "../../../../assets/proto3.png"
-import proto4 from "../../../../assets/proto4.png"
-import proto5 from "../../../../assets/proto5.png"
+import proto3 from "../../../../assets/Proto3.png"
+import proto4 from "../../../../assets/Proto4.png"
+import proto5 from "../../../../assets/Proto5.png"
 import { SCheader1, SSpan } from "../../Serviceselement";
 
 
