@@ -5,7 +5,7 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import Cartpage from './Pages/Cart/cartpage';
+import Cartpage from './Pages/Cart/Cartpage';
 import ContactUs from './Pages/ContactUs/ContactUs';
 import HomePage from './Pages/HomePage/HomePage';
 import Learn from './Pages/Learn/Learn';
