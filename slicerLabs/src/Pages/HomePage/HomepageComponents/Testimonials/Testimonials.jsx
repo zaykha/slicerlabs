@@ -4,7 +4,7 @@ import { HSFlex } from '../Stats/HomeStatselement'
 import { ToServicesContainer } from '../ToServices/ToServiceselement'
 import { Avatar, Avatarname, CTAh2, Testcontainer, Testimonialp } from './Testimonialselement'
 import Bro1 from '../../../../assets/Bro1.png';
-import woman from '../../../../assets/woman.png';
+import woman from '../../../../assets/Woman.png';
 import Mark1 from '../../../../assets/Mark1.png';
 
 
