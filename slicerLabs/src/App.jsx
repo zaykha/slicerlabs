@@ -26,8 +26,10 @@ export function useCartCount() {
 }
 
 function App() {
-  const [cart, setCart] = useState([]);
-  const [cartCount, setCartCount] = useState(JSON.parse(localStorage.getItem('cart')).length || 0);
+  const cartData = JSON.parse(localStorage.getItem('cart')) || [];
+  const cartDataLength = cartData.length || 0;
+  const [cart, setCart] = useState(cartData);
+  const [cartCount, setCartCount] = useState(cartDataLength);
   const handleCartStorageChange = (event) => {
     if (event.key === "cart") {
       const cartData = JSON.parse(event.newValue);
