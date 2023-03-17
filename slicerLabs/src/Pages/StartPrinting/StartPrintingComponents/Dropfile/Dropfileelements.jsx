@@ -37,3 +37,91 @@ export const UPHeaderFullline = styled.div`
     color: #D3D3D3;
     font-size: 1.2rem;
 `;
+export const DropzoneFormcontainer = styled.div`
+    box-sizing: border-box;
+
+    width: 773px;
+    padding: 40px;
+    margin: 40px auto;
+    height: 300px;
+    background: linear-gradient(180deg, rgba(8, 51, 71, 0.63) 0%, rgba(0, 80, 118, 0.63) 100%);
+    border: 1px solid rgba(201, 201, 201, 0.41);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(2px);
+    /* Note: backdrop-filter has minimal browser support */
+
+    border-radius: 10px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    &:hover{
+        border: 1px solid white;
+    }
+
+    @media screen and (max-width: 800px){
+        width: 95%;
+    }
+`;
+export const DropzoneContainer = styled.div`
+    width:100%;
+    margin: 10px auto;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+  
+`;
+export const ErrorContainer = styled.div`
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    top:0;
+    left:0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    z-index:1000;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items:center;
+`;
+export const ErrorCard = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items:center;
+    color:red;
+    font-size:1.4rem;
+    width: 400px;
+    padding: 40px;
+    text-align: center;
+    background:linear-gradient(180deg, rgba(8, 51, 71, 0.63) 0%, rgba(0, 80, 118, 0.63) 100%);
+    border: 1px solid rgba(201, 201, 201, 0.41);
+    border-radius: 10px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+`;
+
+export const Errbutton = styled.button`
+    box-sizing: border-box;
+    text-decoration: none;
+    padding: 10px 21px;
+    background: #F0F0F0;
+    border: 2px solid #006B9E;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 50px;
+    width: 170px;
+    margin: 40px auto 10px auto;
+    text-align: center;
+    border: 1px solid #006B9E;
+    transition: all 0.3s ease-in;
+    cursor:pointer;
+    &:hover{
+        color: #fff;
+        background: #006B9E;
+        border: 1px solid white; 
+    }
+`;
+
