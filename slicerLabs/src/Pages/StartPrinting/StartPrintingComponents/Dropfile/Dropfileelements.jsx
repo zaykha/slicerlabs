@@ -48,6 +48,7 @@ export const DropzoneFormcontainer = styled.div`
     border: 1px solid rgba(201, 201, 201, 0.41);
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
     backdrop-filter: blur(2px);
+    overflow:hidden;
     /* Note: backdrop-filter has minimal browser support */
 
     border-radius: 10px;
