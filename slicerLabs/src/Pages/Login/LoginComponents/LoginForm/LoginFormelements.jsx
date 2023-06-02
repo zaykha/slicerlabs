@@ -104,8 +104,8 @@ export const LoginFlexdiv = styled.div`
     justify-content: space-between;
 `;
 export const RememberMe = styled.input`
-    width: 35px;
-    height: 35px;
+    width: 20px;
+    height: 20px;
     background: #D9D9D9;
     border-radius: 5px;
     cursor:pointer;

@@ -21,7 +21,7 @@ export const Inputelem = styled.input`
     font-size:1.1rem;
 `;
 export const InputelemSmall = styled.input`
-    width:46%;
+    // width:46%;
     height:40px;
     background: rgba(87, 87, 87, 0.43);
     border: 1px solid #A5A5A5;
