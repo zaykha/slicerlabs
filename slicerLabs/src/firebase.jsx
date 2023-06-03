@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { GoogleAuthProvider, getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
+import { getFirestore, collection } from "firebase/firestore"; // Import Firestore functions
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -12,7 +13,8 @@ const firebaseConfig = {
     projectId: "slicerlabs-c10ea",
     storageBucket: "slicerlabs-c10ea.appspot.com",
     messagingSenderId: "1089428165235",
-    appId: "1:1089428165235:web:21711be07841abd26dd006"
+    appId: "1:1089428165235:web:21711be07841abd26dd006",
+    databaseURL:"https://slicerlabs-c10ea-default-rtdb.asia-southeast1.firebasedatabase.app/"
   };
 
 // Initialize Firebase
@@ -20,3 +22,5 @@ const app = initializeApp(firebaseConfig);
 export const auth= getAuth(app)
 export const Googleprovider = new GoogleAuthProvider(app);
 export const db = getDatabase(app);
+export const firestore = getFirestore(app);
+export const usersCollection = collection(firestore, "users");

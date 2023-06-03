@@ -15,18 +15,24 @@ import {
   SocialDiv,
   SocialIcon,
 } from "./LoginFormelements";
-import { auth, db } from "../../../../firebase";
+import { auth, db, usersCollection } from "../../../../firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { get, ref } from "firebase/database";
 import googleicon from "../../../../assets/Googlelogo.png";
 import whatsappicon from "../../../../assets/whatsapp.png";
 import facebookicon from "../../../../assets/facebook.png";
 import linkedinicon from "../../../../assets/linkedin.png";
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setAuthenticationStatus } from "../../../../ReduxStore/actions/Authentication";
+import { setUserDetails } from "../../../../ReduxStore/actions/userDetails";
+import { doc, getDoc } from "firebase/firestore";
+
 const LoginForm = () => {
   const [email, onChangeEmail] = React.useState("");
   const [emailError, setEmailError] = useState("");
-
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [password, onChangePassword] = React.useState("");
   const [passwordError, setPasswordError] = useState("");
   const validateEmail = (inputEmail) => {
@@ -75,11 +81,27 @@ const LoginForm = () => {
           password
         );
         const user = userCredentials.user;
-
-        // Retrieve user type from Firebase Realtime Database
-        const snapshot = await get(ref(db, `users/${user.uid}`));
-        const userData = snapshot.val();
-        Navigate('/cart');
+        const uid = user.uid;
+        const token = await user.getIdToken();
+        localStorage.setItem("jwtToken", token);
+      
+        const userDetailsRef = doc(usersCollection, uid);
+       getDoc(userDetailsRef)
+       .then((doc) => {
+         if (doc.exists) {
+           const userDetails = doc.data();
+           console.log(userDetails);
+           // Dispatch an action to store the user details in Redux
+           dispatch(setUserDetails(userDetails));
+         } else {
+           // Handle the case where the user details document does not exist
+         }
+       })
+       .catch((error) => {
+         // Handle any errors that occurred during the retrieval process
+       });
+        dispatch(setAuthenticationStatus(true));
+        navigate("/cart");
       } catch (error) {
         alert(error.message);
       }

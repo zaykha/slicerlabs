@@ -15,7 +15,7 @@ import {
   Regflexdiv,
   RegsubHeader,
 } from "./Registerformelement";
-import { auth, db } from "../../../firebase";
+import { auth, db, usersCollection } from "../../../firebase";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -23,12 +23,16 @@ import {
 } from "firebase/auth";
 import { ref, set } from "firebase/database";
 import { useNavigate } from "react-router-dom";
+import { addDoc, collection } from "firebase/firestore";
+import { useDispatch } from "react-redux";
+import { setUserDetails } from "../../../ReduxStore/actions/userDetails";
 // import {
 //   GoogleSignin,
 //   statusCodes,
 // } from "@react-native-google-signin/google-signin";
+
 const Registerform = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [formValues, setFormValues] = useState({
     userName: "",
     password: "",
@@ -62,6 +66,7 @@ const Registerform = () => {
       [`${name}Error`]: validateInput(name, value),
     }));
   };
+  const dispatch = useDispatch();
   const validateInput = (name, value) => {
     if (!value) {
       return `${name} is required.`;
@@ -146,12 +151,13 @@ const Registerform = () => {
         occupationError: !formValues.occupation ? "Occupation is required" : "",
         phoneError: !formValues.phone ? "Phone number is required" : "",
         emailError: !formValues.email ? "Email is required" : "",
-        postalCodeError:
-          !formValues.postalCode ? "Postal code is required" : "",
-        blkNumberError:
-          !formValues.blkNumber ? "Block number is required" : "",
-        flatNumberError:
-          !formValues.flatNumber ? "Flat number is required" : "",
+        postalCodeError: !formValues.postalCode
+          ? "Postal code is required"
+          : "",
+        blkNumberError: !formValues.blkNumber ? "Block number is required" : "",
+        flatNumberError: !formValues.flatNumber
+          ? "Flat number is required"
+          : "",
       }));
       return;
     }
@@ -166,19 +172,33 @@ const Registerform = () => {
       );
       const user = userCredentials.user;
 
-      // Store additional user information to your backend server
-
+      // Store additional user information to Firestore
+      const userDetails = {
+        userName: formValues.userName,
+        occupation: formValues.occupation,
+        phone: formValues.phone,
+        email: formValues.email,
+        postalCode: formValues.postalCode,
+        blkNumber: formValues.blkNumber,
+        flatNumber: formValues.flatNumber,
+        uid: user.uid,
+      };
+    
+      // Add the userDetails to the "users" collection in Firestore
+      await addDoc(usersCollection, userDetails);
       // Generate JWT token
       const token = await user.getIdToken();
 
       // Store token in local storage
       localStorage.setItem("jwtToken", token);
 
+      // Update user details in Redux
+      dispatch(setUserDetails(formValues));
       // Redirect to desired page
-   
-      navigate('/');
+      navigate("/");
     } catch (error) {
-      console.log(error.message);}
+      console.log(error.message);
+    }
     // } finally {
     //   setLoading(false);
     // }
@@ -271,7 +291,7 @@ const Registerform = () => {
                 width: "48%",
               }}
             >
-              <div  style={{color:" #C4BFBF"}}>Postal code </div>
+              <div style={{ color: " #C4BFBF" }}>Postal code </div>
               <InputelemSmall
                 type="text"
                 placeholder="Postal code"
@@ -290,7 +310,7 @@ const Registerform = () => {
                 width: "48%",
               }}
             >
-              <div  style={{color:" #C4BFBF"}}>BLK Number </div>
+              <div style={{ color: " #C4BFBF" }}>BLK Number </div>
               <InputelemSmall
                 type="text"
                 placeholder="BLK Number"
@@ -314,19 +334,19 @@ const Registerform = () => {
             }}
           ></div>
           <Regflexdiv>
-          <div
+            <div
               style={{
                 width: "48%",
               }}
             >
-                <div  style={{color:" #C4BFBF"}}> Flat Number</div>
-            <InputelemSmall
-              type="text"
-              placeholder="Flat Number"
-              name="flatNumber"
-              value={formValues.flatNumber}
-              onChange={handleInputChange}
-            />
+              <div style={{ color: " #C4BFBF" }}> Flat Number</div>
+              <InputelemSmall
+                type="text"
+                placeholder="Flat Number"
+                name="flatNumber"
+                value={formValues.flatNumber}
+                onChange={handleInputChange}
+              />
             </div>
             <Addressdiv>Address will be displayed here</Addressdiv>
           </Regflexdiv>
