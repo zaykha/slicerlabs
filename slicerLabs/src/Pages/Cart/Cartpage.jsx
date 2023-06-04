@@ -3,7 +3,7 @@ import Footer from '../../globalcomponents/Footer/footer'
 import Navbar from '../../globalcomponents/navbar/navbar'
 import { CUheader, CUsubheader } from '../ContactUs/ContactUsComponents/ContactUsHero/ContactUsHeroelemements'
 import { SSpan } from '../Services/Serviceselement'
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   Grandtotaldisplay,
   ItemBtn,
@@ -30,6 +30,8 @@ import {
 } from './Cartpageelement'
 import Sidebar from '../../globalcomponents/SidebarMenu/Sidebar'
 import Paymentimage from '../../assets/paymentimg.png'
+import { useDispatch } from 'react-redux'
+import { setAuthenticationStatus } from '../../ReduxStore/actions/Authentication'
 
 
 const ProgressBar = ({ step }) => {
@@ -72,6 +74,18 @@ const Cartpage = () => {
     newCart.splice(index, 1);
     setCart(newCart);
   }
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const handleLogout = () => {
+    // Remove jwtToken from local storage
+    localStorage.removeItem("jwtToken");
+  
+    // Redirect to the home page
+    dispatch(setAuthenticationStatus(false));
+    navigate("/");
+    
+  };
+  
   return (
     <>
     <Sidebar isOpen={isOpen} togglesidebar={togglesidebar}/>
@@ -133,6 +147,7 @@ const Cartpage = () => {
         </>)}
        
         </Step1Container>
+        <NextBtn onClick={handleLogout}>logout</NextBtn>
         <Footer/>
     </>
   )

@@ -84,22 +84,17 @@ const LoginForm = () => {
         const uid = user.uid;
         const token = await user.getIdToken();
         localStorage.setItem("jwtToken", token);
-      
+        localStorage.setItem("uid", uid);
+
         const userDetailsRef = doc(usersCollection, uid);
-       getDoc(userDetailsRef)
-       .then((doc) => {
-         if (doc.exists) {
-           const userDetails = doc.data();
-           console.log(userDetails);
-           // Dispatch an action to store the user details in Redux
-           dispatch(setUserDetails(userDetails));
-         } else {
-           // Handle the case where the user details document does not exist
-         }
-       })
-       .catch((error) => {
-         // Handle any errors that occurred during the retrieval process
-       });
+        const docSnap = await getDoc(userDetailsRef);
+        if (docSnap.exists()) {
+          dispatch(setUserDetails(docSnap.data().userDetails));
+          console.log("Document data:", docSnap.data().userDetails);
+        } else {
+          // docSnap.data() will be undefined in this case
+          console.log("No such document!");
+        }
         dispatch(setAuthenticationStatus(true));
         navigate("/cart");
       } catch (error) {

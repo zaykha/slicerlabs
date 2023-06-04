@@ -20,6 +20,7 @@ import { useDispatch } from 'react-redux';
 import { setUserDetails } from "./ReduxStore/actions/userDetails";
 import {doc, getDoc} from "firebase/firestore";
 import { useSelector } from "react-redux";
+import { setAuthenticationStatus } from "./ReduxStore/actions/Authentication";
 // Create a context object with default values
 const CartCountContext = React.createContext({
   cartCount: 0,
@@ -66,26 +67,29 @@ function App() {
    
   }, []);
   useEffect(() => {
-    const jwtToken = localStorage.getItem("jwtToken");
-    if (jwtToken) {
-       // Retrieve user details from Firestore based on the JWT token
-       const userDetailsRef = doc(usersCollection, jwtToken);
-       getDoc(userDetailsRef)
-       .then((doc) => {
-         if (doc.exists) {
-           const userDetails = doc.data();
-
-           // Dispatch an action to store the user details in Redux
-           dispatch(setUserDetails(userDetails));
-         } else {
-           // Handle the case where the user details document does not exist
-         }
-       })
-       .catch((error) => {
-         // Handle any errors that occurred during the retrieval process
-       });
-   }
- }, [dispatch]);
+    async function fetchData() {
+      const USERUID = localStorage.getItem("uid");
+      if (USERUID) {
+        // Retrieve user details from Firestore based on the UID
+        const userDetailsRef = doc(usersCollection, USERUID);
+        const docSnap = await getDoc(userDetailsRef);
+        if (docSnap.exists()) {
+          dispatch(setUserDetails(docSnap.data().userDetails));
+          console.log("Document data:", docSnap.data().userDetails);
+        } else {
+          console.log("No such document!");
+        }
+        dispatch(setAuthenticationStatus(true));
+      }
+    }
+  
+    fetchData(); // Call the async function immediately
+  
+    // Clean-up function (if needed)
+    return () => {
+      // Perform any clean-up tasks here (if necessary)
+    };
+  }, [dispatch, usersCollection]);
 
   useEffect(() => {
     setCartCount(cart.length); // update cartCount whenever the cart changes

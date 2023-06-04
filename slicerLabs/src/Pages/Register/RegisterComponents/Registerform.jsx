@@ -23,7 +23,7 @@ import {
 } from "firebase/auth";
 import { ref, set } from "firebase/database";
 import { useNavigate } from "react-router-dom";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { setUserDetails } from "../../../ReduxStore/actions/userDetails";
 // import {
@@ -181,16 +181,19 @@ const Registerform = () => {
         postalCode: formValues.postalCode,
         blkNumber: formValues.blkNumber,
         flatNumber: formValues.flatNumber,
-        uid: user.uid,
       };
-    
+
       // Add the userDetails to the "users" collection in Firestore
-      await addDoc(usersCollection, userDetails);
+      await setDoc(doc(usersCollection, user.uid),
+        {
+          userDetails,
+        });
       // Generate JWT token
       const token = await user.getIdToken();
-
+      const USERUID = user.uid;
       // Store token in local storage
       localStorage.setItem("jwtToken", token);
+      localStorage.setItem("uid", USERUID);
 
       // Update user details in Redux
       dispatch(setUserDetails(formValues));

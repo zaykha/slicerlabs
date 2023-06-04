@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { GoogleAuthProvider, getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 import { getFirestore, collection } from "firebase/firestore"; // Import Firestore functions
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -14,7 +15,7 @@ const firebaseConfig = {
     storageBucket: "slicerlabs-c10ea.appspot.com",
     messagingSenderId: "1089428165235",
     appId: "1:1089428165235:web:21711be07841abd26dd006",
-    databaseURL:"https://slicerlabs-c10ea-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    // databaseURL:"https://slicerlabs-c10ea-default-rtdb.asia-southeast1.firebasedatabase.app/"
   };
 
 // Initialize Firebase
