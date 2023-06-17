@@ -1,201 +1,339 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { LoginContainer, LoginFlexdiv, LoginFromcontainer } from '../../../Login/LoginComponents/LoginForm/LoginFormelements'
-import { Mdropdownlabel, MinP, Minputqtt, MOdropdown, Moption, NotiPrompt, PMAlertBox, PMButton, PMContainer, TocartCTABtn, Tocartflexdiv } from './MaterialsOptionselements'
-import { useNavigate } from 'react-router-dom';
-import { useCartCount } from '../../../../App';
-
+import React, { useEffect, useRef, useState } from "react";
+import {
+  LoginContainer,
+  LoginFlexdiv,
+  LoginFromcontainer,
+} from "../../../Login/LoginComponents/LoginForm/LoginFormelements";
+import {
+  Mdropdownlabel,
+  MinP,
+  Minputqtt,
+  MOdropdown,
+  Moption,
+  NotiPrompt,
+  PMAlertBox,
+  PMButton,
+  PMContainer,
+  TocartCTABtn,
+  Tocartflexdiv,
+} from "./MaterialsOptionselements";
+import { useNavigate } from "react-router-dom";
+import { useCartCount } from "../../../../App";
 
 const MaterialsOptions = () => {
   const { cartCount, setCartCount } = useCartCount();
   const aboveDivRef = useRef(null);
   const belowDivRef = useRef(null);
-
+  const leftDivRef = useRef(null);
+  const rightDivRef = useRef(null);
   const [material, setMaterial] = useState("");
-  const [finishing, setFinishing] = useState("");
-  const [dimension, setDimension] = useState("");
-  const [quantity, setQuantity] = useState(0);
+  const [color, setColor] = useState("");
+  const [width, setWidth] = useState(10);
+  const [height, setHeight] = useState(10);
+  const [depth, setDepth] = useState(10);
+  const [quantity, setQuantity] = useState(1);
   const [cart, setCart] = useState([]);
   const Navigate = useNavigate();
-
-  
+  const [price, setPrice] = useState(0);
 
   useEffect(() => {
-    const storedCart = localStorage.getItem('cart');
+    const storedCart = localStorage.getItem("cart");
     if (storedCart) {
       setCart(JSON.parse(storedCart));
     }
   }, []);
 
   useEffect(() => {
-    console.log(JSON.parse(localStorage.getItem('cart')));
+    console.log(JSON.parse(localStorage.getItem("cart")));
   }, [cart]);
 
-  const handleAddToCart = () => {
+  const handleCheckPrice = async () => {
+    console.log("checking");
     const item = {
       material,
-      finishing,
-      dimension,
-      quantity,
+      color,
+      dimensions: {
+        width: Number(width),
+        height: Number(height),
+        depth: Number(depth),
+      },
     };
-    if(!material ||!finishing || !dimension || !quantity){
-      alert('please fill in empty fields')
-    } else{
+    try {
+      const response = await fetch("http://localhost:3000/calculate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(item),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error calculating price");
+      }
+
+      const data = await response.json();
+      const calculatedPrice = data.price.toFixed(2); // Round the price to two decimal places
+      console.log(data);
+      setPrice(calculatedPrice);
+    } catch (error) {
+      console.error(error);
+      // Handle the error
+    }
+  };
+  const item = {
+    material,
+    color,
+    width,
+    quantity,
+  };
+  const handleAddToCart = () => {
+    if (!material || !color || !width || !height || !depth || !quantity) {
+      alert("please fill in empty fields");
+    } else {
       const newCart = [...cart, item];
       setCart(newCart);
-      localStorage.setItem('cart', JSON.stringify(newCart));
+      localStorage.setItem("cart", JSON.stringify(newCart));
       setMaterial("");
-      setFinishing("");
-      setDimension("");
-      setQuantity(0);
-      setCartCount(newCart.length)
+      setColor("");
+      setWidth("");
+      setHeight("");
+      setDepth("");
+      setQuantity(1);
+      setCartCount(newCart.length);
+      setPrice(0)
     }
-    
-    
   };
 
   const handleCheckOut = () => {
-    const item = {
-      material,
-      finishing,
-      dimension,
-      quantity,
-    };
-
-    if(cart.length>0){
-      if(!material && !finishing && !dimension && !quantity ){
+    if (cart.length > 0) {
+      if (!material && !color && !width && !height && !depth && !quantity) {
         const cartString = encodeURIComponent(JSON.stringify(cart));
         Navigate(`/cart?cart=${cartString}`);
-      } else{
-        if(!material ||!finishing || !dimension || !quantity ){
-          alert('please fill all in empty fields or empty the field to proceed')
-        } else{
+      } else {
+        if (!material || !color || !width|| !height || !depth || !quantity) {
+          alert(
+            "please fill all in empty fields or empty the field to proceed"
+          );
+        } else {
           const newCart = [...cart, item];
           setCart(newCart);
-          localStorage.setItem('cart', JSON.stringify(newCart));
+          localStorage.setItem("cart", JSON.stringify(newCart));
           setMaterial("");
-          setFinishing("");
-          setDimension("");
-          setQuantity(0);
+          setColor("");
+          setWidth("");
+          setHeight("");
+          setDepth("");
+          setQuantity(1);
           const cartString = encodeURIComponent(JSON.stringify(cart));
           Navigate(`/cart?cart=${cartString}`);
         }
       }
-    }else{
-      alert('please add to cart');
-      if(!material ||!finishing || !dimension || !quantity ){
-        alert('please fill in empty fields')
-      } else{
+    } else {
+      alert("please add to cart");
+      if (!material || !color || !width || !height || !depth || !quantity) {
+        alert("please fill in empty fields");
+      } else {
         const newCart = [...cart, item];
         setCart(newCart);
-        localStorage.setItem('cart', JSON.stringify(newCart));
+        localStorage.setItem("cart", JSON.stringify(newCart));
         setMaterial("");
-        setFinishing("");
-        setDimension("");
-        setQuantity(0);
+        setColor("");
+        setWidth("");
+        setHeight("");
+        setDepth("");
+        setQuantity(1);
         const cartString = encodeURIComponent(JSON.stringify(cart));
         Navigate(`/cart?cart=${cartString}`);
       }
     }
-  }
+  };
 
   useEffect(() => {
     const updatePosition = () => {
       const aboveHeight = aboveDivRef.current.getBoundingClientRect().height;
-      belowDivRef.current.style.top = `${aboveHeight+520}px`;
+      belowDivRef.current.style.top = `${aboveHeight + 520}px`;
     };
-    
-    updatePosition(); // Set initial position on page load
-    window.addEventListener('resize', updatePosition);
-
+    const updateHorizontalPosition = () => {
+      if (leftDivRef.current && rightDivRef.current) {
+        const aboveWidth = leftDivRef.current.getBoundingClientRect().width;
+        rightDivRef.current.style.left = `${aboveWidth + 15}px`;
+      }
+    };
+    const handleResize = () => {
+      updatePosition();
+      updateHorizontalPosition();
+    };
+    handleResize(); // Set initial positions on page load
+    window.addEventListener("resize", handleResize);
+  
     return () => {
-      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [material, color, width, height, depth, price]);
+
   return (
     <>
-   
-    <LoginFromcontainer ref={aboveDivRef} >
-    <LoginContainer >
-        <Mdropdownlabel htmlFor="material">Materials</Mdropdownlabel>
-        <MOdropdown 
-        value={material}
-        onChange={(e) => setMaterial(e.target.value)}
-        >
-          <Moption value="">Please Select a Material</Moption>
-          <Moption value="ABS">Acrylonitrile Butadiene Styrene (ABS)</Moption>
-          <Moption value="PLA">Polylactic Acid (PLA)</Moption>
-          <Moption value="TPU">Thermoplastic Polyurethane (TPU)</Moption>
-          <Moption value="Nylon">Nylon</Moption>
-          <Moption value="PETG">Polyethylene Terephthalate Glycol (PETG)</Moption>
-          <Moption value="Resin">Resins</Moption>  
-        </MOdropdown>
+      <LoginFromcontainer ref={aboveDivRef}>
+        <LoginContainer>
+          <Mdropdownlabel htmlFor="material">Materials</Mdropdownlabel>
+          <MOdropdown
+            value={material}
+            onChange={(e) => setMaterial(e.target.value)}
+          >
+            <Moption value="">Please Select a Material</Moption>
+            <Moption value="ABS">Acrylonitrile Butadiene Styrene (ABS)</Moption>
+            <Moption value="PLA">Polylactic Acid (PLA)</Moption>
+            <Moption value="TPU">Thermoplastic Polyurethane (TPU)</Moption>
+            <Moption value="Nylon">Nylon</Moption>
+            <Moption value="PETG">
+              Polyethylene Terephthalate Glycol (PETG)
+            </Moption>
+            <Moption value="Resin">Resins</Moption>
+          </MOdropdown>
 
-        <Mdropdownlabel htmlFor="finishing">Finshing & Color</Mdropdownlabel>
-        <MOdropdown 
-        value={finishing}
-        onChange={(e) => setFinishing(e.target.value)}
-        >
-          <Moption value="">Please Select a Color</Moption>
-          <Moption value="white">White</Moption>
-          <Moption value="black">Black</Moption>
-          <Moption value="transparent">Transparent</Moption>
-        </MOdropdown>
+          <Mdropdownlabel htmlFor="color">Finshing & Color</Mdropdownlabel>
+          <MOdropdown value={color} onChange={(e) => setColor(e.target.value)}>
+            <Moption value="">Please Select a Color</Moption>
+            <Moption value="white">White</Moption>
+            <Moption value="black">Black</Moption>
+            <Moption value="transparent">Transparent</Moption>
+          </MOdropdown>
 
+          <Mdropdownlabel htmlFor="width">
+            Dimension ( Width x Height x Depth )
+          </Mdropdownlabel>
 
-        <Mdropdownlabel htmlFor="dimension">Dimension ( Length x Width x Height )</Mdropdownlabel>
-        <MOdropdown
-        value={dimension}
-        onChange={(e) => setDimension(e.target.value)}>
-          <Moption value="">Please Select a Dimension</Moption>
-          <Moption value="10">10 x 10 x 10</Moption>
-          <Moption value="20">20 x 20 x 20</Moption>
-          <Moption value="30">30 x 30 x 30</Moption>
-          <Moption value="40">40 x 40 x 40</Moption>
-          <Moption value="50">50 x 50 x 50</Moption>
-          <Moption value="custom">custom</Moption>  
-        </MOdropdown>
+          <div
+            style={{
+              display: "flex",
+            }}
+          >
+            <input
+              type="number"
+              placeholder="Width"
+              value={width}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value >= 10) {
+                  setWidth(value);
+                }
+              }}
+              style={{
+                width: "28%",
+                background: "rgba(87, 87, 87, 0.43)",
+                border: "1px solid #D5D5D5",
+                borderRadius: "10px",
+                color: "white",
+                margin: "0px auto 15px",
+                padding: "8px",
+                textAlign: "center",
+                height: "40px",
+                fontSize: "1.1rem",
+              }}
+            />
 
-        <Mdropdownlabel htmlFor="quantity">Quantity</Mdropdownlabel>
-        <LoginFlexdiv >
-            <Minputqtt 
-            type='number' 
-            placeholder='Quantity' 
-            min='0'
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            ></Minputqtt>
-            <MinP>x </MinP>
-            <MinP>$ 0 </MinP>
-            <MinP>= </MinP>
-            <MinP>$ 0</MinP>
+            <input
+              type="number"
+              placeholder="Height"
+              value={height}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value >= 10) {
+                  setHeight(value);
+                }
+              }}
+              style={{
+                width: "28%",
+                background: "rgba(87, 87, 87, 0.43)",
+                border: "1px solid #D5D5D5",
+                borderRadius: "10px",
+                color: "white",
+                margin: "0px auto 15px",
+                padding: "8px",
+                textAlign: "center",
+                height: "40px",
+                fontSize: "1.1rem",
+              }}
+            />
 
+            <input
+              type="number"
+              placeholder="Depth"
+              value={depth}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value >= 10) {
+                  setDepth(value);
+                }
+              }}
+              style={{
+                width: "28%",
+                background: "rgba(87, 87, 87, 0.43)",
+                border: "1px solid #D5D5D5",
+                borderRadius: "10px",
+                color: "white",
+                margin: "0px auto 15px",
+                padding: "8px",
+                textAlign: "center",
+                height: "40px",
+                fontSize: "1.1rem",
+              }}
+            />
+          </div>
 
-        </LoginFlexdiv>
-        <MinP>Your Product will be Produced in ? business days.</MinP>
-    </LoginContainer>
+          {material && color && width && height && depth ? (
+            <TocartCTABtn onClick={handleCheckPrice}>Check Price</TocartCTABtn>
+          ) : (
+            <></>
+          )}
+          {price ? (
+            <div>
+              <Mdropdownlabel htmlFor="quantity">Quantity</Mdropdownlabel>
+              <LoginFlexdiv>
+                <Minputqtt
+                  type="number"
+                  placeholder="Quantity"
+                  min="0"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                ></Minputqtt>
+                <MinP>x </MinP>
+                <MinP>${price} </MinP>
+                <MinP>= </MinP>
+                <MinP>$ {(price * parseInt(quantity)).toFixed(2)}</MinP>
+              </LoginFlexdiv>
+            </div>
+          ) : (
+            <></>
+          )}
+          {/* <MinP>Your Product will be Produced in ? business days.</MinP> */}
+        </LoginContainer>
+      </LoginFromcontainer>
+      <Tocartflexdiv ref={belowDivRef}>
+        {price ? (
+          <TocartCTABtn onClick={handleAddToCart}>ADD TO CART</TocartCTABtn>
+        ) : (
+          <></>
+        )}
 
-  
-</LoginFromcontainer>
-<Tocartflexdiv ref={belowDivRef}>
-        <TocartCTABtn onClick={handleAddToCart}>ADD TO CART</TocartCTABtn>
+        {cart.length > 0 ? (
+          <>
+         <div style={{display:'flex',width:'180px'}}>
+            <TocartCTABtn onClick={handleCheckOut}>
+              
+             <div>CHECK OUT</div> 
+              
+              
+            </TocartCTABtn>
+            {cart && <NotiPrompt>{cart.length}</NotiPrompt>}
+            </div>
+          </>
+        ) : (
+          <></>
+        )}
+      </Tocartflexdiv>
+    </>
+  );
+};
 
-      {cart.length>0?
-      <>
-      <TocartCTABtn onClick={handleCheckOut}>
-        CHECK OUT
-        {cart && <NotiPrompt>{cart.length}</NotiPrompt>}
-      </TocartCTABtn>
-      
-      </>:
-      <></>  
-      }
-        
-</Tocartflexdiv>
-
-
-    
-</>
-  )
-}
-
-export default MaterialsOptions
+export default MaterialsOptions;

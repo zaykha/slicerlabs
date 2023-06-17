@@ -103,13 +103,15 @@ export const TocartCTABtn = styled.div`
     }
 `
 export const NotiPrompt = styled.div`
-    position:absolute;
-    top:-5px;
+    position:relative;
+    // top:-5px;
     background: red;
     width: 20px;
+    height:20px;
     border-radius: 50%;
     color: white;
-    right: 15px;
+    padding-left:5px;
+    // right: 15px;
 `
 
 export const PMContainer = styled.div`
