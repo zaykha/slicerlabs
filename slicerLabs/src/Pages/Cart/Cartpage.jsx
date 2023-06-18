@@ -30,7 +30,7 @@ import {
 } from './Cartpageelement'
 import Sidebar from '../../globalcomponents/SidebarMenu/Sidebar'
 import Paymentimage from '../../assets/paymentimg.png'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setAuthenticationStatus } from '../../ReduxStore/actions/Authentication'
 
 
@@ -59,16 +59,57 @@ const Cartpage = () => {
   const togglesidebar = () => {
      setIsOpen(!isOpen);
   }  
-
+  const DB_NAME = 'TEMP_MODEL_STORAGE';
+  const DB_VERSION = 1;
+  const OBJECT_STORE_NAME = 'models';
+  const openDatabase = () => {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+  
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        db.createObjectStore(OBJECT_STORE_NAME, { keyPath: 'id' });
+      };
+  
+      request.onsuccess = () => {
+        const db = request.result;
+        resolve(db);
+      };
+  
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  };
+  const retrieveModelsFromIndexedDB = async () => {
+    try {
+      const db = await openDatabase();
+      const transaction = db.transaction([OBJECT_STORE_NAME], 'readonly');
+      const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
+      
+      // Get all models from the object store
+      const models = await objectStore.getAll();
+      
+      // Log the count and retrieved models
+      console.log('Number of items:', models.length);
+      console.log('Retrieved models:', models);
+    } catch (error) {
+      console.log('Failed to open IndexedDB', error);
+    }
+  };
+  const handleRetrieveAllModels = async () => {
+    await retrieveModelsFromIndexedDB();
+  };
+  const cartItems = useSelector(state => state.cartItems);
   const [cart, setCart] = useState(() => {
     const storedCart = localStorage.getItem('cart');
     return storedCart ? JSON.parse(storedCart) : [];
   });
-
+  // const [cart, setCart] = useState(cartItems);
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
-
+ 
   const handleRemoveItem = (index) => {
     const newCart = [...cart];
     newCart.splice(index, 1);
@@ -148,6 +189,7 @@ const Cartpage = () => {
        
         </Step1Container>
         <NextBtn onClick={handleLogout}>logout</NextBtn>
+        <NextBtn onClick={handleRetrieveAllModels}>retrieve</NextBtn>
         <Footer/>
     </>
   )

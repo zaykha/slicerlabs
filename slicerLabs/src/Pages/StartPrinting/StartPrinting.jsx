@@ -21,7 +21,7 @@ const StartPrinting = () => {
   const togglesidebar = () => {
     setIsOpen(!isOpen);
   };
-
+  const [tempModelId, setTempModelId] = useState(null); 
   const [showPrompt, setShowPrompt] = useState(false);
 
   const handleBeforeUnload = (e) => {
@@ -73,9 +73,9 @@ const StartPrinting = () => {
       </CUheader>
       <CUsubheader>to get instant quote!</CUsubheader>
 
-      <Dropfile isModelLoaded={isModelLoaded} setIsModelLoaded={setIsModelLoaded}/>
+      <Dropfile tempModelId={tempModelId} setTempModelId={setTempModelId} isModelLoaded={isModelLoaded} setIsModelLoaded={setIsModelLoaded}/>
 
-      {isModelLoaded ? <MaterialsOptions /> : <></>}
+      {isModelLoaded ? <MaterialsOptions tempModelId={tempModelId} setTempModelId={setTempModelId} /> : <></>}
       <Footer />
     </>
   );

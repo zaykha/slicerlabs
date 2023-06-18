@@ -19,8 +19,10 @@ import {
 } from "./MaterialsOptionselements";
 import { useNavigate } from "react-router-dom";
 import { useCartCount } from "../../../../App";
+import { useDispatch, useSelector } from 'react-redux';
+import { addMaterialOptions } from "../../../../ReduxStore/reducers/CartItemReducer";
 
-const MaterialsOptions = () => {
+const MaterialsOptions = ({tempModelId, setTempModelId}) => {
   const { cartCount, setCartCount } = useCartCount();
   const aboveDivRef = useRef(null);
   const belowDivRef = useRef(null);
@@ -34,8 +36,11 @@ const MaterialsOptions = () => {
   const [quantity, setQuantity] = useState(1);
   const [cart, setCart] = useState([]);
   const Navigate = useNavigate();
+  const dispatch = useDispatch();
   const [price, setPrice] = useState(0);
-
+  const tempID = useSelector(state => state.tempModelId);
+  // const cartItems = useSelector(state => state.cartItems);
+ 
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) {
@@ -43,9 +48,10 @@ const MaterialsOptions = () => {
     }
   }, []);
 
-  useEffect(() => {
-    console.log(JSON.parse(localStorage.getItem("cart")));
-  }, [cart]);
+  // useEffect(() => {
+  //   console.log(cartItems);
+  //   console.log('from MaterialOptions uuid is ', tempID)
+  // }, [cartItems,tempID]);
 
   const handleCheckPrice = async () => {
     console.log("checking");
@@ -84,8 +90,11 @@ const MaterialsOptions = () => {
     material,
     color,
     width,
+    height,
+    depth,
     quantity,
   };
+  
   const handleAddToCart = () => {
     if (!material || !color || !width || !height || !depth || !quantity) {
       alert("please fill in empty fields");
@@ -100,17 +109,30 @@ const MaterialsOptions = () => {
       setDepth("");
       setQuantity(1);
       setCartCount(newCart.length);
-      setPrice(0)
+      setPrice(0);
+      const finalItem = {
+        tempID, // generate a unique ID for the item
+        material,
+        color,
+        dimensions: {
+          width,
+          height,
+          depth,
+        },
+        quantity,
+        price
+      };
+      dispatch(addMaterialOptions(tempModelId, finalItem));
+      
     }
   };
-
   const handleCheckOut = () => {
     if (cart.length > 0) {
-      if (!material && !color && !width && !height && !depth && !quantity) {
+      if (!material && !color && !width && !height && !depth) {
         const cartString = encodeURIComponent(JSON.stringify(cart));
         Navigate(`/cart?cart=${cartString}`);
       } else {
-        if (!material || !color || !width|| !height || !depth || !quantity) {
+        if (!material || !color || !width|| !height || !depth ) {
           alert(
             "please fill all in empty fields or empty the field to proceed"
           );
