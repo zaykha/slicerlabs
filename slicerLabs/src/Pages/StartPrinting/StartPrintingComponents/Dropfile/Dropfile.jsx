@@ -15,7 +15,6 @@ import { PerspectiveCamera } from "three";
 import { Grid, OrbitControls } from "@react-three/drei";
 import { useDispatch } from "react-redux";
 import {
-  addModelToCart,
   addModelToTempState,
 } from "../../../../ReduxStore/reducers/CartItemReducer";
 import { v4 as uuidv4 } from "uuid";
@@ -24,6 +23,8 @@ const Dropfile = ({
   setTempModelId,
   isModelLoaded,
   setIsModelLoaded,
+  isCheckedOut,
+  setIsCheckedOut
 }) => {
   const [files, setFiles] = useState([]);
   const [model, setModel] = useState(null);
@@ -36,6 +37,12 @@ const Dropfile = ({
   const generateUniqueId = () => {
     return uuidv4();
   };
+
+  useEffect(()=>{
+    setModel(null);
+    // setIsModelLoaded(false);
+    setFiles(null);
+  },[isCheckedOut])
   const DB_NAME = 'TEMP_MODEL_STORAGE';
   const DB_VERSION = 1;
   const OBJECT_STORE_NAME = 'models';
@@ -61,6 +68,7 @@ const Dropfile = ({
       };
     });
   };
+
   const saveModelToIndexedDB = async (modelId, file) => {
     const db = await openDatabase();
     const transaction = db.transaction([OBJECT_STORE_NAME], 'readwrite');
@@ -79,6 +87,7 @@ const Dropfile = ({
       };
     });
   };
+
   // Function to delete all items from IndexedDB
   const deleteAllModelsFromIndexedDB = async () => {
     try {
@@ -96,7 +105,6 @@ const Dropfile = ({
       console.log('Failed to open IndexedDB', error);
     }
   };
-  
 
   // Function to delete a particular item from IndexedDB based on its ID
   const deleteModelFromIndexedDB = async (modelId) => {
@@ -115,7 +123,6 @@ const Dropfile = ({
       console.log('Failed to open IndexedDB', error);
     }
   };
-  
 
   // Function to delete all items
   const handleDeleteAllModels = async () => {
@@ -137,6 +144,7 @@ const Dropfile = ({
       console.error("Error saving model to local storage:", error);
     }
   };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: ".stl,.obj",
     onDrop: async (acceptedFiles, rejectedFiles) => {
@@ -167,7 +175,8 @@ const Dropfile = ({
             // Dispatch an action to add the model to the Redux store
             // Store the UUID
             setTempModelId(modelId); // Set the tempModelId state
-            dispatch(addModelToCart(modelId));
+            dispatch(addModelToTempState(modelId));
+            
           });
         } catch (error) {
           setIsSupportedFileType(false);
@@ -208,7 +217,7 @@ const Dropfile = ({
       {/* {isLoading ? (
         <div>Loading...</div>
       ) : */}
-      {model && (
+      {model && !isCheckedOut ?(
         <DropzoneFormcontainer>
           <DropzoneContainer>
             <Canvas
@@ -240,7 +249,7 @@ const Dropfile = ({
             </button>
           </DropzoneContainer>
         </DropzoneFormcontainer>
-      )}
+      ):<></>}
       {!model && (
         <DropzoneFormcontainer {...getRootProps()}>
           <DropzoneContainer>

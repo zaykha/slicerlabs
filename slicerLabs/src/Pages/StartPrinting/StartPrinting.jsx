@@ -17,11 +17,12 @@ import {
 
 const StartPrinting = () => {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [isCheckedOut, setIsCheckedOut] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const togglesidebar = () => {
     setIsOpen(!isOpen);
   };
-  const [tempModelId, setTempModelId] = useState(null); 
+  const [tempModelId, setTempModelId] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
 
   const handleBeforeUnload = (e) => {
@@ -40,7 +41,7 @@ const StartPrinting = () => {
     localStorage.removeItem("cart");
     window.location.reload();
   };
- 
+
   useEffect(() => {
     window.addEventListener("beforeunload", handleBeforeUnload);
 
@@ -73,9 +74,27 @@ const StartPrinting = () => {
       </CUheader>
       <CUsubheader>to get instant quote!</CUsubheader>
 
-      <Dropfile tempModelId={tempModelId} setTempModelId={setTempModelId} isModelLoaded={isModelLoaded} setIsModelLoaded={setIsModelLoaded}/>
+      <Dropfile
+        tempModelId={tempModelId}
+        setTempModelId={setTempModelId}
+        isModelLoaded={isModelLoaded}
+        setIsModelLoaded={setIsModelLoaded}
+        isCheckedOut={isCheckedOut}
+        setIsCheckedOut={setIsCheckedOut}
+      />
 
-      {isModelLoaded ? <MaterialsOptions tempModelId={tempModelId} setTempModelId={setTempModelId} /> : <></>}
+      {isModelLoaded ? (
+        <MaterialsOptions
+          tempModelId={tempModelId}
+          setTempModelId={setTempModelId}
+          isModelLoaded={isModelLoaded}
+          setIsModelLoaded={setIsModelLoaded}
+          isCheckedOut={isCheckedOut}
+          setIsCheckedOut={setIsCheckedOut}
+        />
+      ) : (
+        <></>
+      )}
       <Footer />
     </>
   );

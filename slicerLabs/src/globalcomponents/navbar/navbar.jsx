@@ -19,8 +19,8 @@ import {
 } from "./navbarelement";
 import logo from "../../assets/Asset 4.png";
 import cart from "../../assets/shopping-cart1.png";
-import { useCartCount } from "../../App";
-import { useSelector } from "react-redux";
+
+import { useDispatch, useSelector } from "react-redux";
 const NavLinksarray = [
   { title: "Home", path: "/" },
   { title: "Services", path: "/services" },
@@ -32,18 +32,10 @@ const NavLinksarray = [
 
 const Navbar = ({ togglesidebar }) => {
   const { pathname } = useLocation();
-  const { cartCount, setCartCount } = useCartCount();
+
   const { isAuthenticated } = useSelector((state) => state.authentication);
   const userDetails = useSelector(state => state.userDetails);
-
-  useEffect(() => {
-    const cart = JSON.parse(localStorage.getItem("cart"));
-    // setCart(cart || []);
-
-    // Update cart count
-    const count = cart ? cart.length : 0;
-    setCartCount(count);
-  }, [setCartCount]);
+  const cartItems = useSelector(state => state.cartItems.cartItems);
 
   return (
     <>
@@ -58,11 +50,11 @@ const Navbar = ({ togglesidebar }) => {
           <NavbarContainer>
             <NavMenu>
               {NavLinksarray.map((link) => (
-                <NavItem>
+                <NavItem key={link.title}>
                   <NavLinks
-                    key={link.title}
                     to={link.path}
-                    isActive={pathname === link.path}
+                    className={pathname === link.path ? "active" : ""}
+                    // isactive={pathname === link.path}
                   >
                     {link.title}
                   </NavLinks>
@@ -73,7 +65,8 @@ const Navbar = ({ togglesidebar }) => {
                   <NavLinks
                     key={"userDetails"}
                     to={"/"}
-                    isActive={pathname === "/login"}
+                    className={pathname === "/userDetails" ? "active" : ""}
+                    // isactive={pathname === "/login"}
                   >
                   {userDetails.userName}
                   </NavLinks>
@@ -83,7 +76,8 @@ const Navbar = ({ togglesidebar }) => {
                   <NavLinks
                     key={"Login"}
                     to={"/login"}
-                    isActive={pathname === "/login"}
+                    className={pathname === "/login" ? "active" : ""}
+                    // isActive={pathname === "/login"}
                   >
                     Login
                   </NavLinks>
@@ -95,7 +89,8 @@ const Navbar = ({ togglesidebar }) => {
             <ActionItems>
               <NavLinks1
                 to="/Start3dPrinting"
-                isActive={pathname === "/Start3dPrinting"}
+                className={pathname === "/Start3dPrinting" ? "active" : ""}
+                // isActive={pathname === "/Start3dPrinting"}
               >
                 {pathname === "/Start3dPrinting"
                   ? "3D Printing"
@@ -106,7 +101,7 @@ const Navbar = ({ togglesidebar }) => {
             <ActionItems>
               <NavLinks to="/cart">
                 <IMGTAG1 src={cart} alt="cart" />
-                {cartCount > 0 && <span>{cartCount}</span>}
+                {cartItems.length > 0 && <span>{cartItems.length}</span>}
               </NavLinks>
             </ActionItems>
           </Commerce>

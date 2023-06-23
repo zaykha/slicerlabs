@@ -22,15 +22,15 @@ import {doc, getDoc} from "firebase/firestore";
 import { useSelector } from "react-redux";
 import { setAuthenticationStatus } from "./ReduxStore/actions/Authentication";
 // Create a context object with default values
-const CartCountContext = React.createContext({
-  cartCount: 0,
-  setCartCount: () => {},
-});
+// const CartCountContext = React.createContext({
+//   cartCount: 0,
+//   setCartCount: () => {},
+// });
 
 // Create a custom hook to make accessing the context easier
-export function useCartCount() {
-  return useContext(CartCountContext);
-}
+// export function useCartCount() {
+//   return useContext(CartCountContext);
+// }
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,34 +38,36 @@ function App() {
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
+  const cartItemsDetails = useSelector(state => state.cartItems.cartItems);
+
   const { isAuthenticated } = useSelector((state) => state.authentication);
-  const cartData = JSON.parse(localStorage.getItem("cart")) || [];
-  const cartDataLength = cartData.length || 0;
-  const [cart, setCart] = useState(cartData);
+
+  const cartDataLength = cartItemsDetails.length || 0;
+  // const [cart, setCart] = useState(cartItemsDetails);
   const [cartCount, setCartCount] = useState(cartDataLength);
-  const handleCartStorageChange = (event) => {
-    if (event.key === "cart") {
-      const cartData = JSON.parse(event.newValue);
-      setCart(cartData || []);
-      setCartCount(cartData ? cartData.length : 0);
-    }
-  };
+  // const handleCartStorageChange = (event) => {
+  //   if (event.key === "cart") {
+  //     const cartData = JSON.parse(event.newValue);
+  //     setCart(cartData || []);
+  //     setCartCount(cartData ? cartData.length : 0);
+  //   }
+  // };
 
-  useEffect(() => {
-    const cartFromLocalStorage = JSON.parse(localStorage.getItem("cart"));
-    if (cartFromLocalStorage) {
-      setCart(cartFromLocalStorage);
-      setCartCount(cartFromLocalStorage.length); // update cartCount
-    }
-    // Listen for changes to cart data in local storage
-    window.addEventListener("storage", handleCartStorageChange);
+  // useEffect(() => {
+  //   const cartFromLocalStorage = JSON.parse(localStorage.getItem("cart"));
+  //   if (cartFromLocalStorage) {
+  //     setCart(cartFromLocalStorage);
+  //     setCartCount(cartFromLocalStorage.length); // update cartCount
+  //   }
+  //   // Listen for changes to cart data in local storage
+  //   window.addEventListener("storage", handleCartStorageChange);
 
-    // Clean up the event listener when the component unmounts
-    return () => {
-      window.removeEventListener("storage", handleCartStorageChange);
-    };
+  //   // Clean up the event listener when the component unmounts
+  //   return () => {
+  //     window.removeEventListener("storage", handleCartStorageChange);
+  //   };
    
-  }, []);
+  // }, []);
   useEffect(() => {
     async function fetchData() {
       const USERUID = localStorage.getItem("uid");
@@ -91,12 +93,12 @@ function App() {
     };
   }, [dispatch, usersCollection]);
 
-  useEffect(() => {
-    setCartCount(cart.length); // update cartCount whenever the cart changes
-    localStorage.setItem("cart", JSON.stringify(cart));
-    // setCount(cart.length);
-    console.log(localStorage.getItem("cart"));
-  }, [cart]);
+  // useEffect(() => {
+  //   setCartCount(cart.length); // update cartCount whenever the cart changes
+  //   localStorage.setItem("cart", JSON.stringify(cart));
+  //   // setCount(cart.length);
+  //   console.log(localStorage.getItem("cart"));
+  // }, [cart]);
 
   const [showPrompt, setShowPrompt] = useState(false);
 
@@ -172,9 +174,9 @@ function App() {
 
   return (
     <Provider store={store}>
-      <CartCountContext.Provider value={{ cartCount, setCartCount }}>
+      {/* <CartCountContext.Provider value={{ cartCount, setCartCount }}> */}
         <RouterProvider router={router} />
-      </CartCountContext.Provider>
+      {/* </CartCountContext.Provider> */}
     </Provider>
   );
 }

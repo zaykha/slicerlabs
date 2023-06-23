@@ -13,40 +13,29 @@ const cartSlice = createSlice({
     addModelToTempState(state, action) {
       state.tempModelId = action.payload;
     },
-    addModelToCart: {
-      reducer(state, action) {
-        const { modelIdfromDropZone } = action.payload;
-        const newItem = {
-          id: modelIdfromDropZone,
-          materialOptions: null,
-        };
-        state.cartItems.push(newItem);
-      },
-      prepare(modelIdfromDropZone) {
-        return {
-          payload: {
-            modelIdfromDropZone,
-          },
-        };
-      },
-    },
     addMaterialOptions(state, action) {
-      const { modelId, options } = action.payload;
-      const updatedCartItems = state.cartItems.map((item) => {
-        if (item.id === modelId) {
-          return {
-            ...item,
-            materialOptions: options,
-          };
-        }
-        return item;
-      });
-      state.cartItems = updatedCartItems;
+      const { options } = action.payload;
+      state.cartItems.push( options);
       state.tempModelId = null; // Reset the tempModelId
     },
+    increaseQuantity(state, action) {
+      const { ProductId } = action.payload;
+      const item = state.cartItems.find(item => item.ProductId === ProductId);
+      if (item) {
+        item.quantity++;
+      }
+    },
+    decreaseQuantity(state, action) {
+      const { ProductId } = action.payload;
+      const item = state.cartItems.find(item => item.ProductId === ProductId);
+      if (item && item.quantity > 1) {
+        item.quantity--;
+      }
+    },
+    
     // other reducers...
   },
 });
 
-export const { addModelToTempState, addModelToCart, addMaterialOptions } = cartSlice.actions;
+export const { addModelToTempState, addMaterialOptions } = cartSlice.actions;
 export default cartSlice.reducer;

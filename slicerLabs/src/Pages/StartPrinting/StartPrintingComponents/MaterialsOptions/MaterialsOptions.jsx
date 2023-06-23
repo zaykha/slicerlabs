@@ -18,12 +18,19 @@ import {
   Tocartflexdiv,
 } from "./MaterialsOptionselements";
 import { useNavigate } from "react-router-dom";
-import { useCartCount } from "../../../../App";
-import { useDispatch, useSelector } from 'react-redux';
+// import { useCartCount } from "../../../../App";
+import { useDispatch, useSelector } from "react-redux";
 import { addMaterialOptions } from "../../../../ReduxStore/reducers/CartItemReducer";
 
-const MaterialsOptions = ({tempModelId, setTempModelId}) => {
-  const { cartCount, setCartCount } = useCartCount();
+const MaterialsOptions = ({
+  tempModelId,
+  setTempModelId,
+  isModelLoaded,
+  setIsModelLoaded,
+  isCheckedOut,
+  setIsCheckedOut
+}) => {
+
   const aboveDivRef = useRef(null);
   const belowDivRef = useRef(null);
   const leftDivRef = useRef(null);
@@ -34,25 +41,21 @@ const MaterialsOptions = ({tempModelId, setTempModelId}) => {
   const [height, setHeight] = useState(10);
   const [depth, setDepth] = useState(10);
   const [quantity, setQuantity] = useState(1);
-  const [cart, setCart] = useState([]);
   const Navigate = useNavigate();
   const dispatch = useDispatch();
   const [price, setPrice] = useState(0);
-  const tempID = useSelector(state => state.tempModelId);
-  // const cartItems = useSelector(state => state.cartItems);
- 
+  const ProductId = useSelector((state) => state.cartItems.tempModelId);
+  const cart = useSelector(state => state.cartItems);
+  const [cartCount, setCartCount] = useState(cart.length > 0 ? cart.length : 0);
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
-    }
-  }, []);
+    // Perform actions or update the UI based on changes in the cart array
+    // For example, you can update a notification count or trigger a checkout process
 
-  // useEffect(() => {
-  //   console.log(cartItems);
-  //   console.log('from MaterialOptions uuid is ', tempID)
-  // }, [cartItems,tempID]);
-
+    // Here's an example of updating a notification count
+   setCartCount(cart.length)
+   console.log(cart);
+    // ... update the UI or trigger other actions based on the notification count
+  }, [cart]);
   const handleCheckPrice = async () => {
     console.log("checking");
     const item = {
@@ -86,32 +89,20 @@ const MaterialsOptions = ({tempModelId, setTempModelId}) => {
       // Handle the error
     }
   };
-  const item = {
-    material,
-    color,
-    width,
-    height,
-    depth,
-    quantity,
-  };
-  
+
   const handleAddToCart = () => {
     if (!material || !color || !width || !height || !depth || !quantity) {
       alert("please fill in empty fields");
     } else {
-      const newCart = [...cart, item];
-      setCart(newCart);
-      localStorage.setItem("cart", JSON.stringify(newCart));
       setMaterial("");
       setColor("");
       setWidth("");
       setHeight("");
       setDepth("");
       setQuantity(1);
-      setCartCount(newCart.length);
       setPrice(0);
       const finalItem = {
-        tempID, // generate a unique ID for the item
+        ProductId, // generate a unique ID for the item
         material,
         color,
         dimensions: {
@@ -120,33 +111,44 @@ const MaterialsOptions = ({tempModelId, setTempModelId}) => {
           depth,
         },
         quantity,
-        price
+        price,
       };
-      dispatch(addMaterialOptions(tempModelId, finalItem));
-      
+      dispatch(addMaterialOptions({options:finalItem}));
+      setIsCheckedOut(true);
+      console.log(cart);
     }
   };
   const handleCheckOut = () => {
-    if (cart.length > 0) {
+    if (cart.cartItems.length > 0) {
       if (!material && !color && !width && !height && !depth) {
         const cartString = encodeURIComponent(JSON.stringify(cart));
         Navigate(`/cart?cart=${cartString}`);
       } else {
-        if (!material || !color || !width|| !height || !depth ) {
+        if (!material || !color || !width || !height || !depth) {
           alert(
             "please fill all in empty fields or empty the field to proceed"
           );
         } else {
-          const newCart = [...cart, item];
-          setCart(newCart);
-          localStorage.setItem("cart", JSON.stringify(newCart));
+          const finalItem = {
+            tempID, // generate a unique ID for the item
+            material,
+            color,
+            dimensions: {
+              width,
+              height,
+              depth,
+            },
+            quantity,
+            price,
+          };
+          dispatch(addMaterialOptions(tempModelId, finalItem));
+          setIsCheckedOut(true);
           setMaterial("");
           setColor("");
           setWidth("");
           setHeight("");
           setDepth("");
           setQuantity(1);
-          const cartString = encodeURIComponent(JSON.stringify(cart));
           Navigate(`/cart?cart=${cartString}`);
         }
       }
@@ -155,16 +157,26 @@ const MaterialsOptions = ({tempModelId, setTempModelId}) => {
       if (!material || !color || !width || !height || !depth || !quantity) {
         alert("please fill in empty fields");
       } else {
-        const newCart = [...cart, item];
-        setCart(newCart);
-        localStorage.setItem("cart", JSON.stringify(newCart));
+        const finalItem = {
+          tempID, // generate a unique ID for the item
+          material,
+          color,
+          dimensions: {
+            width,
+            height,
+            depth,
+          },
+          quantity,
+          price,
+        };
+        dispatch(addMaterialOptions(tempModelId, finalItem));
+        setIsCheckedOut(true);
         setMaterial("");
         setColor("");
         setWidth("");
         setHeight("");
         setDepth("");
         setQuantity(1);
-        const cartString = encodeURIComponent(JSON.stringify(cart));
         Navigate(`/cart?cart=${cartString}`);
       }
     }
@@ -187,7 +199,7 @@ const MaterialsOptions = ({tempModelId, setTempModelId}) => {
     };
     handleResize(); // Set initial positions on page load
     window.addEventListener("resize", handleResize);
-  
+
     return () => {
       window.removeEventListener("resize", handleResize);
     };
@@ -338,16 +350,13 @@ const MaterialsOptions = ({tempModelId, setTempModelId}) => {
           <></>
         )}
 
-        {cart.length > 0 ? (
+        {cart.cartItems.length > 0 ? (
           <>
-         <div style={{display:'flex',width:'180px'}}>
-            <TocartCTABtn onClick={handleCheckOut}>
-              
-             <div>CHECK OUT</div> 
-              
-              
-            </TocartCTABtn>
-            {cart && <NotiPrompt>{cart.length}</NotiPrompt>}
+            <div style={{ display: "flex", width: "180px" }}>
+              <TocartCTABtn onClick={handleCheckOut}>
+                <div>CHECK OUT</div>
+              </TocartCTABtn>
+              {cart && <NotiPrompt>{cart.cartItems.length}</NotiPrompt>}
             </div>
           </>
         ) : (
