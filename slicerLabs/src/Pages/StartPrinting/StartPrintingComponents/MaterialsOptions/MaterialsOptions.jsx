@@ -218,7 +218,7 @@ const MaterialsOptions = ({
             <Moption value="ABS">Acrylonitrile Butadiene Styrene (ABS)</Moption>
             <Moption value="PLA">Polylactic Acid (PLA)</Moption>
             <Moption value="TPU">Thermoplastic Polyurethane (TPU)</Moption>
-            <Moption value="Nylon">Nylon</Moption>
+            <Moption value="NYLON">Nylon</Moption>
             <Moption value="PETG">
               Polyethylene Terephthalate Glycol (PETG)
             </Moption>

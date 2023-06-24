@@ -6,7 +6,14 @@ import {
   Moption,
 } from "../../../StartPrinting/StartPrintingComponents/MaterialsOptions/MaterialsOptionselements";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  decreaseQuantity,
+  increaseQuantity,
+  updateColor,
+  updateDimensions,
+  updateMaterial,
+} from "../../../../ReduxStore/reducers/CartItemReducer";
 const IndividualProduct = ({
   index,
   tempID,
@@ -17,22 +24,36 @@ const IndividualProduct = ({
   depth,
   quantity,
   price,
-  onDelete
+  onDelete,
 }) => {
   const [currentQuantity, setCurrentQuantity] = useState(quantity);
   const cartItemsDetails = useSelector((state) => state.cartItems.cartItems);
-
-  const increaseQuantity = () => {
-    dispatch(increaseQuantity({ ProductId: tempID }));
-
+  const dispatch = useDispatch();
+  const increaseQuantityAction = (ProductId) => {
+    dispatch(increaseQuantity({ ProductId }));
   };
 
-  const decreaseQuantity = () => {
-    dispatch(decreaseQuantity({ ProductId: tempID }));
+  const decreaseQuantityAction = (ProductId) => {
+    dispatch(decreaseQuantity({ ProductId }));
   };
 
+  const handleMaterialChange = (e) => {
+    const newMaterial = e.target.value;
+    dispatch(updateMaterial({ ProductId: tempID, newMaterial }));
+  };
+
+  const handleColorChange = (e) => {
+    const newColor = e.target.value;
+    dispatch(updateColor({ ProductId: tempID, newColor }));
+  };
+  
+  const handleDimensionsChange = (width, height, depth) => {
+    dispatch(updateDimensions({ ProductId: tempID, width, height, depth }));
+  };
   const handleDelete = () => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this item?"
+    );
     if (confirmDelete) {
       onDelete(tempID);
     }
@@ -53,14 +74,20 @@ const IndividualProduct = ({
 
               <div className="group-2">
                 <div className="overlap-group-wrapper">
-                  <div className="overlap-group-3">
-                    <div className="rectangle-2"  onClick={increaseQuantity}>
-                      <div className="text-wrapper-7">+</div> 
+                  <div
+                    className="overlap-group-3"
+                    onClick={() => increaseQuantityAction(tempID)}
+                  >
+                    <div className="rectangle-2">
+                      <div className="text-wrapper-7">+</div>
                     </div>
                   </div>
                   <div className="text-wrapper-6">{quantity}</div>
 
-                  <div className="overlap-2" onClick={decreaseQuantity}>
+                  <div
+                    className="overlap-2"
+                    onClick={() => decreaseQuantityAction(tempID)}
+                  >
                     <div className="rectangle-3">
                       <div className="text-wrapper-8">-</div>
                     </div>
@@ -71,10 +98,7 @@ const IndividualProduct = ({
 
             <div className="vertical-Division2">
               <Mdropdownlabel htmlFor="material">Materials</Mdropdownlabel>
-              <MOdropdown
-                value={material}
-                // onChange={(e) => setMaterial(e.target.value)}
-              >
+              <MOdropdown value={material} onChange={handleMaterialChange}>
                 <Moption value="">Please Select a Material</Moption>
                 <Moption value="ABS">
                   Acrylonitrile Butadiene Styrene (ABS)
@@ -91,13 +115,14 @@ const IndividualProduct = ({
               <Mdropdownlabel htmlFor="color">Finshing & Color</Mdropdownlabel>
               <MOdropdown
                 value={color}
-                onChange={(e) => setColor(e.target.value)}
+                onChange={handleColorChange}
               >
                 <Moption value="">Please Select a Color</Moption>
                 <Moption value="white">White</Moption>
                 <Moption value="black">Black</Moption>
                 <Moption value="transparent">Transparent</Moption>
               </MOdropdown>
+
               <Mdropdownlabel htmlFor="width">
                 Dimension ( Width x Height x Depth )
               </Mdropdownlabel>
@@ -114,7 +139,14 @@ const IndividualProduct = ({
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value >= 10) {
-                      setWidth(value);
+                      dispatch(
+                        updateDimensions({
+                          ProductId: tempID,
+                          width: value,
+                          height,
+                          depth,
+                        })
+                      );
                     }
                   }}
                   style={{
@@ -138,7 +170,7 @@ const IndividualProduct = ({
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value >= 10) {
-                      setHeight(value);
+                      handleDimensionsChange(width, value, depth);
                     }
                   }}
                   style={{
@@ -162,7 +194,7 @@ const IndividualProduct = ({
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value >= 10) {
-                      setDepth(value);
+                      handleDimensionsChange(width, height, value);
                     }
                   }}
                   style={{
