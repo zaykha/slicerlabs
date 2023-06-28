@@ -18,7 +18,7 @@ import { addModelToTempState } from "../../../../ReduxStore/reducers/CartItemRed
 import { v4 as uuidv4 } from "uuid";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
-import { MeshNormalMaterial, Box3, Vector3, Mesh } from "three";
+import { MeshNormalMaterial, Box3, Vector3, Mesh, LoadingManager } from "three";
 const Dropfile = ({
   tempModelId,
   setTempModelId,
@@ -31,7 +31,7 @@ const Dropfile = ({
   const [model, setModel] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSupportedFileType, setIsSupportedFileType] = useState(true);
-  const [progress, setProgress] = useState(0);
+  const [LoadProgress, setProgress] = useState(0);
   const [error, setError] = useState(null);
   const cameraRef = useRef();
   const dispatch = useDispatch();
@@ -59,8 +59,9 @@ const Dropfile = ({
     return uuidv4();
   };
   useEffect(() => {
-    console.log(model);
-  }, [model]);
+    // console.log(model);
+    console.log(LoadProgress)
+  }, [setProgress]);
   useEffect(() => {
     setModel(null);
     // setIsModelLoaded(false);
@@ -241,6 +242,7 @@ const Dropfile = ({
       setIsLoading(true);
       if (rejectedFiles.length > 0) {
         setError("Invalid file type or file is corrupted");
+        setIsLoading(false);
         return;
       }
       setIsLoading(true);
@@ -263,7 +265,42 @@ const Dropfile = ({
             .toLowerCase();
 
           if (fileExtension === "obj") {
-            const objLoader = new OBJLoader();
+            // Define the onProgress callback function
+            const manager = new LoadingManager();
+            const uploadedFile = acceptedFiles[0];
+            const totalSize = uploadedFile.size;
+            manager.onStart = function (url, itemsLoaded, itemsTotal) {
+              console.log(
+                'Started loading file: ' +
+                  url +
+                  '.\nLoaded ' +
+                  itemsLoaded +
+                  ' of ' +
+                  itemsTotal +
+                  ' files.'
+              );
+            };
+
+            manager.onLoad = function () {
+              console.log('Loading complete!');
+              setIsLoading(false);
+              setIsModelLoaded(true);
+            };
+
+            manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+              const percentLoaded = Math.floor((itemsLoaded / totalSize) * 100);
+              setProgress(percentLoaded);
+              console.log( percentLoaded);
+            };
+
+            manager.onError = function (url) {
+              console.log('There was an error loading ' + url);
+              setIsLoading(false);
+              setIsModelLoaded(false);
+            };
+
+      
+            const objLoader = new OBJLoader(manager);
             objLoader.load(
               fileContent,
               (objData) => {
@@ -274,22 +311,6 @@ const Dropfile = ({
                     child.material = material;
                   }
                 });
-
-                // const box = new Box3().setFromObject(objData);
-                // const size = new Vector3();
-                // box.getSize(size);
-                // // Determine the maximum dimension of the model
-                // const maxDimension = Math.max(size.x, size.y, size.z);
-
-                // // Calculate the scale factor based on the maximum dimension and the target size
-                // const targetSize = 1; // Target size of 1 unit
-                // const scale = targetSize / maxDimension;
-
-                // // Apply the scale factor to the model
-                // objData.scale.set(scale, scale, scale);
-
-                // const center = box.getCenter(new Vector3());
-                // objData.position.sub(center);
                 objData.updateMatrix();
                 setModel(objData);
                 setCameraPosition([
@@ -298,11 +319,13 @@ const Dropfile = ({
                 setIsLoading(false);
                 setIsModelLoaded(true);
               },
-              (xhr) => {
-                const percentLoaded = Math.floor((xhr.loaded / xhr.total) * 100);;
-                setProgress(percentLoaded);
-                console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+              // undefined,
+              function (xhr) {
+                const percentLoaded = Math.floor((xhr.loaded / totalSize) * 100);
+                setProgress(percentLoaded)
+                console.log( percentLoaded);
               },
+              // onProgress,
               (error) => {
                 console.log("An error happened", error);
                 setIsSupportedFileType(false);
@@ -339,7 +362,7 @@ const Dropfile = ({
           );
         }
       };
-      setProgress(0)
+      // setProgress(0);
       reader.readAsDataURL(acceptedFiles[0]);
     },
   });
@@ -348,6 +371,7 @@ const Dropfile = ({
     setModel(null);
     setIsModelLoaded(false);
     setFiles(null); // remove the file from the state
+    deleteModelFromIndexedDB(modelId);
   };
 
   const ModelSizeChecker = ({ model }) => {
@@ -382,24 +406,33 @@ const Dropfile = ({
 
     return <primitive object={model} ref={boundingBoxRef} />;
   };
-  const ProgressBar = ({ progress }) => {
+  const ProgressBar = ({ LoadProgress }) => {
     return (
       <div>
-        <div style={{ width: "100%", height: "20px", border: "1px solid white", borderRadius:"10px" }}>
+        <div
+          style={{
+            width: "100%",
+            height: "20px",
+            border: "1px solid white",
+            borderRadius: "10px",
+          }}
+        >
           <div
             style={{
-              width: `${progress}%`,
+              width:`${LoadProgress}%`,
+              // width:"100%",
               height: "100%",
               backgroundColor: "#006B9E",
-              borderRadius:"10px"
+              borderRadius: "10px",
             }}
+  
           ></div>
         </div>
-        <p style={{color:'white'}}>{`${progress}%`}</p>
+        <p style={{ color: "white" }}>{`${LoadProgress}%`}</p>
       </div>
     );
   };
-  
+
   return (
     <>
       {error && (
@@ -469,7 +502,7 @@ const Dropfile = ({
         <DropzoneFormcontainer>
           <DropzoneContainer>
             <UPHeaderFullline>Loading</UPHeaderFullline>
-            <ProgressBar progress={progress} />
+            <ProgressBar LoadProgress={LoadProgress} />
           </DropzoneContainer>
         </DropzoneFormcontainer>
       )}
