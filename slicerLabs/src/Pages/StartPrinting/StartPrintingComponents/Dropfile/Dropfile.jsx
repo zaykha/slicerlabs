@@ -52,7 +52,7 @@ const Dropfile = ({
     //   console.log('Camera Position:', camera.position.toArray());
     // });
 
-    return null; // Since this component doesn't render anything, return null
+    return null;
   };
 
   const generateUniqueId = () => {
@@ -60,7 +60,7 @@ const Dropfile = ({
   };
   useEffect(() => {
     // console.log(model);
-    console.log(LoadProgress)
+    console.log(LoadProgress);
   }, [setProgress]);
   useEffect(() => {
     setModel(null);
@@ -152,90 +152,7 @@ const Dropfile = ({
   const handleDeleteAllModels = async () => {
     await deleteAllModelsFromIndexedDB();
   };
-
-  // Function to delete a particular item based on its ID
-  const handleDeleteModel = async (modelId) => {
-    await deleteModelFromIndexedDB(modelId);
-  };
-
-  const saveModelToLocalStorage = (modelId, model) => {
-    try {
-      // Convert the model to a string and store it in local storage
-      const serializedModel = JSON.stringify(model);
-      localStorage.setItem(modelId, serializedModel);
-    } catch (error) {
-      // Handle any potential errors
-      console.error("Error saving model to local storage:", error);
-    }
-  };
-
-  // const { getRootProps, getInputProps, isDragActive } = useDropzone({
-  //   accept: ".stl,.obj",
-  //   onDrop: async (acceptedFiles, rejectedFiles) => {
-  //     if (rejectedFiles.length > 0) {
-  //       setError("Invalid file type or file is corrupted");
-  //       return;
-  //     }
-  //     setIsLoading(true);
-  //     setIsSupportedFileType(true);
-  //     setFiles(
-  //       acceptedFiles.map((file) =>
-  //         Object.assign(file, {
-  //           preview: URL.createObjectURL(file),
-  //         })
-  //       )
-  //     );
-  //     const reader = new FileReader();
-
-  //     // reader.readAsArrayBuffer(acceptedFiles[0]);
-  //     // reader.readAsText(acceptedFiles[0]);
-  //     reader.readAsText(acceptedFiles[0], "ISO-8859-1");
-
-  //     console.log(reader.result)
-  //     reader.onload = async () => {
-  //       try {
-  //         const gltfLoader = new GLTFLoader();
-  //         gltfLoader.parse(reader.result, "", async (gltf) => {
-  //           setModel(gltf.scene);
-  //           setIsLoading(false);
-  //           setIsModelLoaded(true);
-  //           const file = acceptedFiles[0];
-  //           await saveModelToIndexedDB(modelId, file);
-  //           // Dispatch an action to add the model to the Redux store
-  //           // Store the UUID
-  //           setTempModelId(modelId); // Set the tempModelId state
-  //           dispatch(addModelToTempState(modelId));
-
-  //         });
-  //       } catch (error) {
-  //         setIsSupportedFileType(false);
-  //         setIsLoading(false);
-  //         setError(
-  //           "Invalid file type or file is corrupted, Please upload again only with .stl and .obj files",
-  //         );
-  //         console.log(error)
-  //       }
-  //     };
-  //   },
-  // });
-
-  // const handleDrop = (event) => {
-  //   event.preventDefault();
-  //   const file = event.dataTransfer.files[0];
-  //   setModel(file);
-  //   handleModelChange(file);
-  // };
-  // Log the scale of the model
-  // console.log("Model Scale:", objData.scale);
-
-  // // Log the position of the model
-  // console.log("Model Position:", objData.position);
-
-  // // Log the material(s) applied to the model
-  // console.log("Model Material(s):", objData.material);
-
-  // // Log the geometry of the model
-  // console.log("Model Geometry:", objData.geometry);
+ 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: ".stl,.obj",
     onDrop: async (acceptedFiles, rejectedFiles) => {
@@ -269,39 +186,28 @@ const Dropfile = ({
             const manager = new LoadingManager();
             const uploadedFile = acceptedFiles[0];
             const totalSize = uploadedFile.size;
-            manager.onStart = function (url, itemsLoaded, itemsTotal) {
-              console.log(
-                'Started loading file: ' +
-                  url +
-                  '.\nLoaded ' +
-                  itemsLoaded +
-                  ' of ' +
-                  itemsTotal +
-                  ' files.'
-              );
-            };
+      
 
             manager.onLoad = function () {
-              console.log('Loading complete!');
+              console.log("Loading complete!");
               setIsLoading(false);
               setIsModelLoaded(true);
             };
 
             manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-              const percentLoaded = Math.floor((itemsLoaded / totalSize) * 100);
-              setProgress(percentLoaded);
-              console.log( percentLoaded);
+              const percentLoaded = Math.floor((itemsLoaded / itemsTotal) * 100);
+              // set3DProgress(percentLoaded);
+              console.log(itemsTotal, itemsLoaded, percentLoaded);
             };
 
             manager.onError = function (url) {
-              console.log('There was an error loading ' + url);
+              console.log("There was an error loading " + url);
               setIsLoading(false);
               setIsModelLoaded(false);
             };
 
-      
             const objLoader = new OBJLoader(manager);
-            objLoader.load(
+             objLoader.load(
               fileContent,
               (objData) => {
                 const material = new MeshNormalMaterial();
@@ -321,9 +227,9 @@ const Dropfile = ({
               },
               // undefined,
               function (xhr) {
-                const percentLoaded = Math.floor((xhr.loaded / totalSize) * 100);
-                setProgress(percentLoaded)
-                console.log( percentLoaded);
+                // const percentLoaded = Math.floor((xhr.loaded / totalSize) * 100);
+                // set3DProgress(percentLoaded)
+                console.log(Math.floor((xhr.loaded / totalSize) * 100));
               },
               // onProgress,
               (error) => {
@@ -349,8 +255,8 @@ const Dropfile = ({
             );
           }
 
-          const file = acceptedFiles[0];
-          await saveModelToIndexedDB(modelId, file);
+         
+          await saveModelToIndexedDB(modelId, fileContent);
           setTempModelId(modelId);
           dispatch(addModelToTempState(modelId));
         } catch (error) {
@@ -362,6 +268,13 @@ const Dropfile = ({
           );
         }
       };
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentLoaded = Math.floor((event.loaded / event.total) * 100);
+          setProgress(percentLoaded);
+        }
+      };
+
       // setProgress(0);
       reader.readAsDataURL(acceptedFiles[0]);
     },
@@ -372,6 +285,7 @@ const Dropfile = ({
     setIsModelLoaded(false);
     setFiles(null); // remove the file from the state
     deleteModelFromIndexedDB(modelId);
+    setProgress(0);
   };
 
   const ModelSizeChecker = ({ model }) => {
@@ -419,16 +333,14 @@ const Dropfile = ({
         >
           <div
             style={{
-              width:`${LoadProgress}%`,
+              width: `${LoadProgress}%`,
               // width:"100%",
               height: "100%",
               backgroundColor: "#006B9E",
               borderRadius: "10px",
             }}
-  
           ></div>
         </div>
-        <p style={{ color: "white" }}>{`${LoadProgress}%`}</p>
       </div>
     );
   };
@@ -501,8 +413,14 @@ const Dropfile = ({
       {isLoading && (
         <DropzoneFormcontainer>
           <DropzoneContainer>
-            <UPHeaderFullline>Loading</UPHeaderFullline>
-            <ProgressBar LoadProgress={LoadProgress} />
+            <UPHeaderFullline>
+              {LoadProgress === 100
+                ? `Preparing 3D model ...`
+                : `Loading ${LoadProgress}%`}
+            </UPHeaderFullline>
+          
+              <ProgressBar LoadProgress={LoadProgress} />
+   
           </DropzoneContainer>
         </DropzoneFormcontainer>
       )}

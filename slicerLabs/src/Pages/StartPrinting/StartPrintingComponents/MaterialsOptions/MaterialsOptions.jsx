@@ -67,27 +67,28 @@ const MaterialsOptions = ({
         depth: Number(depth),
       },
     };
-    try {
-      const response = await fetch("http://localhost:3000/calculate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(item),
-      });
+    // try {
+    //   const response = await fetch("http://localhost:3000/calculate", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(item),
+    //   });
 
-      if (!response.ok) {
-        throw new Error("Error calculating price");
-      }
+    //   if (!response.ok) {
+    //     throw new Error("Error calculating price");
+    //   }
 
-      const data = await response.json();
-      const calculatedPrice = data.price.toFixed(2); // Round the price to two decimal places
-      console.log(data);
-      setPrice(calculatedPrice);
-    } catch (error) {
-      console.error(error);
-      // Handle the error
-    }
+    //   const data = await response.json();
+    //   const calculatedPrice = data.price.toFixed(2); // Round the price to two decimal places
+    //   console.log(data);
+    //   setPrice(calculatedPrice);
+    // } catch (error) {
+    //   console.error(error);
+    //   // Handle the error
+    // }
+    setPrice(48.70)
   };
 
   const handleAddToCart = () => {

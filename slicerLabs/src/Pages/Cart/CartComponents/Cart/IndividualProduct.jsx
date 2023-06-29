@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import "./IndividualProductelement.css";
 import {
   MOdropdown,
@@ -14,6 +14,12 @@ import {
   updateDimensions,
   updateMaterial,
 } from "../../../../ReduxStore/reducers/CartItemReducer";
+import { Canvas, useThree } from "@react-three/fiber";
+import { Grid, OrbitControls } from "@react-three/drei";
+
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
+import { Box3, Vector3 } from "three";
 const IndividualProduct = ({
   index,
   tempID,
@@ -29,6 +35,69 @@ const IndividualProduct = ({
   const [currentQuantity, setCurrentQuantity] = useState(quantity);
   const cartItemsDetails = useSelector((state) => state.cartItems.cartItems);
   const dispatch = useDispatch();
+  const [model, setModel] = useState(null);
+  const [cameraPosition, setCameraPosition] = useState([
+    -7.726866370752757, 7.241928986275022, -8.091348270643504,
+  ]); 
+  useEffect(() => {
+    
+    const loadModel = async () => {
+      try {
+        const fileContent = await retrieveModelFromIndexedDB(tempID);
+        console.log(fileContent)
+        const fileExtension = fileContent.name.split('.').pop().toLowerCase();
+        console.log(fileContent)
+        if (fileExtension === 'obj') {
+          const objLoader = new OBJLoader();
+          const objData = await objLoader.loadAsync(fileContent);
+          setModel(objData);
+        } else if (fileExtension === 'stl') {
+          const stlLoader = new STLLoader();
+          const stlData = await stlLoader.loadAsync(fileContent);
+          setModel(stlData);
+        }
+      } catch (error) {
+        console.log('Error loading model:', error);
+      }
+    };
+
+    loadModel();
+  }, [tempID]);
+  const DB_NAME = "TEMP_MODEL_STORAGE";
+  const DB_VERSION = 1;
+  const OBJECT_STORE_NAME = "models";
+
+  const retrieveModelFromIndexedDB = async (tempID) => {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION); 
+      request.onerror = (event) => {
+        reject(request.error);
+      };
+  
+      request.onsuccess = (event) => {
+        const db = event.target.result;
+        const transaction = db.transaction(OBJECT_STORE_NAME , 'readonly'); 
+        const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
+  
+        const getRequest = objectStore.get(tempID);
+  
+        getRequest.onsuccess = (event) => {
+          const result = event.target.result;
+          if (result) {
+            resolve(result.file);
+          } else {
+            reject(new Error('Model not found in IndexedDB'));
+          }
+        };
+  
+        getRequest.onerror = (event) => {
+          reject(request.error);
+        };
+      };
+    });
+  };
+  
+  
   const increaseQuantityAction = (ProductId) => {
     dispatch(increaseQuantity({ ProductId }));
   };
@@ -58,6 +127,54 @@ const IndividualProduct = ({
       onDelete(tempID);
     }
   };
+  const ModelSizeChecker = ({ model }) => {
+    const { camera } = useThree();
+    const boundingBoxRef = useRef();
+
+    useEffect(() => {
+      const checkModelSize = () => {
+        const boundingBox = new Box3().setFromObject(model);
+        const size = new Vector3();
+        boundingBox.getSize(size);
+
+        // Get the size of the camera frustum
+        const frustumSize =
+          Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
+
+        // Calculate the scale factor based on the size of the model and the frustum size
+        // const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
+
+        // Apply the scale factor to the model
+        // model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+        // // Position the model at the center of the viewport
+        // const modelCenter = boundingBox.getCenter(new Vector3());
+        // model.position.sub(modelCenter);
+      };
+
+      if (model && boundingBoxRef.current) {
+        checkModelSize();
+      }
+    }, [model, camera]);
+
+    return <primitive object={model} ref={boundingBoxRef} />;
+  };
+  const CameraControls = ({ cameraPosition }) => {
+    const { camera } = useThree();
+    useEffect(() => {
+      if (camera && cameraPosition) {
+        camera.position.set(...cameraPosition);
+        camera.lookAt(0, 0, 0);
+        camera.updateProjectionMatrix();
+      }
+    }, [camera, cameraPosition]);
+
+    // useFrame(() => {
+    //   console.log('Camera Position:', camera.position.toArray());
+    // });
+
+    return null;
+  };
   return (
     <div className="box">
       <div className="ITEM-wrapper">
@@ -65,7 +182,21 @@ const IndividualProduct = ({
           <div className="overlap">
             <div className="vertical-Division1">
               <div className="ezgif-wrapper">
-                <img className="ezgif" alt="Ezgif" src="ezgif.png" />
+              <Canvas
+              // style={{
+              //   width: "773px",
+              //   height: "300px",
+              //   // zIndex: 6,
+              //   // border:"1px solid red"
+              // }}
+            >
+              <Grid cellSize={3} infiniteGrid={true} />
+              <OrbitControls />
+              <ambientLight />
+              <pointLight position={[10, 10, 10]} />
+              <ModelSizeChecker model={model} />
+              <CameraControls cameraPosition={cameraPosition} />
+            </Canvas>
               </div>
             </div>
 
