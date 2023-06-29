@@ -20,6 +20,8 @@ import { Grid, OrbitControls } from "@react-three/drei";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { Box3, Vector3 } from "three";
+import * as blobUtil from 'blob-util';
+
 const IndividualProduct = ({
   index,
   tempID,
@@ -63,29 +65,56 @@ const IndividualProduct = ({
       };
     });
   };
-
   useEffect(() => {
  
     const loadModel = async () => {
       try {
-        // const fileContent = await retrieveModelFromIndexedDB(tempID);
         const filesRetrieved = await retrieveModelsFromIndexedDB(tempID);
-        console.log("File content:", filesRetrieved);
-    
+        
         if (filesRetrieved.length > 0) {
-          const fileExtension = filesRetrieved[0].file
-            .split(".")
-            .pop()
-            .toLowerCase();
-
-          if (fileExtension === "obj") {
+          const fileContent = filesRetrieved[0].file;
+          const fileExtension = filesRetrieved[0].fileExtension;
+  
+          if (fileExtension === 'obj') {
             const objLoader = new OBJLoader();
-            const objData = await objLoader.loadAsync(filesRetrieved[0]);
-            setModel(objData);
-          } else if (fileExtension === "stl") {
-            const stlLoader = new STLLoader();
-            const stlData = await stlLoader.loadAsync(filesRetrieved[0]);
-            setModel(stlData);
+            objLoader.load(
+              fileContent,
+              (objData) => {
+                const material = new MeshNormalMaterial();
+
+                objData.traverse((child) => {
+                  if (child instanceof Mesh) {
+                    child.material = material;
+                  }
+                });
+                objData.updateMatrix();
+                setModel(objData);
+                setCameraPosition([
+                  -7.726866370752757, 7.241928986275022, -8.091348270643504,
+                ]);
+                setIsLoading(false);
+                setIsModelLoaded(true);
+              },
+              // undefined,
+              function (xhr) {
+                // const percentLoaded = Math.floor((xhr.loaded / totalSize) * 100);
+                // set3DProgress(percentLoaded)
+                console.log(Math.floor((xhr.loaded / totalSize) * 100));
+              },
+              // onProgress,
+              (error) => {
+                console.log("An error happened", error);
+                setIsSupportedFileType(false);
+                setIsLoading(false);
+                setError(
+                  "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
+                );
+              }
+            );
+          } else if (fileExtension === 'stl') {
+            // const stlLoader = new STLLoader();
+            // const stlData = await stlLoader.loadAsync(fileContent);
+            // setModel(stlData);
           }
         }
       } catch (error) {
@@ -114,6 +143,8 @@ const IndividualProduct = ({
           // Log the count and retrieved models
           console.log("Number of items:", filteredModels.length);
           console.log("Retrieved models:", filteredModels);
+          console.log("Retrieved file type:", filteredModels[0].fileExtension);
+
 
           resolve(filteredModels);
         };

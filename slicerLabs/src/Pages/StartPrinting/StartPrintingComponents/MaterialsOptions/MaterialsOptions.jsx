@@ -53,11 +53,11 @@ const MaterialsOptions = ({
 
     // Here's an example of updating a notification count
    setCartCount(cart.length)
-   console.log(cart);
+  //  console.log(cart);
     // ... update the UI or trigger other actions based on the notification count
   }, [cart]);
   const handleCheckPrice = async () => {
-    console.log("checking");
+    // console.log("checking");
     const item = {
       material,
       color,
@@ -82,7 +82,7 @@ const MaterialsOptions = ({
 
       const data = await response.json();
       const calculatedPrice = data.price.toFixed(2); // Round the price to two decimal places
-      console.log(data);
+      // console.log(data);
       setPrice(calculatedPrice);
     } catch (error) {
       console.error(error);
@@ -116,7 +116,7 @@ const MaterialsOptions = ({
       };
       dispatch(addMaterialOptions({options:finalItem}));
       setIsCheckedOut(true);
-      console.log(cart);
+      // console.log(cart);
     }
   };
   const handleCheckOut = () => {

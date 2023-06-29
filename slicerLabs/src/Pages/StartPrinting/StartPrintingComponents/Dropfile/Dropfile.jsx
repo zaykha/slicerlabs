@@ -93,24 +93,26 @@ const Dropfile = ({
     });
   };
 
-  const saveModelToIndexedDB = async (modelId, file) => {
+  const saveModelToIndexedDB = async (modelId, file, fileExtension) => {
     const db = await openDatabase();
     const transaction = db.transaction([OBJECT_STORE_NAME], "readwrite");
     const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
-    const data = { id: modelId, file};
-    // : btoa(file) 
+    const fileContent = atob(file.split(",")[1]);
+    const data = { id: modelId, file: fileContent, fileExtension: fileExtension };
+  
     return new Promise((resolve, reject) => {
       const request = objectStore.put(data);
-
+  
       request.onsuccess = () => {
         resolve();
       };
-
+  
       request.onerror = () => {
         reject(request.error);
       };
     });
   };
+  
 
   // Function to delete all items from IndexedDB
   const deleteAllModelsFromIndexedDB = async () => {
@@ -171,16 +173,17 @@ const Dropfile = ({
           })
         )
       );
+     
+      const fileExtension = acceptedFiles[0].name
+      .split(".")
+      .pop()
+      .toLowerCase();
 
       const reader = new FileReader();
       reader.onload = async () => {
         try {
           const fileContent = reader.result;
-          const fileExtension = acceptedFiles[0].name
-            .split(".")
-            .pop()
-            .toLowerCase();
-
+         
           if (fileExtension === "obj") {
             // Define the onProgress callback function
             const manager = new LoadingManager();
@@ -197,7 +200,7 @@ const Dropfile = ({
             manager.onProgress = function (url, itemsLoaded, itemsTotal) {
               const percentLoaded = Math.floor((itemsLoaded / itemsTotal) * 100);
               // set3DProgress(percentLoaded);
-              console.log(itemsTotal, itemsLoaded, percentLoaded);
+              // console.log(itemsTotal, itemsLoaded, percentLoaded);
             };
 
             manager.onError = function (url) {
@@ -256,7 +259,7 @@ const Dropfile = ({
           }
 
          
-          await saveModelToIndexedDB(modelId, fileContent);
+          await saveModelToIndexedDB(modelId, fileContent, fileExtension);
           setTempModelId(modelId);
           dispatch(addModelToTempState(modelId));
         } catch (error) {
