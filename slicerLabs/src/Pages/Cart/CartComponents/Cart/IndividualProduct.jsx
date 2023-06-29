@@ -38,66 +38,133 @@ const IndividualProduct = ({
   const [model, setModel] = useState(null);
   const [cameraPosition, setCameraPosition] = useState([
     -7.726866370752757, 7.241928986275022, -8.091348270643504,
-  ]); 
+  ]);
+
+  const DB_NAME = "TEMP_MODEL_STORAGE";
+  const DB_VERSION = 1;
+  const OBJECT_STORE_NAME = "models";
+
+  const openDatabase = () => {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        db.createObjectStore(OBJECT_STORE_NAME, { keyPath: "id" });
+      };
+
+      request.onsuccess = () => {
+        const db = request.result;
+        resolve(db);
+      };
+
+      request.onerror = () => {
+        reject(request.error);
+      };
+    });
+  };
+
   useEffect(() => {
-    
+ 
     const loadModel = async () => {
       try {
-        const fileContent = await retrieveModelFromIndexedDB(tempID);
-        console.log(fileContent)
-        const fileExtension = fileContent.name.split('.').pop().toLowerCase();
-        console.log(fileContent)
-        if (fileExtension === 'obj') {
-          const objLoader = new OBJLoader();
-          const objData = await objLoader.loadAsync(fileContent);
-          setModel(objData);
-        } else if (fileExtension === 'stl') {
-          const stlLoader = new STLLoader();
-          const stlData = await stlLoader.loadAsync(fileContent);
-          setModel(stlData);
+        // const fileContent = await retrieveModelFromIndexedDB(tempID);
+        const filesRetrieved = await retrieveModelsFromIndexedDB(tempID);
+        console.log("File content:", filesRetrieved);
+    
+        if (filesRetrieved.length > 0) {
+          const fileExtension = filesRetrieved[0].file
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+          if (fileExtension === "obj") {
+            const objLoader = new OBJLoader();
+            const objData = await objLoader.loadAsync(filesRetrieved[0]);
+            setModel(objData);
+          } else if (fileExtension === "stl") {
+            const stlLoader = new STLLoader();
+            const stlData = await stlLoader.loadAsync(filesRetrieved[0]);
+            setModel(stlData);
+          }
         }
       } catch (error) {
-        console.log('Error loading model:', error);
+        console.log("Error loading model:", error);
       }
     };
 
     loadModel();
   }, [tempID]);
-  const DB_NAME = "TEMP_MODEL_STORAGE";
-  const DB_VERSION = 1;
-  const OBJECT_STORE_NAME = "models";
 
-  const retrieveModelFromIndexedDB = async (tempID) => {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION); 
-      request.onerror = (event) => {
-        reject(request.error);
-      };
-  
-      request.onsuccess = (event) => {
-        const db = event.target.result;
-        const transaction = db.transaction(OBJECT_STORE_NAME , 'readonly'); 
-        const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
-  
-        const getRequest = objectStore.get(tempID);
-  
+  const retrieveModelsFromIndexedDB = async (tempID) => {
+    try {
+      const db = await openDatabase(); // Await the openDatabase call
+      const transaction = db.transaction([OBJECT_STORE_NAME], "readonly");
+      const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
+
+      const getRequest = objectStore.getAll();
+
+      return new Promise((resolve, reject) => {
         getRequest.onsuccess = (event) => {
-          const result = event.target.result;
-          if (result) {
-            resolve(result.file);
-          } else {
-            reject(new Error('Model not found in IndexedDB'));
-          }
+          const models = event.target.result;
+
+          // Filter the models by tempID
+          const filteredModels = models.filter((model) => model.id === tempID);
+
+          // Log the count and retrieved models
+          console.log("Number of items:", filteredModels.length);
+          console.log("Retrieved models:", filteredModels);
+
+          resolve(filteredModels);
         };
-  
+
         getRequest.onerror = (event) => {
-          reject(request.error);
+          reject(event.target.error);
         };
-      };
-    });
+      });
+    } catch (error) {
+      console.log("Failed to open IndexedDB", error);
+      throw error;
+    }
   };
-  
-  
+
+  const handleRetrieveAllModels = async () => {
+    await retrieveModelsFromIndexedDB();
+  };
+
+  // const retrieveModelFromIndexedDB = async (tempID) => {
+  //   return new Promise((resolve, reject) => {
+  //     const request = indexedDB.open(DB_NAME, DB_VERSION);
+  //     request.onerror = (event) => {
+  //       reject(request.error);
+  //     };
+
+  //     request.onsuccess = (event) => {
+  //       const db = event.target.result;
+  //       const transaction = db.transaction(OBJECT_STORE_NAME , 'readonly');
+  //       const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
+
+  //       const getRequest = objectStore.get(tempID);
+
+  //       getRequest.onsuccess = (event) => {
+  //         const result = event.target.result;
+  //         if (result) {
+  //           // const decodedContent = atob(result.file); // Decode the file content
+  //           // resolve(decodedContent);
+  //           // console.log(result.file);
+  //           resolve(result.file)
+  //         } else {
+  //           reject(new Error('Model not found in IndexedDB'));
+  //         }
+  //       };
+
+  //       getRequest.onerror = (event) => {
+  //         reject(request.error);
+  //       };
+  //     };
+  //   });
+  // };
+
   const increaseQuantityAction = (ProductId) => {
     dispatch(increaseQuantity({ ProductId }));
   };
@@ -115,7 +182,7 @@ const IndividualProduct = ({
     const newColor = e.target.value;
     dispatch(updateColor({ ProductId: tempID, newColor }));
   };
-  
+
   const handleDimensionsChange = (width, height, depth) => {
     dispatch(updateDimensions({ ProductId: tempID, width, height, depth }));
   };
@@ -182,21 +249,21 @@ const IndividualProduct = ({
           <div className="overlap">
             <div className="vertical-Division1">
               <div className="ezgif-wrapper">
-              <Canvas
-              // style={{
-              //   width: "773px",
-              //   height: "300px",
-              //   // zIndex: 6,
-              //   // border:"1px solid red"
-              // }}
-            >
-              <Grid cellSize={3} infiniteGrid={true} />
-              <OrbitControls />
-              <ambientLight />
-              <pointLight position={[10, 10, 10]} />
-              <ModelSizeChecker model={model} />
-              <CameraControls cameraPosition={cameraPosition} />
-            </Canvas>
+                <Canvas
+                // style={{
+                //   width: "773px",
+                //   height: "300px",
+                //   // zIndex: 6,
+                //   // border:"1px solid red"
+                // }}
+                >
+                  <Grid cellSize={3} infiniteGrid={true} />
+                  <OrbitControls />
+                  <ambientLight />
+                  <pointLight position={[10, 10, 10]} />
+                  <ModelSizeChecker model={model} />
+                  <CameraControls cameraPosition={cameraPosition} />
+                </Canvas>
               </div>
             </div>
 
@@ -244,10 +311,7 @@ const IndividualProduct = ({
               </MOdropdown>
 
               <Mdropdownlabel htmlFor="color">Finshing & Color</Mdropdownlabel>
-              <MOdropdown
-                value={color}
-                onChange={handleColorChange}
-              >
+              <MOdropdown value={color} onChange={handleColorChange}>
                 <Moption value="">Please Select a Color</Moption>
                 <Moption value="white">White</Moption>
                 <Moption value="black">Black</Moption>

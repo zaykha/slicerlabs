@@ -97,8 +97,8 @@ const Dropfile = ({
     const db = await openDatabase();
     const transaction = db.transaction([OBJECT_STORE_NAME], "readwrite");
     const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
-    const data = { id: modelId, file };
-
+    const data = { id: modelId, file};
+    // : btoa(file) 
     return new Promise((resolve, reject) => {
       const request = objectStore.put(data);
 

@@ -109,15 +109,6 @@ const Cartpage = () => {
     await retrieveModelsFromIndexedDB();
   };
 
-  // const [cart, setCart] = useState(() => {
-  //   const storedCart = localStorage.getItem('cart');
-  //   return storedCart ? JSON.parse(storedCart) : [];
-  // });
-  // const [cart, setCart] = useState(cartItems);
-  // useEffect(() => {
-  //   localStorage.setItem('cart', JSON.stringify(cart));
-  // }, [cart]);
-
   const handleRemoveItem = (index) => {
     const newCart = [...cartItemsDetails];
     newCart.splice(index, 1);
