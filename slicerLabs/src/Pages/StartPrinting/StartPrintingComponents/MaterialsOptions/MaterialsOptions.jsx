@@ -28,9 +28,10 @@ const MaterialsOptions = ({
   isModelLoaded,
   setIsModelLoaded,
   isCheckedOut,
-  setIsCheckedOut
+  setIsCheckedOut,
+  isAddedToCart,
+  setIsAddedToCart,
 }) => {
-
   const aboveDivRef = useRef(null);
   const belowDivRef = useRef(null);
   const leftDivRef = useRef(null);
@@ -45,15 +46,15 @@ const MaterialsOptions = ({
   const dispatch = useDispatch();
   const [price, setPrice] = useState(0);
   const ProductId = useSelector((state) => state.cartItems.tempModelId);
-  const cart = useSelector(state => state.cartItems);
+  const cart = useSelector((state) => state.cartItems);
   const [cartCount, setCartCount] = useState(cart.length > 0 ? cart.length : 0);
   useEffect(() => {
     // Perform actions or update the UI based on changes in the cart array
     // For example, you can update a notification count or trigger a checkout process
 
     // Here's an example of updating a notification count
-   setCartCount(cart.length)
-  //  console.log(cart);
+    setCartCount(cart.length);
+    //  console.log(cart);
     // ... update the UI or trigger other actions based on the notification count
   }, [cart]);
   const handleCheckPrice = async () => {
@@ -90,7 +91,7 @@ const MaterialsOptions = ({
     }
     // setPrice(48.70)
   };
-
+  const cartString = encodeURIComponent(JSON.stringify(cart.options));
   const handleAddToCart = () => {
     if (!material || !color || !width || !height || !depth || !quantity) {
       alert("please fill in empty fields");
@@ -114,15 +115,16 @@ const MaterialsOptions = ({
         quantity,
         price,
       };
-      dispatch(addMaterialOptions({options:finalItem}));
+      dispatch(addMaterialOptions({ checkID: tempModelId, options: finalItem }));
+      setIsAddedToCart(true);
       setIsCheckedOut(true);
-      // console.log(cart);
+      console.log(cart);
     }
   };
   const handleCheckOut = () => {
     if (cart.cartItems.length > 0) {
       if (!material && !color && !width && !height && !depth) {
-        const cartString = encodeURIComponent(JSON.stringify(cart));
+        
         Navigate(`/cart?cart=${cartString}`);
       } else {
         if (!material || !color || !width || !height || !depth) {
@@ -142,7 +144,9 @@ const MaterialsOptions = ({
             quantity,
             price,
           };
-          dispatch(addMaterialOptions(tempModelId, finalItem));
+          dispatch(
+            addMaterialOptions({ checkID: tempModelId, options: finalItem })
+          );
           setIsCheckedOut(true);
           setMaterial("");
           setColor("");
@@ -151,6 +155,7 @@ const MaterialsOptions = ({
           setDepth("");
           setQuantity(1);
           Navigate(`/cart?cart=${cartString}`);
+          console.log(cart);
         }
       }
     } else {
@@ -170,7 +175,7 @@ const MaterialsOptions = ({
           quantity,
           price,
         };
-        dispatch(addMaterialOptions(tempModelId, finalItem));
+        dispatch(addMaterialOptions({ checkID: tempModelId, options: finalItem }));
         setIsCheckedOut(true);
         setMaterial("");
         setColor("");
@@ -179,6 +184,7 @@ const MaterialsOptions = ({
         setDepth("");
         setQuantity(1);
         Navigate(`/cart?cart=${cartString}`);
+        console.log(cart);
       }
     }
   };

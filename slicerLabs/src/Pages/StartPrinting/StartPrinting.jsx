@@ -18,6 +18,8 @@ import {
 const StartPrinting = () => {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [isCheckedOut, setIsCheckedOut] = useState(false);
+  const [isAddedToCart, setIsAddedToCart] = useState(false);
+
   const [isOpen, setIsOpen] = useState(false);
   const togglesidebar = () => {
     setIsOpen(!isOpen);
@@ -81,6 +83,8 @@ const StartPrinting = () => {
         setIsModelLoaded={setIsModelLoaded}
         isCheckedOut={isCheckedOut}
         setIsCheckedOut={setIsCheckedOut}
+        isAddedToCart={isAddedToCart}
+        setIsAddedToCart={setIsAddedToCart}
       />
 
       {isModelLoaded ? (
@@ -91,6 +95,8 @@ const StartPrinting = () => {
           setIsModelLoaded={setIsModelLoaded}
           isCheckedOut={isCheckedOut}
           setIsCheckedOut={setIsCheckedOut}
+          isAddedToCart={isAddedToCart}
+          setIsAddedToCart={setIsAddedToCart}
         />
       ) : (
         <></>

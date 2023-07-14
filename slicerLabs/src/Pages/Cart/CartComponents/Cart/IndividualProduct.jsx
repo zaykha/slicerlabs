@@ -25,6 +25,7 @@ import * as blobUtil from 'blob-util';
 const IndividualProduct = ({
   index,
   tempID,
+  model,
   material,
   color,
   width,
@@ -37,7 +38,7 @@ const IndividualProduct = ({
   const [currentQuantity, setCurrentQuantity] = useState(quantity);
   const cartItemsDetails = useSelector((state) => state.cartItems.cartItems);
   const dispatch = useDispatch();
-  const [model, setModel] = useState(null);
+  // const [model, setModel] = useState(null);
   const [cameraPosition, setCameraPosition] = useState([
     -7.726866370752757, 7.241928986275022, -8.091348270643504,
   ]);
@@ -65,58 +66,95 @@ const IndividualProduct = ({
       };
     });
   };
+
   useEffect(() => {
  
     const loadModel = async () => {
       try {
-        const filesRetrieved = await retrieveModelsFromIndexedDB(tempID);
-        
-        if (filesRetrieved.length > 0) {
-          const fileContent = filesRetrieved[0].file;
-          const fileExtension = filesRetrieved[0].fileExtension;
-  
-          if (fileExtension === 'obj') {
-            const objLoader = new OBJLoader();
-            objLoader.load(
-              fileContent,
-              (objData) => {
-                const material = new MeshNormalMaterial();
+        // const filesRetrieved = await cartItemsDetails.model;
+        // console.log(filesRetrieved);
+        // retrieveModelsFromIndexedDB(tempID);
+        const objLoader = new OBJLoader();
+        objLoader.load(
+          model,
+          (objData) => {
+            const material = new MeshNormalMaterial();
 
-                objData.traverse((child) => {
-                  if (child instanceof Mesh) {
-                    child.material = material;
-                  }
-                });
-                objData.updateMatrix();
-                setModel(objData);
-                setCameraPosition([
-                  -7.726866370752757, 7.241928986275022, -8.091348270643504,
-                ]);
-                setIsLoading(false);
-                setIsModelLoaded(true);
-              },
-              // undefined,
-              function (xhr) {
-                // const percentLoaded = Math.floor((xhr.loaded / totalSize) * 100);
-                // set3DProgress(percentLoaded)
-                console.log(Math.floor((xhr.loaded / totalSize) * 100));
-              },
-              // onProgress,
-              (error) => {
-                console.log("An error happened", error);
-                setIsSupportedFileType(false);
-                setIsLoading(false);
-                setError(
-                  "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
-                );
+            objData.traverse((child) => {
+              if (child instanceof Mesh) {
+                child.material = material;
               }
+            });
+            objData.updateMatrix();
+            setModel(objData);
+            setCameraPosition([
+              -7.726866370752757, 7.241928986275022, -8.091348270643504,
+            ]);
+            setIsLoading(false);
+            setIsModelLoaded(true);
+          },
+          // undefined,
+          function (xhr) {
+            // const percentLoaded = Math.floor((xhr.loaded / totalSize) * 100);
+            // set3DProgress(percentLoaded)
+            console.log(Math.floor((xhr.loaded / totalSize) * 100));
+          },
+          // onProgress,
+          (error) => {
+            console.log("An error happened", error);
+            // setIsSupportedFileType(false);
+            setIsLoading(false);
+            setError(
+              "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
             );
-          } else if (fileExtension === 'stl') {
-            // const stlLoader = new STLLoader();
-            // const stlData = await stlLoader.loadAsync(fileContent);
-            // setModel(stlData);
           }
-        }
+        );
+        // if (filesRetrieved.length > 0) {
+        //   const fileContent = filesRetrieved[0].file;
+        //   const fileExtension = filesRetrieved[0].fileExtension;
+  
+        //   if (fileExtension === 'obj') {
+        //     const objLoader = new OBJLoader();
+        //     objLoader.load(
+        //       fileContent,
+        //       (objData) => {
+        //         const material = new MeshNormalMaterial();
+
+        //         objData.traverse((child) => {
+        //           if (child instanceof Mesh) {
+        //             child.material = material;
+        //           }
+        //         });
+        //         objData.updateMatrix();
+        //         setModel(objData);
+        //         setCameraPosition([
+        //           -7.726866370752757, 7.241928986275022, -8.091348270643504,
+        //         ]);
+        //         setIsLoading(false);
+        //         setIsModelLoaded(true);
+        //       },
+        //       // undefined,
+        //       function (xhr) {
+        //         // const percentLoaded = Math.floor((xhr.loaded / totalSize) * 100);
+        //         // set3DProgress(percentLoaded)
+        //         console.log(Math.floor((xhr.loaded / totalSize) * 100));
+        //       },
+        //       // onProgress,
+        //       (error) => {
+        //         console.log("An error happened", error);
+        //         setIsSupportedFileType(false);
+        //         setIsLoading(false);
+        //         setError(
+        //           "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
+        //         );
+        //       }
+        //     );
+        //   } else if (fileExtension === 'stl') {
+        //     // const stlLoader = new STLLoader();
+        //     // const stlData = await stlLoader.loadAsync(fileContent);
+        //     // setModel(stlData);
+        //   }
+        // }
       } catch (error) {
         console.log("Error loading model:", error);
       }

@@ -144,14 +144,15 @@ const Cartpage = () => {
             <IndividualProduct
               key={index}
               index={index+1}
-              tempID={item.ProductId}
-              material={item.material}
-              color={item.color}
-              width={item.dimensions.width}
-              height={item.dimensions.height}
-              depth={item.dimensions.depth}
-              quantity={item.quantity}
-              price={item.price}
+              model={item.model}
+              tempID={item.options.ProductId}
+              material={item.options.material}
+              color={item.options.color}
+              width={item.options.dimensions.width}
+              height={item.options.dimensions.height}
+              depth={item.options.dimensions.depth}
+              quantity={item.options.quantity}
+              price={item.options.price}
               onDelete={handleRemoveItem}
             />
           ))

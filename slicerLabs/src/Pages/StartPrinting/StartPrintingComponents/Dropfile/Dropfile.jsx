@@ -13,8 +13,8 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { PerspectiveCamera } from "three";
 import { Grid, OrbitControls } from "@react-three/drei";
-import { useDispatch } from "react-redux";
-import { addModelToTempState } from "../../../../ReduxStore/reducers/CartItemReducer";
+import { useDispatch, useSelector } from "react-redux";
+import { addModel, addModelToTempState, updateModel } from "../../../../ReduxStore/reducers/CartItemReducer";
 import { v4 as uuidv4 } from "uuid";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
@@ -26,6 +26,8 @@ const Dropfile = ({
   setIsModelLoaded,
   isCheckedOut,
   setIsCheckedOut,
+  isAddedToCart,
+  setIsAddedToCart
 }) => {
   const [files, setFiles] = useState([]);
   const [model, setModel] = useState(null);
@@ -35,6 +37,7 @@ const Dropfile = ({
   const [error, setError] = useState(null);
   const cameraRef = useRef();
   const dispatch = useDispatch();
+  // const ProductId = useSelector((state) => state.cartItems.tempModelId);
   const [cameraPosition, setCameraPosition] = useState([
     -7.726866370752757, 7.241928986275022, -8.091348270643504,
   ]); // Initial camera position
@@ -63,10 +66,11 @@ const Dropfile = ({
     console.log(LoadProgress);
   }, [setProgress]);
   useEffect(() => {
+    
     setModel(null);
     // setIsModelLoaded(false);
     setFiles(null);
-  }, [isCheckedOut]);
+  }, [isCheckedOut,isAddedToCart]);
   const DB_NAME = "TEMP_MODEL_STORAGE";
   const DB_VERSION = 1;
   const OBJECT_STORE_NAME = "models";
@@ -111,8 +115,7 @@ const Dropfile = ({
         reject(request.error);
       };
     });
-  };
-  
+  }; 
 
   // Function to delete all items from IndexedDB
   const deleteAllModelsFromIndexedDB = async () => {
@@ -221,6 +224,9 @@ const Dropfile = ({
                   }
                 });
                 objData.updateMatrix();
+
+                const serializedModel = JSON.stringify(objData);
+                dispatch(addModel({ id: modelId, model: serializedModel }));
                 setModel(objData);
                 setCameraPosition([
                   -7.726866370752757, 7.241928986275022, -8.091348270643504,
@@ -258,8 +264,8 @@ const Dropfile = ({
             );
           }
 
-         
-          await saveModelToIndexedDB(modelId, fileContent, fileExtension);
+          
+          // await saveModelToIndexedDB(modelId, fileContent, fileExtension);
           setTempModelId(modelId);
           dispatch(addModelToTempState(modelId));
         } catch (error) {
@@ -287,7 +293,7 @@ const Dropfile = ({
     setModel(null);
     setIsModelLoaded(false);
     setFiles(null); // remove the file from the state
-    deleteModelFromIndexedDB(modelId);
+    // deleteModelFromIndexedDB(modelId);
     setProgress(0);
   };
 
