@@ -19,7 +19,7 @@ import { Grid, OrbitControls } from "@react-three/drei";
 
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
-import { Box3, Vector3 } from "three";
+import { Box3, Mesh, MeshNormalMaterial, Vector3 } from "three";
 import * as blobUtil from 'blob-util';
 
 const IndividualProduct = ({
@@ -42,6 +42,7 @@ const IndividualProduct = ({
   const [cameraPosition, setCameraPosition] = useState([
     -7.726866370752757, 7.241928986275022, -8.091348270643504,
   ]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const DB_NAME = "TEMP_MODEL_STORAGE";
   const DB_VERSION = 1;
@@ -68,7 +69,7 @@ const IndividualProduct = ({
   };
 
   useEffect(() => {
- 
+    console.log(model)
     const loadModel = async () => {
       try {
         // const filesRetrieved = await cartItemsDetails.model;
@@ -86,25 +87,25 @@ const IndividualProduct = ({
               }
             });
             objData.updateMatrix();
-            setModel(objData);
+            // setModel(objData);
             setCameraPosition([
               -7.726866370752757, 7.241928986275022, -8.091348270643504,
             ]);
             setIsLoading(false);
-            setIsModelLoaded(true);
+            // setIsModelLoaded(true);
           },
           // undefined,
           function (xhr) {
             // const percentLoaded = Math.floor((xhr.loaded / totalSize) * 100);
             // set3DProgress(percentLoaded)
-            console.log(Math.floor((xhr.loaded / totalSize) * 100));
+            console.log(Math.floor((xhr.loaded) * 100));
           },
           // onProgress,
           (error) => {
             console.log("An error happened", error);
             // setIsSupportedFileType(false);
             setIsLoading(false);
-            setError(
+            console.log (
               "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
             );
           }
