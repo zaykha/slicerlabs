@@ -14,7 +14,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { PerspectiveCamera } from "three";
 import { Grid, OrbitControls } from "@react-three/drei";
 import { useDispatch, useSelector } from "react-redux";
-import { addModel, addModelToTempState, updateModel } from "../../../../ReduxStore/reducers/CartItemReducer";
+import { addModel, addModelToTempState, deleteModel, updateModel } from "../../../../ReduxStore/reducers/CartItemReducer";
 import { v4 as uuidv4 } from "uuid";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
@@ -71,92 +71,9 @@ const Dropfile = ({
     // setIsModelLoaded(false);
     setFiles(null);
   }, [isCheckedOut,isAddedToCart]);
-  const DB_NAME = "TEMP_MODEL_STORAGE";
-  const DB_VERSION = 1;
-  const OBJECT_STORE_NAME = "models";
 
   const modelId = generateUniqueId();
-  // Function to open IndexedDB
-  const openDatabase = () => {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-      request.onupgradeneeded = () => {
-        const db = request.result;
-        db.createObjectStore(OBJECT_STORE_NAME, { keyPath: "id" });
-      };
-
-      request.onsuccess = () => {
-        const db = request.result;
-        resolve(db);
-      };
-
-      request.onerror = () => {
-        reject(request.error);
-      };
-    });
-  };
-
-  const saveModelToIndexedDB = async (modelId, file, fileExtension) => {
-    const db = await openDatabase();
-    const transaction = db.transaction([OBJECT_STORE_NAME], "readwrite");
-    const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
-    const fileContent = atob(file.split(",")[1]);
-    const data = { id: modelId, file: fileContent, fileExtension: fileExtension };
-  
-    return new Promise((resolve, reject) => {
-      const request = objectStore.put(data);
-  
-      request.onsuccess = () => {
-        resolve();
-      };
-  
-      request.onerror = () => {
-        reject(request.error);
-      };
-    });
-  }; 
-
-  // Function to delete all items from IndexedDB
-  const deleteAllModelsFromIndexedDB = async () => {
-    try {
-      const db = await openDatabase();
-      const transaction = db.transaction([OBJECT_STORE_NAME], "readwrite");
-      const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
-      objectStore.clear();
-      transaction.oncomplete = () => {
-        console.log("All models deleted from IndexedDB");
-      };
-      transaction.onerror = () => {
-        console.log("Error deleting models from IndexedDB");
-      };
-    } catch (error) {
-      console.log("Failed to open IndexedDB", error);
-    }
-  };
-
-  // Function to delete a particular item from IndexedDB based on its ID
-  const deleteModelFromIndexedDB = async (modelId) => {
-    try {
-      const db = await openDatabase();
-      const transaction = db.transaction([OBJECT_STORE_NAME], "readwrite");
-      const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
-      objectStore.delete(modelId);
-      transaction.oncomplete = () => {
-        console.log("Model deleted from IndexedDB");
-      };
-      transaction.onerror = () => {
-        console.log("Error deleting model from IndexedDB");
-      };
-    } catch (error) {
-      console.log("Failed to open IndexedDB", error);
-    }
-  };
-
-  // Function to delete all items
-  const handleDeleteAllModels = async () => {
-    await deleteAllModelsFromIndexedDB();
-  };
  
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: ".stl,.obj",
@@ -225,8 +142,8 @@ const Dropfile = ({
                 });
                 objData.updateMatrix();
 
-                const serializedModel = JSON.stringify(objData);
-                dispatch(addModel({ id: modelId, model: serializedModel }));
+                // const serializedModel = JSON.stringify(objData);
+                dispatch(addModel({ id: modelId, model: objData }));
                 setModel(objData);
                 setCameraPosition([
                   -7.726866370752757, 7.241928986275022, -8.091348270643504,
@@ -268,6 +185,7 @@ const Dropfile = ({
           // await saveModelToIndexedDB(modelId, fileContent, fileExtension);
           setTempModelId(modelId);
           dispatch(addModelToTempState(modelId));
+          console.log(model, "this is model in dropfile")
         } catch (error) {
           console.log(error);
           setIsSupportedFileType(false);
@@ -295,6 +213,7 @@ const Dropfile = ({
     setFiles(null); // remove the file from the state
     // deleteModelFromIndexedDB(modelId);
     setProgress(0);
+    dispatch(deleteModel(tempModelId));
   };
 
   const ModelSizeChecker = ({ model }) => {
@@ -434,19 +353,7 @@ const Dropfile = ({
         </DropzoneFormcontainer>
       )}
 
-      <button
-        style={{
-          width: "150px",
-          padding: "10px",
-          borderRadius: 10,
-          position: "absolute",
-          left: "45%",
-          bottom: "30%",
-        }}
-        onClick={handleDeleteAllModels}
-      >
-        delete all
-      </button>
+      
     </>
   );
 };

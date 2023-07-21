@@ -16,21 +16,12 @@ import RegisterPage from "./Pages/Register/RegisterPage";
 import Services from "./Pages/Services/Services";
 import StartPrinting from "./Pages/StartPrinting/StartPrinting";
 import { db, usersCollection } from "./firebase";
-import { useDispatch } from 'react-redux';
+import { useDispatch } from "react-redux";
 import { setUserDetails } from "./ReduxStore/actions/userDetails";
-import {doc, getDoc} from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { useSelector } from "react-redux";
 import { setAuthenticationStatus } from "./ReduxStore/actions/Authentication";
-// Create a context object with default values
-// const CartCountContext = React.createContext({
-//   cartCount: 0,
-//   setCartCount: () => {},
-// });
-
-// Create a custom hook to make accessing the context easier
-// export function useCartCount() {
-//   return useContext(CartCountContext);
-// }
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,67 +29,71 @@ function App() {
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-  const cartItemsDetails = useSelector(state => state.cartItems.cartItems);
 
-  const { isAuthenticated } = useSelector((state) => state.authentication);
-
-  const cartDataLength = cartItemsDetails.length || 0;
-  // const [cart, setCart] = useState(cartItemsDetails);
-  const [cartCount, setCartCount] = useState(cartDataLength);
-  // const handleCartStorageChange = (event) => {
-  //   if (event.key === "cart") {
-  //     const cartData = JSON.parse(event.newValue);
-  //     setCart(cartData || []);
-  //     setCartCount(cartData ? cartData.length : 0);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   const cartFromLocalStorage = JSON.parse(localStorage.getItem("cart"));
-  //   if (cartFromLocalStorage) {
-  //     setCart(cartFromLocalStorage);
-  //     setCartCount(cartFromLocalStorage.length); // update cartCount
-  //   }
-  //   // Listen for changes to cart data in local storage
-  //   window.addEventListener("storage", handleCartStorageChange);
-
-  //   // Clean up the event listener when the component unmounts
-  //   return () => {
-  //     window.removeEventListener("storage", handleCartStorageChange);
-  //   };
-   
-  // }, []);
   useEffect(() => {
-    async function fetchData() {
-      const USERUID = localStorage.getItem("uid");
-      if (USERUID) {
-        // Retrieve user details from Firestore based on the UID
-        const userDetailsRef = doc(usersCollection, USERUID);
-        const docSnap = await getDoc(userDetailsRef);
-        if (docSnap.exists()) {
-          dispatch(setUserDetails(docSnap.data().userDetails));
-          console.log("Document data:", docSnap.data().userDetails);
-        } else {
-          console.log("No such document!");
-        }
-        dispatch(setAuthenticationStatus(true));
-      }
-    }
-  
-    fetchData(); // Call the async function immediately
-  
-    // Clean-up function (if needed)
-    return () => {
-      // Perform any clean-up tasks here (if necessary)
-    };
-  }, [dispatch, usersCollection]);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // If the user is logged in, get the ID token
+        const idToken = await user.getIdToken();
+        // Store the ID token in local storage
+        localStorage.setItem("idToken", idToken);
 
-  // useEffect(() => {
-  //   setCartCount(cart.length); // update cartCount whenever the cart changes
-  //   localStorage.setItem("cart", JSON.stringify(cart));
-  //   // setCount(cart.length);
-  //   console.log(localStorage.getItem("cart"));
-  // }, [cart]);
+        // Now you can make the fetch request to retrieve the calculatePrice function
+        // and store it in local storage.
+        try {
+          const response = await fetch(
+            "http://localhost:3000/calculate-function",
+            {
+              method: "GET",
+              headers: {
+                Authorization: idToken,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            // Handle the response error, if any
+            console.error("Error fetching calculatePrice function");
+            return;
+          }
+
+          const data = await response.json();
+          // Assuming data contains all three functions: calculatePrice, calculateMassAndPrintTime, and calculatePostProcessingTime
+          const {
+            calculatePrice,
+          } = data;
+
+          // Serialize the functions to JSON strings
+          const calculatePriceString = JSON.stringify(calculatePrice);
+      
+
+          // Store the functions in local storage
+          localStorage.setItem("calculatePriceFunction", calculatePriceString);
+    
+
+          // Continue with your other logic
+          const USERUID = user.uid;
+          const userDetailsRef = doc(usersCollection, USERUID);
+          const docSnap = await getDoc(userDetailsRef);
+          if (docSnap.exists()) {
+            dispatch(setUserDetails(docSnap.data().userDetails));
+            console.log("Document data:", docSnap.data().userDetails);
+          } else {
+            console.log("No such document!");
+          }
+          dispatch(setAuthenticationStatus(true));
+        } catch (error) {
+          console.error("Error fetching calculatePrice function:", error);
+        }
+      }
+    });
+
+    return () => {
+      // Unsubscribe from the onAuthStateChanged listener when the component unmounts
+      unsubscribe();
+    };
+  }, [dispatch]);
 
   const [showPrompt, setShowPrompt] = useState(false);
 
@@ -175,7 +170,7 @@ function App() {
   return (
     <Provider store={store}>
       {/* <CartCountContext.Provider value={{ cartCount, setCartCount }}> */}
-        <RouterProvider router={router} />
+      <RouterProvider router={router} />
       {/* </CartCountContext.Provider> */}
     </Provider>
   );

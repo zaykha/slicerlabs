@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-
+import cloneDeep from 'lodash/cloneDeep';
 // Redux store
 const initialState = {
   cartItems: [],
@@ -15,10 +15,10 @@ const cartSlice = createSlice({
     },
     addModel(state, action) {
       const { id, model } = action.payload; 
-      const deserializedModel = JSON.parse(model);
+      // const clonedModel = cloneDeep(model);
       state.cartItems.push({
         id,
-        model: deserializedModel
+        model
       });
       state.tempModelId = id;
     },
@@ -43,59 +43,67 @@ const cartSlice = createSlice({
     increaseQuantity(state, action) {
       const { ProductId } = action.payload;
       const itemIndex = state.cartItems.findIndex(
-        (item) => item.ProductId === ProductId
+        (item) => item.id === ProductId
       );
       if (itemIndex !== -1) {
-        state.cartItems[itemIndex].quantity++;
+        state.cartItems[itemIndex].options.quantity++;
       }
+      console.log(ProductId, itemIndex, state.cartItems)
     },
     decreaseQuantity(state, action) {
       const { ProductId } = action.payload;
       const itemIndex = state.cartItems.findIndex(
-        (item) => item.ProductId === ProductId
+        (item) => item.id === ProductId
       );
-      if (itemIndex !== -1 && state.cartItems[itemIndex].quantity > 1) {
-        state.cartItems[itemIndex].quantity--;
+      if (itemIndex !== -1 && state.cartItems[itemIndex].options.quantity > 1) {
+        state.cartItems[itemIndex].options.quantity--;
       }
     },
     updateMaterial(state, action) {
       const { ProductId, newMaterial } = action.payload;
       const itemIndex = state.cartItems.findIndex(
-        (item) => item.ProductId === ProductId
+        (item) => item.id === ProductId
       );
       if (itemIndex !== -1) {
-        state.cartItems[itemIndex].material = newMaterial;
+        state.cartItems[itemIndex].options.material = newMaterial;
       }
     },
     updateColor(state, action) {
       const { ProductId, newColor } = action.payload;
       const itemIndex = state.cartItems.findIndex(
-        (item) => item.ProductId === ProductId
+        (item) => item.id === ProductId
       );
       if (itemIndex !== -1) {
-        state.cartItems[itemIndex].color = newColor;
+        state.cartItems[itemIndex].options.color = newColor;
       }
     },
     updateDimensions(state, action) {
       const { ProductId, width, height, depth } = action.payload;
       const itemIndex = state.cartItems.findIndex(
-        (item) => item.ProductId === ProductId
+        (item) => item.id === ProductId
       );
       if (itemIndex !== -1) {
-        state.cartItems[itemIndex].width = width;
-        state.cartItems[itemIndex].height = height;
-        state.cartItems[itemIndex].depth = depth;
+        state.cartItems[itemIndex].options.dimensions.width = width;
+        state.cartItems[itemIndex].options.dimensions.height = height;
+        state.cartItems[itemIndex].options.dimensions.depth = depth;
       }
     },
     updateModel(state, action){
       const { ProductId, newModel } = action.payload;
       const itemIndex = state.cartItems.findIndex(
-        (item) => item.ProductId === ProductId
+        (item) => item.id === ProductId
       );
       if (itemIndex !== -1) {
         state.cartItems[itemIndex].model = newModel;
       }
-    }
+    },
+    deleteModel(state, action) {
+      const modelIdToDelete = action.payload;
+      state.cartItems = state.cartItems.filter((item) => item.id !== modelIdToDelete);
+      if (state.tempModelId === modelIdToDelete) {
+        state.tempModelId = null;
+      } 
+    },
     // other reducers...
   },
 });
@@ -109,6 +117,7 @@ export const {
   updateMaterial,
   updateColor,
   updateDimensions,
-  updateModel
+  updateModel,
+  deleteModel
 } = cartSlice.actions;
 export default cartSlice.reducer;

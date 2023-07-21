@@ -35,7 +35,7 @@ import Sidebar from "../../globalcomponents/SidebarMenu/Sidebar";
 import Paymentimage from "../../assets/paymentimg.png";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuthenticationStatus } from "../../ReduxStore/actions/Authentication";
-import { addMaterialOptions } from "../../ReduxStore/reducers/CartItemReducer";
+import { addMaterialOptions, deleteModel } from "../../ReduxStore/reducers/CartItemReducer";
 import IndividualProduct from "./CartComponents/Cart/IndividualProduct";
 
 const ProgressBar = ({ step }) => {
@@ -67,52 +67,11 @@ const Cartpage = () => {
   const navigate = useNavigate();
   const cartItemsDetails = useSelector((state) => state.cartItems.cartItems);
 
-  const DB_NAME = "TEMP_MODEL_STORAGE";
-  const DB_VERSION = 1;
-  const OBJECT_STORE_NAME = "models";
-  const openDatabase = () => {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-      request.onupgradeneeded = () => {
-        const db = request.result;
-        db.createObjectStore(OBJECT_STORE_NAME, { keyPath: "id" });
-      };
-
-      request.onsuccess = () => {
-        const db = request.result;
-        resolve(db);
-      };
-
-      request.onerror = () => {
-        reject(request.error);
-      };
-    });
-  };
-  const retrieveModelsFromIndexedDB = async () => {
-    try {
-      const db = await openDatabase();
-      const transaction = db.transaction([OBJECT_STORE_NAME], "readonly");
-      const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
-
-      // Get all models from the object store
-      const models = await objectStore.getAll();
-
-      // Log the count and retrieved models
-      console.log("Number of items:", models.length);
-      console.log("Retrieved models:", models);
-    } catch (error) {
-      console.log("Failed to open IndexedDB", error);
-    }
-  };
-  const handleRetrieveAllModels = async () => {
-    await retrieveModelsFromIndexedDB();
-  };
-
-  const handleRemoveItem = (index) => {
-    const newCart = [...cartItemsDetails];
-    newCart.splice(index, 1);
-    console.log(cartItemsDetails);
+  const handleRemoveItem = (modelIdToDelete) => {
+    // const newCart = [...cartItemsDetails];
+    // newCart.splice(index, 1);
+    // console.log(cartItemsDetails);
+    dispatch(deleteModel(modelIdToDelete));
   };
 
   const handleLogout = () => {
@@ -192,7 +151,6 @@ const Cartpage = () => {
         )}
       </Step1Container>
       <NextBtn onClick={handleLogout}>logout</NextBtn>
-      <NextBtn onClick={handleRetrieveAllModels}>retrieve</NextBtn>
       <Footer />
     </>
   );
