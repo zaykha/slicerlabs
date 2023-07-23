@@ -13,6 +13,7 @@ import {
   updateColor,
   updateDimensions,
   updateMaterial,
+  updatePrice,
 } from "../../../../ReduxStore/reducers/CartItemReducer";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Grid, OrbitControls } from "@react-three/drei";
@@ -36,6 +37,8 @@ const IndividualProduct = ({
   onDelete,
 }) => {
   const [currentQuantity, setCurrentQuantity] = useState(quantity);
+  const [IndividualTtlPrice, setIndividualTtlPrice] = useState(price);
+
   const cartItemsDetails = useSelector((state) => state.cartItems.cartItems);
   const dispatch = useDispatch();
   // const [model, setModel] = useState(null);
@@ -43,6 +46,67 @@ const IndividualProduct = ({
     -7.726866370752757, 7.241928986275022, -8.091348270643504,
   ]);
 
+  const parseStoredFunction = (functionName, storedFunction) => {
+    try {
+      const Unstring = JSON.parse(storedFunction);
+
+      // Use eval() to convert the object to a function
+      const parsedFunction = eval(`(${Unstring})`);
+      // console.log(parsedFunction)
+      // const parsedFunction = new Function(`return ${functionization}`)
+      if (typeof parsedFunction === "function") {
+        return parsedFunction;
+      } else {
+        throw new Error(`Parsed ${functionName} is not a function`);
+      }
+    } catch (error) {
+      console.error(`Error parsing ${functionName} function:`, error);
+      return null;
+    }
+  };
+  const calculatePriceString = localStorage.getItem("calculatePriceFunction");
+
+  // Fetch the calculatePrice function from local storage
+  useEffect(() => {
+
+    if (calculatePriceString) {
+     const calculatePriceFunctionToStore = parseStoredFunction(
+        "calculatePrice",
+        calculatePriceString
+      );
+      // console.log(
+      //   "Parsed calculatePriceFunction:",
+      //   calculatePriceFunctionToStore
+      // );
+
+      // Now you have the parsed functions, you can use them as needed
+      // For example, you can store them in state or use them directly.
+      // setCalculatePriceFunction(
+      //   calculatePriceFunctionToStore
+      // );
+      newPricetoUpdate(calculatePriceFunctionToStore);
+    }
+  }, [material, color, width, height, depth]);
+
+  const newPricetoUpdate = (anotherFunction) => {
+    // console.log(anotherFunction);
+    if (
+      anotherFunction &&
+      material &&
+      color &&
+      width &&
+      height &&
+      depth
+    ) {
+      const newPrice = anotherFunction(material, color, {
+        width,
+        height,
+        depth,
+      });
+      dispatch(updatePrice({ ProductId: tempID, newPrice }));
+      // setPrice(newPrice);
+    }
+  };
 
   const increaseQuantityAction = (ProductId) => {
     dispatch(increaseQuantity({ ProductId }));
@@ -90,6 +154,7 @@ const IndividualProduct = ({
 
     return null;
   };
+  const totalPrice = (price * quantity).toFixed(2);
   return (
     <div className="box">
       <div className="ITEM-wrapper">
@@ -260,7 +325,7 @@ const IndividualProduct = ({
               <div className="div">Total :</div>
               <div className="overlap-group">
                 <div className="text-wrapper-3">SGD</div>
-                <div className="text-wrapper-2">{price*quantity}</div>
+                <div className="text-wrapper-2">{totalPrice}</div>
               </div>
             </div>
 

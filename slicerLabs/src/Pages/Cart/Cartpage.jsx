@@ -6,7 +6,7 @@ import {
   CUsubheader,
 } from "../ContactUs/ContactUsComponents/ContactUsHero/ContactUsHeroelemements";
 import { SSpan } from "../Services/Serviceselement";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Grandtotaldisplay,
   ItemBtn,
@@ -30,12 +30,16 @@ import {
   Shippingoption,
   Soption,
   Step1Container,
+  StyledAddButton,
 } from "./Cartpageelement";
 import Sidebar from "../../globalcomponents/SidebarMenu/Sidebar";
 import Paymentimage from "../../assets/paymentimg.png";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuthenticationStatus } from "../../ReduxStore/actions/Authentication";
-import { addMaterialOptions, deleteModel } from "../../ReduxStore/reducers/CartItemReducer";
+import {
+  addMaterialOptions,
+  deleteModel,
+} from "../../ReduxStore/reducers/CartItemReducer";
 import IndividualProduct from "./CartComponents/Cart/IndividualProduct";
 
 const ProgressBar = ({ step }) => {
@@ -102,7 +106,7 @@ const Cartpage = () => {
           cartItemsDetails.map((item, index) => (
             <IndividualProduct
               key={index}
-              index={index+1}
+              index={index + 1}
               model={item.model}
               tempID={item.options.ProductId}
               material={item.options.material}
@@ -115,6 +119,15 @@ const Cartpage = () => {
               onDelete={handleRemoveItem}
             />
           ))
+        )}
+        {cartItemsDetails.length === 0 ? (
+          <></>
+        ) : (
+          <>
+            <StyledAddButton to="/Start3dPrinting">
+              <span style={plusSignStyle}>+</span> 
+            </StyledAddButton>
+          </>
         )}
         {cartItemsDetails.length === 0 ? (
           <></>
@@ -156,4 +169,12 @@ const Cartpage = () => {
   );
 };
 
+
+
+
+
+const plusSignStyle = {
+  // paddingRight: '5px',
+  fontSize:'20px'
+};
 export default Cartpage;

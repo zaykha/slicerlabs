@@ -61,15 +61,17 @@ const Dropfile = ({
   const generateUniqueId = () => {
     return uuidv4();
   };
+  // useEffect(() => {
+  //   // console.log(model);
+  //   console.log(LoadProgress);
+  // }, [setProgress]);
   useEffect(() => {
-    // console.log(model);
-    console.log(LoadProgress);
-  }, [setProgress]);
-  useEffect(() => {
-    
-    setModel(null);
-    // setIsModelLoaded(false);
-    setFiles(null);
+    if(isCheckedOut || isAddedToCart){
+      setModel(null);
+      // setIsModelLoaded(false);
+      setFiles(null);
+    }
+   
   }, [isCheckedOut,isAddedToCart]);
 
   const modelId = generateUniqueId();
@@ -150,6 +152,7 @@ const Dropfile = ({
                 ]);
                 setIsLoading(false);
                 setIsModelLoaded(true);
+                setIsAddedToCart(false);
               },
               // undefined,
               function (xhr) {
@@ -285,7 +288,7 @@ const Dropfile = ({
         </ErrorContainer>
       )}
 
-      {model && !isCheckedOut && !isLoading ? (
+      {model  && !isLoading ? (
         <DropzoneFormcontainer>
           <DropzoneContainer>
             <Canvas

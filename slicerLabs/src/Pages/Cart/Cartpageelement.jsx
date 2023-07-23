@@ -1,5 +1,5 @@
 import styled, { keyframes,css } from "styled-components";
-
+import { Link as LinkR } from "react-router-dom";
 const Pulse = keyframes`
   0% {
     transform: scale(0.8);
@@ -231,4 +231,41 @@ export const Grandtotaldisplay = styled.div`
   padding-top: 10px;
 `;
 
+export const StyledAddButton = styled(LinkR)`
+  margin-top: 20px;
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(180deg, rgb(38, 115, 130) 0%, rgb(0, 121, 188) 100%);
+  color: #fff;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  transition: background 0.3s ease;
 
+  &:hover {
+    background: linear-gradient(180deg, rgb(38, 102, 130) 0%, rgb(0, 128, 188) 100%);
+  }
+`;
+
+
+export const StyledAddButtonForStartPrinting = styled.div`
+  width: 380px;
+  margin-top: 20px;
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(180deg, rgb(38, 115, 130) 0%, rgb(0, 121, 188) 100%);
+  color: #fff;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  transition: background 0.3s ease;
+
+  &:hover {
+    color: lightblue;
+    background: linear-gradient(180deg, rgb(38, 102, 130) 0%, rgb(0, 128, 188) 100%);
+  }
+`;

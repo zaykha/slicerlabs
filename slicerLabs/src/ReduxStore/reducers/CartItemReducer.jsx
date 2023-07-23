@@ -88,6 +88,16 @@ const cartSlice = createSlice({
         state.cartItems[itemIndex].options.dimensions.depth = depth;
       }
     },
+    updatePrice(state, action) {
+      const { ProductId, newPrice } = action.payload;
+      console.log(ProductId, newPrice)
+      const itemIndex = state.cartItems.findIndex(
+        (item) => item.id === ProductId
+      );
+      if (itemIndex !== -1) {
+        state.cartItems[itemIndex].options.price = newPrice;
+      }
+    },
     updateModel(state, action){
       const { ProductId, newModel } = action.payload;
       const itemIndex = state.cartItems.findIndex(
@@ -117,6 +127,7 @@ export const {
   updateMaterial,
   updateColor,
   updateDimensions,
+  updatePrice,
   updateModel,
   deleteModel
 } = cartSlice.actions;

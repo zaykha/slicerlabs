@@ -10,15 +10,27 @@ import { SSpan } from "../Services/Serviceselement";
 import Dropfile from "./StartPrintingComponents/Dropfile/Dropfile";
 import MaterialsOptions from "./StartPrintingComponents/MaterialsOptions/MaterialsOptions";
 import {
+  NotiPrompt,
   PMAlertBox,
   PMButton,
   PMContainer,
+  TocartCTABtn,
 } from "./StartPrintingComponents/MaterialsOptions/MaterialsOptionselements";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  StyledAddButton,
+  StyledAddButtonForStartPrinting,
+} from "../Cart/Cartpageelement";
+import { FaCheck, FaExclamationCircle } from 'react-icons/fa';
+import { useNavigate } from "react-router-dom";
 
 const StartPrinting = () => {
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [isCheckedOut, setIsCheckedOut] = useState(false);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
+  const [isFormFilled, setisFormFilled] = useState(false);
+  const StoreItems = useSelector((state) => state.cartItems.cartItems);
+  const cart = useSelector((state) => state.cartItems);
 
   const [isOpen, setIsOpen] = useState(false);
   const togglesidebar = () => {
@@ -26,7 +38,7 @@ const StartPrinting = () => {
   };
   const [tempModelId, setTempModelId] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
-
+  const navigate = useNavigate();
   const handleBeforeUnload = (e) => {
     if (showPrompt) {
       e.preventDefault();
@@ -42,6 +54,24 @@ const StartPrinting = () => {
   const handleOk = () => {
     localStorage.removeItem("cart");
     window.location.reload();
+  };
+
+  const handleCheckOutInParent = () => {
+    // This function will be executed when the action is triggered in the child component
+    // Put the logic you want to execute in the parent here
+    // For example, you can update some state or perform some other action in the parent component
+    console.log("Action triggered in the child, executing in the parent!");
+  };
+
+  const handleCheckOut = () => {
+    if (!isFormFilled) {
+      alert("please fill all in empty fields or empty the field to proceed");
+    } else if (!isAddedToCart) {
+      alert("please add to cart first");
+    } else {
+      navigate(`/cart?cart=${cart.cartItems.length}`);
+      
+    }
   };
 
   useEffect(() => {
@@ -97,7 +127,36 @@ const StartPrinting = () => {
           setIsCheckedOut={setIsCheckedOut}
           isAddedToCart={isAddedToCart}
           setIsAddedToCart={setIsAddedToCart}
+          isFormFilled={isFormFilled}
+          setisFormFilled={setisFormFilled}
+          handleCheckOutInChild={handleCheckOutInParent}
         />
+      ) : (
+        <></>
+      )}
+      {StoreItems.length > 0  ? (
+        <>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <StyledAddButtonForStartPrinting onClick={handleCheckOut}>
+              <div>CHECK OUT</div>
+              {isAddedToCart ? <FaCheck style={{ marginTop: '10px' }} /> : <FaExclamationCircle style={{ marginTop: '10px' }} />}
+
+            </StyledAddButtonForStartPrinting>
+            
+            {/* {cart && isFormFilled ? (
+              <NotiPrompt>{cart.cartItems.length}</NotiPrompt>
+            ) : (
+              <></>
+            )} */}
+          </div>
+        </>
       ) : (
         <></>
       )}

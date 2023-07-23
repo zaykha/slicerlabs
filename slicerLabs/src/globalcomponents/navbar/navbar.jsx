@@ -34,10 +34,9 @@ const Navbar = ({ togglesidebar }) => {
   const { pathname } = useLocation();
 
   const { isAuthenticated } = useSelector((state) => state.authentication);
-  const userDetails = useSelector(state => state.userDetails);
-  const cartItems = useSelector(state => state.cartItems.cartItems);
-
-  return (
+  const userDetails = useSelector((state) => state.userDetails);
+  const cartItems = useSelector((state) => state.cartItems.cartItems);
+  const hasUndefinedProduct = cartItems.some((item) => !item || !item.options || !item.options.ProductId);  return (
     <>
       <Nav>
         <MobileIcon onClick={togglesidebar}>
@@ -68,7 +67,7 @@ const Navbar = ({ togglesidebar }) => {
                     className={pathname === "/userDetails" ? "active" : ""}
                     // isactive={pathname === "/login"}
                   >
-                  {userDetails.userName}
+                    {userDetails.userName}
                   </NavLinks>
                 </NavItem>
               ) : (
@@ -99,10 +98,21 @@ const Navbar = ({ togglesidebar }) => {
             </ActionItems>
 
             <ActionItems>
-              <NavLinks to="/cart">
-                <IMGTAG1 src={cart} alt="cart" />
-                {cartItems.length > 0 && <span>{cartItems.length}</span>}
-              </NavLinks>
+              {hasUndefinedProduct ? (
+                <NavLinks
+                  onClick={() =>
+                    alert("Please fill in the material details first.")
+                  }
+                >
+                  <IMGTAG1 src={cart} alt="cart" />
+                  {cartItems.length > 0 && <span>{cartItems.length}</span>}
+                </NavLinks>
+              ) : (
+                <NavLinks to="/cart">
+                  <IMGTAG1 src={cart} alt="cart" />
+                  {cartItems.length > 0 && <span>{cartItems.length}</span>}
+                </NavLinks>
+              )}
             </ActionItems>
           </Commerce>
         </NavController>

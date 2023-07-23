@@ -8,7 +8,8 @@ const store = configureStore({
   getDefaultMiddleware({
     serializableCheck: {
       ignoredActions: ['cart/addModel'], // Add the action type of your addModel reducer
-      ignoredPaths: ['cartItems.cartItems.0.model'], // Add the path to the model field
+      ignoredPaths: ['cartItems.cartItems.*.model'], // Add the path to the model field
+      ignoredActionPaths: ['cart/addMaterialOptions.cartItems.cartItems.*.model'],
     },
   })
 });

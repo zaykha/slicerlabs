@@ -34,12 +34,14 @@ const MaterialsOptions = ({
   setIsCheckedOut,
   isAddedToCart,
   setIsAddedToCart,
+  isFormFilled,
+  setisFormFilled,
+  handleCheckOutInChild 
 }) => {
   const aboveDivRef = useRef(null);
   const belowDivRef = useRef(null);
   const leftDivRef = useRef(null);
   const rightDivRef = useRef(null);
-  const [calculatePriceFunction, setCalculatePriceFunction] = useState(()=>defaultCalculatePriceFunction);
   const [material, setMaterial] = useState("");
   const [color, setColor] = useState("");
   const [width, setWidth] = useState(10);
@@ -84,16 +86,18 @@ const MaterialsOptions = ({
 
   // Fetch the calculatePrice function from local storage
   useEffect(() => {
-
+    if(material && color && width && height && depth){
+      setisFormFilled(true)
+    }
     if (calculatePriceString) {
      const calculatePriceFunctionToStore = parseStoredFunction(
         "calculatePrice",
         calculatePriceString
       );
-      console.log(
-        "Parsed calculatePriceFunction:",
-        calculatePriceFunctionToStore
-      );
+      // console.log(
+      //   "Parsed calculatePriceFunction:",
+      //   calculatePriceFunctionToStore
+      // );
 
       // Now you have the parsed functions, you can use them as needed
       // For example, you can store them in state or use them directly.
@@ -181,7 +185,7 @@ const MaterialsOptions = ({
   //   return parseFloat(roundedTotalCost);
   // }
   const updatePrice = (anotherFunction) => {
-    console.log(anotherFunction);
+    // console.log(anotherFunction);
     if (
       anotherFunction &&
       material &&
@@ -207,9 +211,9 @@ const MaterialsOptions = ({
     } else {
       setMaterial("");
       setColor("");
-      setWidth("");
-      setHeight("");
-      setDepth("");
+      setWidth(10);
+      setHeight(10);
+      setDepth(10);
       setQuantity(1);
       setPrice(0);
       const finalItem = {
@@ -224,11 +228,13 @@ const MaterialsOptions = ({
         quantity,
         price,
       };
+      handleCheckOutInChild();
       dispatch(
         addMaterialOptions({ checkID: tempModelId, options: finalItem })
       );
       setIsAddedToCart(true);
-      setIsCheckedOut(true);
+      setIsModelLoaded(false);
+      // setIsCheckedOut(true);
       console.log(cart);
     }
   };
@@ -258,6 +264,7 @@ const MaterialsOptions = ({
             addMaterialOptions({ checkID: tempModelId, options: finalItem })
           );
           setIsCheckedOut(true);
+          // setIsAddedToCart(false);
           setMaterial("");
           setColor("");
           setWidth("");
@@ -289,6 +296,7 @@ const MaterialsOptions = ({
           addMaterialOptions({ checkID: tempModelId, options: finalItem })
         );
         setIsCheckedOut(true);
+        // setIsAddedToCart(false);
         setMaterial("");
         setColor("");
         setWidth("");
@@ -463,13 +471,13 @@ const MaterialsOptions = ({
         </LoginContainer>
       </LoginFromcontainer>
       <Tocartflexdiv ref={belowDivRef}>
-        {price ? (
+        {price ?  (
           <TocartCTABtn onClick={handleAddToCart}>ADD TO CART</TocartCTABtn>
         ) : (
           <></>
         )}
 
-        {cart.cartItems.length > 0 ? (
+        {/* {cart.cartItems.length > 0 ? (
           <>
             <div style={{ display: "flex", width: "180px" }}>
               <TocartCTABtn onClick={handleCheckOut}>
@@ -480,7 +488,7 @@ const MaterialsOptions = ({
           </>
         ) : (
           <></>
-        )}
+        )} */}
       </Tocartflexdiv>
     </>
   );
