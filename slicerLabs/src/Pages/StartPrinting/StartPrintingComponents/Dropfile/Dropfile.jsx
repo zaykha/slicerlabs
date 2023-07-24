@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   DropzoneContainer,
   DropzoneFormcontainer,
@@ -14,7 +14,12 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { PerspectiveCamera } from "three";
 import { Grid, OrbitControls } from "@react-three/drei";
 import { useDispatch, useSelector } from "react-redux";
-import { addModel, addModelToTempState, deleteModel, updateModel } from "../../../../ReduxStore/reducers/CartItemReducer";
+import {
+  addModel,
+  addModelToTempState,
+  deleteModel,
+  updateModel,
+} from "../../../../ReduxStore/reducers/CartItemReducer";
 import { v4 as uuidv4 } from "uuid";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
@@ -27,7 +32,7 @@ const Dropfile = ({
   isCheckedOut,
   setIsCheckedOut,
   isAddedToCart,
-  setIsAddedToCart
+  setIsAddedToCart,
 }) => {
   const [files, setFiles] = useState([]);
   const [model, setModel] = useState(null);
@@ -66,17 +71,15 @@ const Dropfile = ({
   //   console.log(LoadProgress);
   // }, [setProgress]);
   useEffect(() => {
-    if(isCheckedOut || isAddedToCart){
+    if (isCheckedOut || isAddedToCart) {
       setModel(null);
       // setIsModelLoaded(false);
       setFiles(null);
     }
-   
-  }, [isCheckedOut,isAddedToCart]);
+  }, [isCheckedOut, isAddedToCart]);
 
   const modelId = generateUniqueId();
 
- 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: ".stl,.obj",
     onDrop: async (acceptedFiles, rejectedFiles) => {
@@ -95,23 +98,22 @@ const Dropfile = ({
           })
         )
       );
-     
+
       const fileExtension = acceptedFiles[0].name
-      .split(".")
-      .pop()
-      .toLowerCase();
+        .split(".")
+        .pop()
+        .toLowerCase();
 
       const reader = new FileReader();
       reader.onload = async () => {
         try {
           const fileContent = reader.result;
-         
+
           if (fileExtension === "obj") {
             // Define the onProgress callback function
             const manager = new LoadingManager();
             const uploadedFile = acceptedFiles[0];
             const totalSize = uploadedFile.size;
-      
 
             manager.onLoad = function () {
               console.log("Loading complete!");
@@ -120,7 +122,9 @@ const Dropfile = ({
             };
 
             manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-              const percentLoaded = Math.floor((itemsLoaded / itemsTotal) * 100);
+              const percentLoaded = Math.floor(
+                (itemsLoaded / itemsTotal) * 100
+              );
               // set3DProgress(percentLoaded);
               // console.log(itemsTotal, itemsLoaded, percentLoaded);
             };
@@ -132,7 +136,7 @@ const Dropfile = ({
             };
 
             const objLoader = new OBJLoader(manager);
-             objLoader.load(
+            objLoader.load(
               fileContent,
               (objData) => {
                 const material = new MeshNormalMaterial();
@@ -184,11 +188,10 @@ const Dropfile = ({
             );
           }
 
-          
           // await saveModelToIndexedDB(modelId, fileContent, fileExtension);
           setTempModelId(modelId);
           dispatch(addModelToTempState(modelId));
-          console.log(model, "this is model in dropfile")
+          console.log(model, "this is model in dropfile");
         } catch (error) {
           console.log(error);
           setIsSupportedFileType(false);
@@ -219,36 +222,69 @@ const Dropfile = ({
     dispatch(deleteModel(tempModelId));
   };
 
+  // const ModelSizeChecker = ({ model }) => {
+  //   const { camera } = useThree();
+  //   const boundingBoxRef = useRef();
+
+  //   useLayoutEffect(() => {
+  //     const checkModelSize = () => {
+  //       const boundingBox = new Box3().setFromObject(model);
+  //       const size = new Vector3();
+  //       boundingBox.getSize(size);
+
+  //       // Get the size of the camera frustum
+  //       const frustumSize =
+  //         Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
+
+  //       // Calculate the scale factor based on the size of the model and the frustum size
+  //       const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
+
+  //       // Apply the scale factor to the model
+  //       model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+  //       // // Position the model at the center of the viewport
+  //       // const modelCenter = boundingBox.getCenter(new Vector3());
+  //       // model.position.sub(modelCenter);
+  //     };
+
+  //     if (model && boundingBoxRef.current) {
+  //       checkModelSize();
+  //     }
+  //   }, [model, camera]);
+
+  //   return <primitive object={model} ref={boundingBoxRef} />;
+  // };
+ 
   const ModelSizeChecker = ({ model }) => {
     const { camera } = useThree();
     const boundingBoxRef = useRef();
-
-    useEffect(() => {
-      const checkModelSize = () => {
-        const boundingBox = new Box3().setFromObject(model);
-        const size = new Vector3();
-        boundingBox.getSize(size);
-
-        // Get the size of the camera frustum
-        const frustumSize =
-          Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
-
-        // Calculate the scale factor based on the size of the model and the frustum size
-        const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
-
-        // Apply the scale factor to the model
-        model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-        // // Position the model at the center of the viewport
-        // const modelCenter = boundingBox.getCenter(new Vector3());
-        // model.position.sub(modelCenter);
+  
+    if (model && boundingBoxRef.current) {
+      // Calculate the size of the model's bounding box
+      const boundingBox = new Box3().setFromObject(model);
+      const size = new Vector3();
+      boundingBox.getSize(size);
+  
+      // Get the size of the camera frustum
+      const frustumSize =
+        Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
+  
+      // Calculate the scale factor based on the size of the model and the frustum size
+      const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
+  
+      // Apply the scale factor to the model
+      model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+  
+      // Set the camera position based on the model's size
+      const cameraPosition = {
+        x: camera.position.x,
+        y: camera.position.y,
+        z: camera.position.z,
       };
-
-      if (model && boundingBoxRef.current) {
-        checkModelSize();
-      }
-    }, [model, camera]);
-
+      camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+      model.rotation.x = Math.PI;
+    }
+  
     return <primitive object={model} ref={boundingBoxRef} />;
   };
   const ProgressBar = ({ LoadProgress }) => {
@@ -288,15 +324,14 @@ const Dropfile = ({
         </ErrorContainer>
       )}
 
-      {model  && !isLoading ? (
+      {model && !isLoading ? (
         <DropzoneFormcontainer>
           <DropzoneContainer>
             <Canvas
               style={{
-                width: "773px",
-                height: "300px",
-                // zIndex: 6,
-                // border:"1px solid red"
+                width: "100%",
+                height: "100%",
+                position: "absolute",
               }}
             >
               <Grid cellSize={3} infiniteGrid={true} />
@@ -349,14 +384,11 @@ const Dropfile = ({
                 ? `Preparing 3D model ...`
                 : `Loading ${LoadProgress}%`}
             </UPHeaderFullline>
-          
-              <ProgressBar LoadProgress={LoadProgress} />
-   
+
+            <ProgressBar LoadProgress={LoadProgress} />
           </DropzoneContainer>
         </DropzoneFormcontainer>
       )}
-
-      
     </>
   );
 };

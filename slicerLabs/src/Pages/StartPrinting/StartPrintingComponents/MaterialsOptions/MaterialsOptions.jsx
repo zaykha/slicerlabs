@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   LoginContainer,
   LoginFlexdiv,
@@ -234,6 +234,7 @@ const MaterialsOptions = ({
       );
       setIsAddedToCart(true);
       setIsModelLoaded(false);
+      setisFormFilled(false);
       // setIsCheckedOut(true);
       console.log(cart);
     }
@@ -309,7 +310,7 @@ const MaterialsOptions = ({
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const updatePosition = () => {
       const aboveHeight = aboveDivRef.current.getBoundingClientRect().height;
       belowDivRef.current.style.top = `${aboveHeight + 520}px`;

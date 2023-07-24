@@ -36,7 +36,10 @@ const Navbar = ({ togglesidebar }) => {
   const { isAuthenticated } = useSelector((state) => state.authentication);
   const userDetails = useSelector((state) => state.userDetails);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
-  const hasUndefinedProduct = cartItems.some((item) => !item || !item.options || !item.options.ProductId);  return (
+  const hasUndefinedProduct = cartItems.some(
+    (item) => !item || !item.options || !item.options.ProductId
+  );
+  return (
     <>
       <Nav>
         <MobileIcon onClick={togglesidebar}>
@@ -93,6 +96,8 @@ const Navbar = ({ togglesidebar }) => {
               >
                 {pathname === "/Start3dPrinting"
                   ? "3D Printing"
+                  : cartItems.length > 0
+                  ? "Add More Items"
                   : "Start 3D Printing"}
               </NavLinks1>
             </ActionItems>

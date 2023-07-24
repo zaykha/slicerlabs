@@ -21,16 +21,16 @@ import {
   StyledAddButton,
   StyledAddButtonForStartPrinting,
 } from "../Cart/Cartpageelement";
-import { FaCheck, FaExclamationCircle } from 'react-icons/fa';
+import { FaCheck, FaExclamationCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const StartPrinting = () => {
+  const cart = useSelector((state) => state.cartItems);
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [isCheckedOut, setIsCheckedOut] = useState(false);
-  const [isAddedToCart, setIsAddedToCart] = useState(false);
+  const [isAddedToCart, setIsAddedToCart] = useState(cart.cartItems.length > 0);
   const [isFormFilled, setisFormFilled] = useState(false);
   const StoreItems = useSelector((state) => state.cartItems.cartItems);
-  const cart = useSelector((state) => state.cartItems);
 
   const [isOpen, setIsOpen] = useState(false);
   const togglesidebar = () => {
@@ -64,13 +64,26 @@ const StartPrinting = () => {
   };
 
   const handleCheckOut = () => {
-    if (!isFormFilled) {
-      alert("please fill all in empty fields or empty the field to proceed");
-    } else if (!isAddedToCart) {
-      alert("please add to cart first");
-    } else {
-      navigate(`/cart?cart=${cart.cartItems.length}`);
-      
+    if (cart.cartItems.length > 0) {
+      if (!isModelLoaded) {
+        if (!isFormFilled) {
+          navigate(`/cart?cart=${cart.cartItems.length}`);
+        } else {
+          console.log("forgot to clear form field");
+        }
+      } else {
+        if (!isFormFilled) {
+          alert(
+            "please fill all in empty fields or empty the field to proceed"
+          );
+        } else {
+          if (!isAddedToCart) {
+            alert("please add to cart first");
+          } else {
+            navigate(`/cart?cart=${cart.cartItems.length}`);
+          }
+        }
+      }
     }
   };
 
@@ -134,7 +147,7 @@ const StartPrinting = () => {
       ) : (
         <></>
       )}
-      {StoreItems.length > 0  ? (
+      {StoreItems.length > 0 ? (
         <>
           <div
             style={{
@@ -146,10 +159,18 @@ const StartPrinting = () => {
           >
             <StyledAddButtonForStartPrinting onClick={handleCheckOut}>
               <div>CHECK OUT</div>
-              {isAddedToCart ? <FaCheck style={{ marginTop: '10px' }} /> : <FaExclamationCircle style={{ marginTop: '10px' }} />}
-
+              {(cart.cartItems.length === 0 &&
+                isModelLoaded &&
+                isAddedToCart) ||
+              (cart.cartItems.length > 0 &&
+                !isModelLoaded &&
+                isAddedToCart) ? (
+                <FaCheck style={{ marginTop: "10px" }} />
+              ) : (
+                <FaExclamationCircle style={{ marginTop: "10px" }} />
+              )}
             </StyledAddButtonForStartPrinting>
-            
+
             {/* {cart && isFormFilled ? (
               <NotiPrompt>{cart.cartItems.length}</NotiPrompt>
             ) : (

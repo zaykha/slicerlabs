@@ -154,6 +154,39 @@ const IndividualProduct = ({
 
     return null;
   };
+  const ModelSizeChecker = ({ model }) => {
+    const { camera } = useThree();
+    const boundingBoxRef = useRef();
+  
+    if (model && boundingBoxRef.current) {
+      // Calculate the size of the model's bounding box
+      const boundingBox = new Box3().setFromObject(model);
+      const size = new Vector3();
+      boundingBox.getSize(size);
+  
+      // Get the size of the camera frustum
+      const frustumSize =
+        Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
+  
+      // Calculate the scale factor based on the size of the model and the frustum size
+      const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
+  
+      // Apply the scale factor to the model
+      model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+  
+      // Set the camera position based on the model's size
+      const cameraPosition = {
+        x: camera.position.x,
+        y: camera.position.y,
+        z: camera.position.z,
+      };
+      camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+      model.rotation.x = Math.PI;
+    }
+  
+    return <primitive object={model} ref={boundingBoxRef} />;
+  };
+
   const totalPrice = (price * quantity).toFixed(2);
   return (
     <div className="box">
@@ -167,14 +200,14 @@ const IndividualProduct = ({
                   <OrbitControls />
                   <ambientLight />
                   <pointLight position={[10, 10, 10]} />
-                  {/* <ModelSizeChecker model={model} /> */}
-                  {model && (
+                  <ModelSizeChecker model={model} />
+                  {/* {model && (
                     <primitive
                       object={model}
                       position={[0, 0, 0]}
                       scale={[0.1, 0.1, 0.1]}
                     />
-                  )}
+                  )} */}
                   <CameraControls cameraPosition={cameraPosition} />
                 </Canvas>
               </div>
