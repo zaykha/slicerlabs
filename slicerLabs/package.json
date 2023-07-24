@@ -12,6 +12,7 @@
     "@react-three/drei": "^9.64.0",
     "@react-three/fiber": "^8.12.0",
     "@reduxjs/toolkit": "^1.9.5",
+    "@stripe/stripe-js": "^1.54.1",
     "blob-util": "^2.0.2",
     "firebase": "^9.22.1",
     "lodash": "^4.17.21",
@@ -23,6 +24,7 @@
     "react-router-dom": "^6.8.2",
     "read-chunk": "^4.0.3",
     "redux": "^4.2.1",
+    "stripe": "^12.14.0",
     "styled-components": "^5.3.6",
     "three": "^0.150.1",
     "uuid": "^9.0.0"

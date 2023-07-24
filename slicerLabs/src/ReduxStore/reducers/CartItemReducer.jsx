@@ -90,7 +90,7 @@ const cartSlice = createSlice({
     },
     updatePrice(state, action) {
       const { ProductId, newPrice } = action.payload;
-      console.log(ProductId, newPrice)
+      // console.log(ProductId, newPrice)
       const itemIndex = state.cartItems.findIndex(
         (item) => item.id === ProductId
       );

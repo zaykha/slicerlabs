@@ -194,6 +194,7 @@ const Registerform = () => {
       // Store token in local storage
       localStorage.setItem("jwtToken", token);
       localStorage.setItem("uid", USERUID);
+      localStorage.setItem("userDetails", formValues);
 
       // Update user details in Redux
       dispatch(setUserDetails(formValues));
