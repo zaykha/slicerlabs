@@ -25,3 +25,4 @@ export const Googleprovider = new GoogleAuthProvider(app);
 export const db = getDatabase(app);
 export const firestore = getFirestore(app);
 export const usersCollection = collection(firestore, "users");
+export const PurchasedItemsCollection = collection(firestore, "PurchasedItems");

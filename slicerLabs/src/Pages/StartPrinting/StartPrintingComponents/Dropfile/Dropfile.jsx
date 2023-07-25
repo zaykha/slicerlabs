@@ -24,6 +24,7 @@ import { v4 as uuidv4 } from "uuid";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { MeshNormalMaterial, Box3, Vector3, Mesh, LoadingManager } from "three";
+import { deleteFileFromDB, storeFileInDB } from "../../../../indexedDBUtilis";
 const Dropfile = ({
   tempModelId,
   setTempModelId,
@@ -89,6 +90,15 @@ const Dropfile = ({
         setIsLoading(false);
         return;
       }
+  
+      const uploadedFile = acceptedFiles[0];
+      const maxSize = 60 * 1024 * 1024; // 60MB in bytes
+      if (uploadedFile.size > maxSize) {
+        setError("File size exceeds the maximum allowed (60MB).");
+        setIsLoading(false);
+        return;
+      }
+  
       setIsLoading(true);
       setIsSupportedFileType(true);
       setFiles(
@@ -98,7 +108,7 @@ const Dropfile = ({
           })
         )
       );
-
+      await storeFileInDB(acceptedFiles[0], modelId);
       const fileExtension = acceptedFiles[0].name
         .split(".")
         .pop()
@@ -220,6 +230,7 @@ const Dropfile = ({
     // deleteModelFromIndexedDB(modelId);
     setProgress(0);
     dispatch(deleteModel(tempModelId));
+    deleteFileFromDB(modelId);
   };
 
   // const ModelSizeChecker = ({ model }) => {

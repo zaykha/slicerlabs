@@ -1,4 +1,5 @@
 const initialState = {
+    userUID:'',
     userName: '',
     occupation: '',
     phone: '',

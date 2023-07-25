@@ -22,6 +22,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { useSelector } from "react-redux";
 import { setAuthenticationStatus } from "./ReduxStore/actions/Authentication";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import PaymentSuccess from "./Pages/Payment/PaymentSuccess";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +30,7 @@ function App() {
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-
+  
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -60,25 +61,26 @@ function App() {
 
           const data = await response.json();
           // Assuming data contains all three functions: calculatePrice, calculateMassAndPrintTime, and calculatePostProcessingTime
-          const {
-            calculatePrice,
-          } = data;
+          const { calculatePrice } = data;
 
           // Serialize the functions to JSON strings
           const calculatePriceString = JSON.stringify(calculatePrice);
-      
 
           // Store the functions in local storage
           localStorage.setItem("calculatePriceFunction", calculatePriceString);
-    
 
           // Continue with your other logic
           const USERUID = user.uid;
           const userDetailsRef = doc(usersCollection, USERUID);
           const docSnap = await getDoc(userDetailsRef);
           if (docSnap.exists()) {
-            dispatch(setUserDetails(docSnap.data().userDetails));
-            console.log("Document data:", docSnap.data().userDetails);
+            const userDetailsData = docSnap.data();
+            const userDetailsWithUid = {
+              ...userDetailsData,
+              userUID: docSnap.id,
+            };
+            dispatch(setUserDetails(userDetailsWithUid));
+            console.log("Document data:",userDetailsWithUid );
           } else {
             console.log("No such document!");
           }
@@ -93,7 +95,7 @@ function App() {
       // Unsubscribe from the onAuthStateChanged listener when the component unmounts
       unsubscribe();
     };
-  }, [dispatch]);
+  }, []);
 
   // const [showPrompt, setShowPrompt] = useState(false);
 
@@ -159,11 +161,15 @@ function App() {
       path: "/cart",
       element: (
         <Cartpage
-          // showPrompt={showPrompt}
-          // handleOk={handleOk}
-          // handleHidePrompt={handleHidePrompt}
+        // showPrompt={showPrompt}
+        // handleOk={handleOk}
+        // handleHidePrompt={handleHidePrompt}
         />
       ),
+    },
+    {
+      path: "/success",
+      element: <PaymentSuccess />,
     },
   ]);
 

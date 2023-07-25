@@ -46,7 +46,28 @@ import {
   calculateDistanceWithOneMap,
   fetchAddressDetails,
 } from "../../globalcomponents/MapServices/MapServices";
-import { loadStripe } from '@stripe/stripe-js';
+// import stripe from "../../stripeConfig";
+import Stripe from "stripe";
+import { countItemsInDB, deleteAllRecordsFromDB, deleteFileFromDB } from "../../indexedDBUtilis";
+
+const getStripeKey = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/get-stripe-key');
+    if (response.ok) {
+      const data = await response.json();
+      const stripe = new Stripe(data.publishableKey, {
+        apiVersion: '2022-11-15'
+      });
+      return stripe;
+    } else {
+      throw new Error('Failed to fetch Stripe API key from the server.');
+    }
+  } catch (error) {
+    console.error('Error fetching Stripe API key:', error);
+    alert('Error fetching Stripe API key. Please try again later.');
+    return null;
+  }
+};
 const ProgressBar = ({ step }) => {
   return (
     <ProgressBarContainer>
@@ -76,6 +97,8 @@ const Cartpage = () => {
   const navigate = useNavigate();
   const [endCoordinates, setEndCoordinates] = useState("");
   const cartItemsDetails = useSelector((state) => state.cartItems.cartItems);
+  const userUID = useSelector((state) => state.userDetails.userUID);
+
   const [TTLPriceBeforeRouting, setTTLPriceBeforeRouting] = useState(0);
   // const postalCode = useSelector((state) => state.userDetails.postalCode);
   const AddressDetails = useSelector(
@@ -115,7 +138,12 @@ const Cartpage = () => {
       console.log("endCoordinates not ready");
     }
   }, [endCoordinates]);
-
+  useEffect(() => {
+    // Fetch and update the item count in the state
+    countItemsInDB()
+      .then((count) => console.log('indexedDb Count is ', count))
+      .catch((error) => console.error('Error counting items:', error));
+  }, []);
   useEffect(() => {
     console.log(AddressDetails);
     if (AddressDetails) {
@@ -123,10 +151,8 @@ const Cartpage = () => {
     }
   }, [AddressDetails]);
   const handleRemoveItem = (modelIdToDelete) => {
-    // const newCart = [...cartItemsDetails];
-    // newCart.splice(index, 1);
-    // console.log(cartItemsDetails);
     dispatch(deleteModel(modelIdToDelete));
+    deleteFileFromDB(modelIdToDelete);
   };
 
   const handleLogout = () => {
@@ -165,6 +191,10 @@ const Cartpage = () => {
   // const totalAmountInCents = Math.round(TTLPriceBeforeRouting * 100); // Convert dollars to cents
 
   const handleProceedToPayment = async () => {
+    const stripe = await getStripeKey();
+    if (!stripe) {
+      return console.log('error with stripeapiKey fetching');
+    }
     console.log(cartItemsDetails)
     // Create an array to store items for validation
     const itemsForValidation = [];
@@ -181,6 +211,7 @@ const Cartpage = () => {
         dimensions,
         quantity, // Adjust the expected price based on quantity
         price,
+        userUID
       });
     });
 
@@ -206,6 +237,15 @@ const Cartpage = () => {
           const checkoutSessionData = await checkoutSessionResponse.json();
           // Redirect the user to the Stripe Checkout page
           window.location.href = checkoutSessionData.url;
+        //  stripe.redirectToCheckout({
+        //   sessionId: checkoutSessionData.id
+        //  }).then((result) => {
+        //   // Handle any errors during the redirect, if necessary
+        //   if (result.error) {
+        //     console.error(result.error);
+        //     alert('Error redirecting to Stripe Checkout. Please try again.');
+        //   }
+        // });
         } else {
           // Handle error response from the server
           console.error("Error creating checkout session:", checkoutSessionResponse);
@@ -222,6 +262,9 @@ const Cartpage = () => {
     }
   };
 
+  const handleDeleteAllRecords = ()=>{
+    deleteAllRecordsFromDB();
+  }
   return (
     <>
       <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
@@ -301,6 +344,7 @@ const Cartpage = () => {
         )}
       </Step1Container>
       <NextBtn onClick={handleLogout}>logout</NextBtn>
+      <NextBtn onClick={handleDeleteAllRecords}>deleteAllFromIDB</NextBtn>
 
       <Footer />
     </>
