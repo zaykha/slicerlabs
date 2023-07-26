@@ -158,11 +158,8 @@ export const getAllFilesFromDB = async () => {
     const request = store.getAll();
 
     request.onsuccess = () => {
-      const filesBase64 = request.result;
-      const files = filesBase64.map((fileData) =>
-        base64ToFile(fileData.file, fileData.fileName, fileData.mimeType)
-      );
-      resolve(files);
+      const filesData = request.result;
+      resolve(filesData);
     };
 
     request.onerror = () => {
@@ -171,3 +168,4 @@ export const getAllFilesFromDB = async () => {
     };
   });
 };
+

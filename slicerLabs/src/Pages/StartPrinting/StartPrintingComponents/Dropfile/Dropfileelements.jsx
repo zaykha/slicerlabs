@@ -134,3 +134,7 @@ export const Errbutton = styled.button`
     border: 1px solid white;
   }
 `;
+
+export const ContainerforResponse = styled.div`
+  margin: 100px 0;
+`;
