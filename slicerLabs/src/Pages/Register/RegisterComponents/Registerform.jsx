@@ -171,26 +171,28 @@ const Registerform = () => {
         formValues.password
       );
       const user = userCredentials.user;
-
+      const USERUID = user.uid;
       // Store additional user information to Firestore
       const userDetails = {
-        userName: formValues.userName,
-        occupation: formValues.occupation,
-        phone: formValues.phone,
-        email: formValues.email,
-        postalCode: formValues.postalCode,
-        blkNumber: formValues.blkNumber,
-        flatNumber: formValues.flatNumber,
+        userDetails: {
+          userName: formValues.userName,
+          occupation: formValues.occupation,
+          phone: formValues.phone,
+          email: formValues.email,
+          postalCode: formValues.postalCode,
+          blkNumber: formValues.blkNumber,
+          flatNumber: formValues.flatNumber,
+        },
+        userUID:USERUID
       };
 
       // Add the userDetails to the "users" collection in Firestore
-      await setDoc(doc(usersCollection, user.uid),
-        {
-          userDetails,
-        });
+      await setDoc(doc(usersCollection, user.uid), {
+        userDetails,
+      });
       // Generate JWT token
       const token = await user.getIdToken();
-      const USERUID = user.uid;
+      
       // Store token in local storage
       localStorage.setItem("jwtToken", token);
       localStorage.setItem("uid", USERUID);

@@ -70,7 +70,7 @@ const Navbar = ({ togglesidebar }) => {
                     className={pathname === "/userDetails" ? "active" : ""}
                     // isactive={pathname === "/login"}
                   >
-                    {userDetails.userName}
+                    {userDetails.userDetails.userName}
                   </NavLinks>
                 </NavItem>
               ) : (

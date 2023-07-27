@@ -52,6 +52,7 @@ export const storeFileInDB = async (file, modelId) => {
   const db = await openDB();
   const transaction = db.transaction(STORE_NAME, "readwrite");
   const store = transaction.objectStore(STORE_NAME);
+  console.log(file);
   const fileWithModelId = {
     id: modelId,
     file,

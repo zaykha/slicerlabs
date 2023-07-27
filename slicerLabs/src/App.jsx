@@ -39,7 +39,7 @@ function App() {
         const idToken = await user.getIdToken();
         // Store the ID token in local storage
         localStorage.setItem("idToken", idToken);
-
+   
         // Now you can make the fetch request to retrieve the calculatePrice function
         // and store it in local storage.
         try {
@@ -68,7 +68,6 @@ function App() {
 
           // Store the functions in local storage
           localStorage.setItem("calculatePriceFunction", calculatePriceString);
-
           // Continue with your other logic
           const USERUID = user.uid;
           const userDetailsRef = doc(usersCollection, USERUID);
@@ -80,6 +79,7 @@ function App() {
               userUID: docSnap.id,
             };
             dispatch(setUserDetails(userDetailsWithUid));
+            localStorage.setItem("userDetails",JSON.stringify(userDetailsWithUid));
             console.log("Document data:",userDetailsWithUid );
           } else {
             console.log("No such document!");

@@ -56,13 +56,14 @@ const Dropfile = ({
         camera.updateProjectionMatrix();
       }
     }, [camera, cameraPosition]);
-
     // useFrame(() => {
     //   console.log('Camera Position:', camera.position.toArray());
     // });
 
     return null;
   };
+
+  
 
   const generateUniqueId = () => {
     return uuidv4();
