@@ -58,8 +58,9 @@ const PaymentSuccess = () => {
 
   if (userPurchasedItems?.length>0) {
     purchasedItems = userPurchasedItems.map((item) => {
-      const { material, color, dimensions } = item;
+      const { material, color, dimensions, itemId } = item;
       return {
+        itemId,
         material,
         color,
         dimensions,
@@ -136,7 +137,7 @@ const PaymentSuccess = () => {
                 purchasedAt: formatDateTime(Date.now()),
               };
               try {
-                const documentId = `${userDetailsParsed.userUID}-${Date.now()}`;
+                const documentId = `${userDetailsParsed.userUID}`;
                 // Add the data to Firestore
                 await addDoc(
                   collection(PurchasedItemsCollection,"PurchaseInstance", documentId),
@@ -177,7 +178,7 @@ const PaymentSuccess = () => {
       console.error("Invalid payment response from Stripe.");
     }
     // need to clean localstorage and IDB
-  }, []);
+  }, [userUID]);
 
   useLayoutEffect(() => {
     const updatePosition = () => {
@@ -235,7 +236,7 @@ const PaymentSuccess = () => {
           Print More
         </TocartCTABtn>
         <TocartCTABtn onClick={() => handleRoute("Learn")}>
-          Learn More
+          Track Product
         </TocartCTABtn>
       </Tocartflexdiv>
       {/* Additional content for the success page */}

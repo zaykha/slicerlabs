@@ -11,7 +11,7 @@ import {
 import { useDropzone } from "react-dropzone";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { PerspectiveCamera } from "three";
+import { MeshBasicMaterial, PerspectiveCamera } from "three";
 import { Grid, OrbitControls } from "@react-three/drei";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -21,10 +21,47 @@ import {
   updateModel,
 } from "../../../../ReduxStore/reducers/CartItemReducer";
 import { v4 as uuidv4 } from "uuid";
+import * as THREE from "three";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { MeshNormalMaterial, Box3, Vector3, Mesh, LoadingManager } from "three";
 import { deleteFileFromDB, storeFileInDB } from "../../../../indexedDBUtilis";
+
+const STLModelSizeChecker = ({ model }) => {
+  const { camera } = useThree();
+  const boundingBoxRef = useRef();
+
+ 
+    if (model && boundingBoxRef.current) {
+      // Calculate the size of the model's bounding box
+      const boundingBox = new Box3().setFromObject(model);
+      const size = new Vector3();
+      boundingBox.getSize(size);
+
+      // Get the size of the camera frustum
+      const frustumSize =
+        Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
+
+      // Calculate the scale factor based on the size of the model and the frustum size
+      const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
+
+      // Apply the scale factor to the model
+      model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+      // Set the camera position based on the model's size
+      const cameraPosition = {
+        x: camera.position.x,
+        y: camera.position.y,
+        z: camera.position.z,
+      };
+      camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+      model.rotation.x = Math.PI;
+    }
+
+
+  return <primitive object={model} ref={boundingBoxRef} />;
+};
+
 const Dropfile = ({
   tempModelId,
   setTempModelId,
@@ -36,12 +73,15 @@ const Dropfile = ({
   setIsAddedToCart,
 }) => {
   const [files, setFiles] = useState([]);
+  const [filetype, setFiletype] = useState("");
+
   const [model, setModel] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSupportedFileType, setIsSupportedFileType] = useState(true);
   const [LoadProgress, setProgress] = useState(0);
   const [error, setError] = useState(null);
   const cameraRef = useRef();
+  const meshRef = useRef();
   const dispatch = useDispatch();
   // const ProductId = useSelector((state) => state.cartItems.tempModelId);
   const [cameraPosition, setCameraPosition] = useState([
@@ -62,8 +102,6 @@ const Dropfile = ({
 
     return null;
   };
-
-  
 
   const generateUniqueId = () => {
     return uuidv4();
@@ -91,7 +129,7 @@ const Dropfile = ({
         setIsLoading(false);
         return;
       }
-  
+
       const uploadedFile = acceptedFiles[0];
       const maxSize = 60 * 1024 * 1024; // 60MB in bytes
       if (uploadedFile.size > maxSize) {
@@ -99,7 +137,7 @@ const Dropfile = ({
         setIsLoading(false);
         return;
       }
-  
+
       setIsLoading(true);
       setIsSupportedFileType(true);
       setFiles(
@@ -109,17 +147,19 @@ const Dropfile = ({
           })
         )
       );
-      await storeFileInDB(acceptedFiles[0], modelId);
+      
       const fileExtension = acceptedFiles[0].name
         .split(".")
         .pop()
         .toLowerCase();
-
+        await storeFileInDB(acceptedFiles[0],fileExtension, modelId);
+      console.log(fileExtension);
+      setFiletype(fileExtension);
       const reader = new FileReader();
       reader.onload = async () => {
         try {
           const fileContent = reader.result;
-
+          console.log("fileContent", acceptedFiles[0]);
           if (fileExtension === "obj") {
             // Define the onProgress callback function
             const manager = new LoadingManager();
@@ -150,6 +190,7 @@ const Dropfile = ({
             objLoader.load(
               fileContent,
               (objData) => {
+                console.log(objData)
                 const material = new MeshNormalMaterial();
 
                 objData.traverse((child) => {
@@ -186,11 +227,49 @@ const Dropfile = ({
               }
             );
           } else if (fileExtension === "stl") {
+       
             const stlLoader = new STLLoader();
-            const stlData = await stlLoader.loadAsync(fileContent);
-            setModel(stlData);
-            setIsLoading(false);
-            setIsModelLoaded(true);
+            stlLoader.load(
+              fileContent,
+              (stlGeometry) => {
+                console.log(stlGeometry);
+                if (stlGeometry) {
+                  // Create a mesh using the loaded geometry and a material
+                  const material = new THREE.MeshNormalMaterial();
+                  const stlMesh = new THREE.Mesh(stlGeometry, material);
+                  // Assign the mesh to the provided ref
+                  meshRef.current = stlMesh;
+                  setModel(stlMesh);
+                  setIsLoading(false);
+                  setIsModelLoaded(true);
+                  dispatch(addModel({ id: modelId, model: stlMesh }));
+                  setCameraPosition([
+                    -7.726866370752757, 7.241928986275022, -8.091348270643504,
+                  ]);
+                  setIsAddedToCart(false);
+                } else {
+                  // Handle the case where the STL geometry is invalid
+                  setIsSupportedFileType(false);
+                  setIsLoading(false);
+                  setError("Invalid STL file or file is corrupted.");
+                }
+              },
+              (xhr) => {
+                // Progress callback for STL loading
+                const percentLoaded = Math.floor(
+                  (xhr.loaded / xhr.total) * 100
+                );
+                console.log(percentLoaded);
+              },
+              (error) => {
+                console.log("An error happened", error);
+                setIsSupportedFileType(false);
+                setIsLoading(false);
+                setError(
+                  "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
+                );
+              }
+            );
           } else {
             setIsSupportedFileType(false);
             setIsLoading(false);
@@ -266,27 +345,27 @@ const Dropfile = ({
 
   //   return <primitive object={model} ref={boundingBoxRef} />;
   // };
- 
+
   const ModelSizeChecker = ({ model }) => {
     const { camera } = useThree();
     const boundingBoxRef = useRef();
-  
+
     if (model && boundingBoxRef.current) {
       // Calculate the size of the model's bounding box
       const boundingBox = new Box3().setFromObject(model);
       const size = new Vector3();
       boundingBox.getSize(size);
-  
+
       // Get the size of the camera frustum
       const frustumSize =
         Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
-  
+
       // Calculate the scale factor based on the size of the model and the frustum size
       const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
-  
+
       // Apply the scale factor to the model
       model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-  
+
       // Set the camera position based on the model's size
       const cameraPosition = {
         x: camera.position.x,
@@ -296,7 +375,7 @@ const Dropfile = ({
       camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
       model.rotation.x = Math.PI;
     }
-  
+
     return <primitive object={model} ref={boundingBoxRef} />;
   };
   const ProgressBar = ({ LoadProgress }) => {
@@ -350,7 +429,13 @@ const Dropfile = ({
               <OrbitControls />
               <ambientLight />
               <pointLight position={[10, 10, 10]} />
-              <ModelSizeChecker model={model} />
+              {/* {filetype === "obj" ? (
+                <ModelSizeChecker model={model} />
+              ) : (
+                <STLModelSizeChecker  model={model}/>
+                // model && <primitive object={model} ref={meshRef} />
+              )} */}
+ <ModelSizeChecker model={model} />
               <CameraControls cameraPosition={cameraPosition} />
             </Canvas>
 

@@ -23,6 +23,7 @@ import { useSelector } from "react-redux";
 import { setAuthenticationStatus } from "./ReduxStore/actions/Authentication";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import PaymentSuccess from "./Pages/Payment/PaymentSuccess";
+import { DashBoard } from "./Pages/UserProfile/UserProfile";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -156,6 +157,10 @@ function App() {
     {
       path: "/Start3dPrinting",
       element: <StartPrinting />,
+    },
+    {
+      path: "/DashBoard",
+      element: <DashBoard />,
     },
     {
       path: "/cart",

@@ -66,8 +66,8 @@ const Navbar = ({ togglesidebar }) => {
                 <NavItem>
                   <NavLinks
                     key={"userDetails"}
-                    to={"/"}
-                    className={pathname === "/userDetails" ? "active" : ""}
+                    to={"/DashBoard"}
+                    className={pathname === "/DashBoard" ? "active" : ""}
                     // isactive={pathname === "/login"}
                   >
                     {userDetails.userDetails.userName}
