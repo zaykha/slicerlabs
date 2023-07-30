@@ -140,7 +140,7 @@ const PaymentSuccess = () => {
                 const documentId = `${userDetailsParsed.userUID}`;
                 // Add the data to Firestore
                 await addDoc(
-                  collection(PurchasedItemsCollection,"PurchaseInstance", documentId),
+                  PurchasedItemsCollection,
                   dataToAdd
                 );
 
@@ -166,7 +166,7 @@ const PaymentSuccess = () => {
           console.error("Error handling payment success:", error);
         }
         setsuccessPaymentState(true);
-        console.error("mock send data success");
+        // console.error("mock send data success");
       } else {
         // Handle case where userId is missing (e.g., if user directly navigates to /success)
         console.error("Invalid payment response from Stripe.");
@@ -178,7 +178,7 @@ const PaymentSuccess = () => {
       console.error("Invalid payment response from Stripe.");
     }
     // need to clean localstorage and IDB
-  }, [userUID]);
+  }, []);
 
   useLayoutEffect(() => {
     const updatePosition = () => {
@@ -194,7 +194,7 @@ const PaymentSuccess = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [successPaymentState]);
+  }, []);
 
   const handleRoute = (route) => {
     navigate(`/${route}`);

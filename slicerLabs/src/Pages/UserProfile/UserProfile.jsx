@@ -9,6 +9,7 @@ import {
 } from "../StartPrinting/StartPrintingComponents/Dropfile/Dropfileelements";
 import {
   InnerHeader,
+  InnerHeader1,
   InnerHeaderWrapper,
   SubHeader,
 } from "./UserProfileElement";
@@ -22,31 +23,31 @@ export const DashBoard = () => {
   const togglesidebar = () => {
     setIsOpen(!isOpen);
   };
+  // Initialize an array to store the retrieved documents
+  const [purchaseInstances, setPurchaseInstances] = useState([]);
+
   const userUIDInLocalStorage = localStorage.getItem("uid");
   useEffect(() => {
     async function getPurchaseInstancesForUser(userId) {
       console.log("userid", userId);
       // Get a reference to the "PurchaseInstance" collection
-      const purchaseInstanceRef = collection(firestore, "PurchasedItems", "PurchaseInstance");
+      // const purchaseInstanceRef = collection(PurchasedItemsCollection, "PurchaseInstance");
 
       // Create a query to filter documents based on the "userId" field
-    //   const q = query(purchaseInstanceRef, userId);
+      //   const q = query(purchaseInstanceRef, userId);
 
       try {
         // Execute the query and get the snapshot of matching documents
-        const querySnapshot = await getDoc(purchaseInstanceRef, userId);
-
-        // Initialize an array to store the retrieved documents
-        const purchaseInstances = [];
-
+        const querySnapshot = await getDocs(PurchasedItemsCollection, userId);
+        const purchaseInstancesData = [];
         // Loop through the snapshot and extract the data from each document
         querySnapshot.forEach((doc) => {
           // Extract the data from the document and add it to the array
-          const purchaseInstanceData = doc.data();
-          purchaseInstances.push(purchaseInstanceData);
+          const purchaseInstanceDatatoPush = doc.data();
+          purchaseInstancesData.push(purchaseInstanceDatatoPush);
         });
-        console.log("purchaseInstances", purchaseInstances);
-        return purchaseInstances; // Return the array of purchase instances
+        console.log("purchaseInstances", purchaseInstancesData);
+        setPurchaseInstances(purchaseInstancesData);
       } catch (error) {
         console.error("Error retrieving purchase instances:", error);
         return []; // Return an empty array if an error occurs
@@ -58,10 +59,11 @@ export const DashBoard = () => {
         userUIDInLocalStorage
       );
       // Handle the fetched data here if needed
-      console.log("fetched data:", purchaseInstancesData);
+      // console.log("fetched data:", purchaseInstancesData);
     };
 
     fetchData(); // Call the function
+    console.log("purchaseInstances", purchaseInstances);
   }, []);
   return (
     <>
@@ -73,12 +75,32 @@ export const DashBoard = () => {
       <LoginFromcontainer>
         <SubHeader>Item Status</SubHeader>
         <InnerHeaderWrapper>
-          <InnerHeader></InnerHeader>
-          <InnerHeader>Material and color</InnerHeader>
+          <InnerHeader1></InnerHeader1>
+          <InnerHeader>Material & color</InnerHeader>
           <InnerHeader>Dimension</InnerHeader>
           <InnerHeader>Status</InnerHeader>
           <InnerHeader>Price Paid</InnerHeader>
         </InnerHeaderWrapper>
+        {purchaseInstances.length > 0 ? (
+          purchaseInstances.map((purchaseInstance, index) => (
+            <div key={index}>
+              
+              {purchaseInstance.purchasedItems.map((item) => (
+                <InnerHeaderWrapper key={item.itemId}>
+                  <InnerHeader>{/* Add content here */}</InnerHeader>
+                  <InnerHeader>
+                    {item.material} {item.color}
+                  </InnerHeader>
+                  <InnerHeader>{item.dimensions.depth} x {item.dimensions.width} x {item.dimensions.height}</InnerHeader>
+                  <InnerHeader>{/* Add content here */}</InnerHeader>
+                  <InnerHeader>{/* Add content here */}</InnerHeader>
+                </InnerHeaderWrapper>
+              ))}
+            </div>
+          ))
+        ) : (
+          <></>
+        )}
       </LoginFromcontainer>
       <Footer />
     </>
