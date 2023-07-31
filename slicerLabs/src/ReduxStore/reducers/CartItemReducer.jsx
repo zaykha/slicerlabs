@@ -14,10 +14,11 @@ const cartSlice = createSlice({
       state.tempModelId = action.payload;
     },
     addModel(state, action) {
-      const { id, model } = action.payload; 
+      const { id,fileName, model } = action.payload; 
       // const clonedModel = cloneDeep(model);
       state.cartItems.push({
         id,
+        fileName,
         model
       });
       state.tempModelId = id;

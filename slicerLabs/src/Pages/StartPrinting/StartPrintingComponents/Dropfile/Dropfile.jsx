@@ -201,7 +201,7 @@ const Dropfile = ({
                 objData.updateMatrix();
 
                 // const serializedModel = JSON.stringify(objData);
-                dispatch(addModel({ id: modelId, model: objData }));
+                dispatch(addModel({ id: modelId, fileName:acceptedFiles[0].name , model: objData }));
                 setModel(objData);
                 setCameraPosition([
                   -7.726866370752757, 7.241928986275022, -8.091348270643504,

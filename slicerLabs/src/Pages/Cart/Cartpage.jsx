@@ -295,8 +295,10 @@ const Cartpage = () => {
     cartItemsDetails.forEach((item) => {
       const { material, color, dimensions, price, quantity } = item.options;
       const itemId = item.id;
+      const fileName = item.fileName
       itemsForValidation.push({
         itemId,
+        fileName,
         material,
         color,
         dimensions,

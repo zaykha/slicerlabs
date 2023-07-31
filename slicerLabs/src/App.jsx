@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 // import { Route, Routes } from 'react-router-dom';
 import { Provider } from "react-redux";
 import store from "./ReduxStore/store";
@@ -24,6 +24,7 @@ import { setAuthenticationStatus } from "./ReduxStore/actions/Authentication";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import PaymentSuccess from "./Pages/Payment/PaymentSuccess";
 import { DashBoard } from "./Pages/UserProfile/UserProfile";
+import { handlePaymentSuccess } from "./Pages/Payment/SendDataToFireStore";
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,71 +32,104 @@ function App() {
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-  
+  const userDetailsUnparsed = localStorage.getItem("userDetails");
+  const userDetailsParsed = JSON.parse(userDetailsUnparsed);
+  const userDetails = userDetailsParsed.userDetails;
+  const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
+  const userPurchasedItems = JSON.parse(unparsedStoreditems);
+  const hasMountedRef = useRef(false);
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // If the user is logged in, get the ID token
-        const idToken = await user.getIdToken();
-        // Store the ID token in local storage
-        localStorage.setItem("idToken", idToken);
-   
-        // Now you can make the fetch request to retrieve the calculatePrice function
-        // and store it in local storage.
-        try {
-          const response = await fetch(
-            "http://localhost:3000/calculate-function",
-            {
-              method: "GET",
-              headers: {
-                Authorization: idToken,
-              },
+    if (!hasMountedRef.current) {
+      const auth = getAuth();
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          // If the user is logged in, get the ID token
+          const idToken = await user.getIdToken();
+          // Store the ID token in local storage
+          localStorage.setItem("idToken", idToken);
+
+          // Now you can make the fetch request to retrieve the calculatePrice function
+          // and store it in local storage.
+          try {
+            const response = await fetch(
+              "http://localhost:3000/calculate-function",
+              {
+                method: "GET",
+                headers: {
+                  Authorization: idToken,
+                },
+              }
+            );
+
+            if (!response.ok) {
+              // Handle the response error, if any
+              console.error("Error fetching calculatePrice function");
+              return;
             }
-          );
 
-          if (!response.ok) {
-            // Handle the response error, if any
-            console.error("Error fetching calculatePrice function");
-            return;
+            const data = await response.json();
+            // Assuming data contains all three functions: calculatePrice, calculateMassAndPrintTime, and calculatePostProcessingTime
+            const { calculatePrice } = data;
+
+            // Serialize the functions to JSON strings
+            const calculatePriceString = JSON.stringify(calculatePrice);
+
+            // Store the functions in local storage
+            localStorage.setItem(
+              "calculatePriceFunction",
+              calculatePriceString
+            );
+            // Continue with your other logic
+            const USERUID = user.uid;
+            const userDetailsRef = doc(usersCollection, USERUID);
+            const docSnap = await getDoc(userDetailsRef);
+            if (docSnap.exists()) {
+              const userDetailsData = docSnap.data();
+              const userDetailsWithUid = {
+                ...userDetailsData,
+                userUID: docSnap.id,
+              };
+              dispatch(setUserDetails(userDetailsWithUid));
+              localStorage.setItem(
+                "userDetails",
+                JSON.stringify(userDetailsWithUid)
+              );
+              console.log("Document data:", userDetailsWithUid);
+            } else {
+              console.log("No such document!");
+            }
+            dispatch(setAuthenticationStatus(true));
+            if (
+              userDetailsUnparsed &&
+              userDetailsUnparsed.length > 0 &&
+              unparsedStoreditems &&
+              unparsedStoreditems.length > 0
+            ) {
+              handlePaymentSuccess(
+                user.uid,
+                userPurchasedItems,
+                userDetailsParsed,
+                userDetails
+              );
+              console.log(
+                "localstorage has purchased item and purchase is success"
+              );
+            } else {
+              console.log(
+                "localstorage has no purchased item and no purchase is made"
+              );
+            }
+          } catch (error) {
+            console.error("Error fetching calculatePrice function:", error);
           }
-
-          const data = await response.json();
-          // Assuming data contains all three functions: calculatePrice, calculateMassAndPrintTime, and calculatePostProcessingTime
-          const { calculatePrice } = data;
-
-          // Serialize the functions to JSON strings
-          const calculatePriceString = JSON.stringify(calculatePrice);
-
-          // Store the functions in local storage
-          localStorage.setItem("calculatePriceFunction", calculatePriceString);
-          // Continue with your other logic
-          const USERUID = user.uid;
-          const userDetailsRef = doc(usersCollection, USERUID);
-          const docSnap = await getDoc(userDetailsRef);
-          if (docSnap.exists()) {
-            const userDetailsData = docSnap.data();
-            const userDetailsWithUid = {
-              ...userDetailsData,
-              userUID: docSnap.id,
-            };
-            dispatch(setUserDetails(userDetailsWithUid));
-            localStorage.setItem("userDetails",JSON.stringify(userDetailsWithUid));
-            console.log("Document data:",userDetailsWithUid );
-          } else {
-            console.log("No such document!");
-          }
-          dispatch(setAuthenticationStatus(true));
-        } catch (error) {
-          console.error("Error fetching calculatePrice function:", error);
         }
-      }
-    });
-
-    return () => {
-      // Unsubscribe from the onAuthStateChanged listener when the component unmounts
-      unsubscribe();
-    };
+      });
+      hasMountedRef.current = true;
+      return () => {
+        // Unsubscribe from the onAuthStateChanged listener when the component unmounts
+        unsubscribe();
+      };
+    }
   }, []);
 
   // const [showPrompt, setShowPrompt] = useState(false);

@@ -8,15 +8,21 @@ import {
   UPHeaderFullline,
 } from "../StartPrinting/StartPrintingComponents/Dropfile/Dropfileelements";
 import {
+  DisplayHeader,
   InnerHeader,
   InnerHeader1,
+  InnerHeaderLeft,
   InnerHeaderWrapper,
+  InnerLayerP,
+  InnerLayersP,
+  ItemHeaderprofile,
   SubHeader,
 } from "./UserProfileElement";
 import { LoginFromcontainer } from "../Login/LoginComponents/LoginForm/LoginFormelements";
 import { PurchasedItemsCollection, db, firestore } from "../../firebase";
 import { collection, getDocs, where } from "firebase/firestore";
 import { query } from "firebase/database";
+import { ItemHeader, StyledAddButton } from "../Cart/Cartpageelement";
 
 export const DashBoard = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,12 +36,6 @@ export const DashBoard = () => {
   useEffect(() => {
     async function getPurchaseInstancesForUser(userId) {
       console.log("userid", userId);
-      // Get a reference to the "PurchaseInstance" collection
-      // const purchaseInstanceRef = collection(PurchasedItemsCollection, "PurchaseInstance");
-
-      // Create a query to filter documents based on the "userId" field
-      //   const q = query(purchaseInstanceRef, userId);
-
       try {
         // Execute the query and get the snapshot of matching documents
         const querySnapshot = await getDocs(PurchasedItemsCollection, userId);
@@ -63,7 +63,7 @@ export const DashBoard = () => {
     };
 
     fetchData(); // Call the function
-    console.log("purchaseInstances", purchaseInstances);
+    // console.log("purchaseInstances", purchaseInstances);
   }, []);
   return (
     <>
@@ -73,27 +73,31 @@ export const DashBoard = () => {
       <UPHeaderFullline>Welcome</UPHeaderFullline>
 
       <LoginFromcontainer>
-        <SubHeader>Item Status</SubHeader>
+        <ItemHeaderprofile>Item Status</ItemHeaderprofile>
         <InnerHeaderWrapper>
           <InnerHeader1></InnerHeader1>
-          <InnerHeader>Material & color</InnerHeader>
-          <InnerHeader>Dimension</InnerHeader>
-          <InnerHeader>Status</InnerHeader>
-          <InnerHeader>Price Paid</InnerHeader>
+          <DisplayHeader>Material & color</DisplayHeader>
+          <DisplayHeader>Dimension</DisplayHeader>
+          <DisplayHeader>Status</DisplayHeader>
+          <DisplayHeader>Price Paid</DisplayHeader>
         </InnerHeaderWrapper>
         {purchaseInstances.length > 0 ? (
           purchaseInstances.map((purchaseInstance, index) => (
             <div key={index}>
-              
               {purchaseInstance.purchasedItems.map((item) => (
                 <InnerHeaderWrapper key={item.itemId}>
-                  <InnerHeader>{/* Add content here */}</InnerHeader>
+                  <InnerHeader>{item.fileName.substring(6)}</InnerHeader>
                   <InnerHeader>
-                    {item.material} {item.color}
+                    <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
+                    <InnerLayersP>with</InnerLayersP>
+                    <InnerLayerP>{item.material}</InnerLayerP>
                   </InnerHeader>
-                  <InnerHeader>{item.dimensions.depth} x {item.dimensions.width} x {item.dimensions.height}</InnerHeader>
-                  <InnerHeader>{/* Add content here */}</InnerHeader>
-                  <InnerHeader>{/* Add content here */}</InnerHeader>
+                  <InnerHeader>
+                    {item.dimensions.depth} x {item.dimensions.width} x{" "}
+                    {item.dimensions.height}
+                  </InnerHeader>
+                  <InnerHeader>Pre-Printing Procedures</InnerHeader>
+                  <InnerHeaderLeft>SGD {item.price.toFixed(2)}</InnerHeaderLeft>
                 </InnerHeaderWrapper>
               ))}
             </div>
@@ -102,7 +106,81 @@ export const DashBoard = () => {
           <></>
         )}
       </LoginFromcontainer>
+
+      <LoginFromcontainer>
+      <ItemHeaderprofile>Purchase History</ItemHeaderprofile>
+      <InnerHeaderWrapper>
+          <InnerHeader1></InnerHeader1>
+          <DisplayHeader>Material & color</DisplayHeader>
+          <DisplayHeader>Dimension</DisplayHeader>
+          <DisplayHeader>Delivered On</DisplayHeader>
+          <DisplayHeader>Price Paid</DisplayHeader>
+        </InnerHeaderWrapper>
+
+      <InnerHeaderWrapper>
+          <InnerHeader>Item 1</InnerHeader>
+          <InnerHeader>
+            <InnerLayerP>FDM Printing(Black)</InnerLayerP>
+            <InnerLayersP>with</InnerLayersP>
+            <InnerLayerP>ABS</InnerLayerP>
+          </InnerHeader>
+          <InnerHeader>
+            10 x 10 x 10
+          </InnerHeader>
+          <InnerHeader>25th July 2023</InnerHeader>
+          <InnerHeaderLeft>SGD 80.33</InnerHeaderLeft>
+        </InnerHeaderWrapper>
+      </LoginFromcontainer>
+
+      <LoginFromcontainer>
+      <ItemHeaderprofile>Issue Status</ItemHeaderprofile>
+      <InnerHeaderWrapper>
+      <DisplayHeader></DisplayHeader>
+          <DisplayHeader>Material & color</DisplayHeader>
+          <DisplayHeader>Dimension</DisplayHeader>
+          <DisplayHeader>Status</DisplayHeader>
+          <DisplayHeader>Last updated</DisplayHeader>
+          <DisplayHeader>Note</DisplayHeader>
+        </InnerHeaderWrapper>
+
+      <InnerHeaderWrapper>
+          <InnerHeader>Ticket 1</InnerHeader>
+          <InnerHeader>
+            <InnerLayerP>FDM Printing(Black)</InnerLayerP>
+            <InnerLayersP>with</InnerLayersP>
+            <InnerLayerP>ABS</InnerLayerP>
+          </InnerHeader>
+          <InnerHeader>
+            10 x 10 x 10
+          </InnerHeader>
+          <InnerHeader>Resolved</InnerHeader>
+          <InnerHeaderLeft>25th July 2023</InnerHeaderLeft>
+          <InnerHeader>Printed wrong dimension</InnerHeader>
+          </InnerHeaderWrapper>
+
+          <InnerHeaderWrapper>
+          <InnerHeader>Ticket 2</InnerHeader>
+          <InnerHeader>
+            <InnerLayerP>FDM Printing(Transparent)</InnerLayerP>
+            <InnerLayersP>with</InnerLayersP>
+            <InnerLayerP>PLA</InnerLayerP>
+          </InnerHeader>
+          <InnerHeader>
+            10 x 10 x 10
+          </InnerHeader>
+          <InnerHeader>Resolved</InnerHeader>
+          <InnerHeaderLeft>15th July 2023</InnerHeaderLeft>
+          <InnerHeader>Printed wrong material</InnerHeader>
+          </InnerHeaderWrapper>
+          <StyledAddButton to="/">
+              <span style={plusSignStyle}>+</span>
+            </StyledAddButton>
+      </LoginFromcontainer>
       <Footer />
     </>
   );
+};
+const plusSignStyle = {
+  // paddingRight: '5px',
+  fontSize: "20px",
 };
