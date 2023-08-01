@@ -107,72 +107,72 @@ const PaymentSuccess = () => {
     }
   };
   // Handle success payment response from Stripe
-   const handlePaymentSuccess = async () => {
-    if (userUID) {
-      try {
-        // Get all files from IndexedDB
-        const files = await getAllFilesFromDB();
+  //  const handlePaymentSuccess = async () => {
+  //   if (userUID) {
+  //     try {
+  //       // Get all files from IndexedDB
+  //       const files = await getAllFilesFromDB();
 
-        // Send data to Firestore and perform additional functionalities here
-        const success = await storeDataInFirestore(files);
+  //       // Send data to Firestore and perform additional functionalities here
+  //       const success = await storeDataInFirestore(files);
 
-        if (success) {
-          // Handle successful storage, e.g., show success message to the user
-          // Add user details to Firestore
-          if (
-            userDetailsParsed.userUID &&
-            userDetails &&
-            userDetails.userName &&
-            userDetails.email &&
-            userDetails.postalCode &&
-            userDetails.flatNumber &&
-            userDetails.phone &&
-            purchasedItems.length > 0
-          ) {
-            // Create the data object to be added to Firestore
-            const dataToAdd = {
-              userUID: userDetailsParsed.userUID,
-              userName: userDetails.userName,
-              userEmail: userDetails.email,
-              userPostal: userDetails.postalCode,
-              userFlatNumber: userDetails.flatNumber,
-              userPhone: userDetails.phone,
-              purchasedItems,
-              purchasedAt: formatDateTime(Date.now()),
-            };
-            try {
-              const documentId = `${userDetailsParsed.userUID}`;
-              // Add the data to Firestore
-              await addDoc(PurchasedItemsCollection, dataToAdd);
-              console.log("data sent to firebase")
-              // Rest of your code after successful addition to Firestore
-            } catch (error) {
-              console.error("Error adding document to Firestore:", error);
-              // Handle the error, e.g., show an error message to the user
-            }
-          } else {
-            console.error(
-              "Missing required fields. Data not added to Firestore."
-            );
-            // Handle the case where required fields are missing, e.g., show an error message to the user
-          }
+  //       if (success) {
+  //         // Handle successful storage, e.g., show success message to the user
+  //         // Add user details to Firestore
+  //         if (
+  //           userDetailsParsed.userUID &&
+  //           userDetails &&
+  //           userDetails.userName &&
+  //           userDetails.email &&
+  //           userDetails.postalCode &&
+  //           userDetails.flatNumber &&
+  //           userDetails.phone &&
+  //           purchasedItems.length > 0
+  //         ) {
+  //           // Create the data object to be added to Firestore
+  //           const dataToAdd = {
+  //             userUID: userDetailsParsed.userUID,
+  //             userName: userDetails.userName,
+  //             userEmail: userDetails.email,
+  //             userPostal: userDetails.postalCode,
+  //             userFlatNumber: userDetails.flatNumber,
+  //             userPhone: userDetails.phone,
+  //             purchasedItems,
+  //             purchasedAt: formatDateTime(Date.now()),
+  //           };
+  //           try {
+  //             const documentId = `${userDetailsParsed.userUID}`;
+  //             // Add the data to Firestore
+  //             await addDoc(PurchasedItemsCollection, dataToAdd);
+  //             console.log("data sent to firebase")
+  //             // Rest of your code after successful addition to Firestore
+  //           } catch (error) {
+  //             console.error("Error adding document to Firestore:", error);
+  //             // Handle the error, e.g., show an error message to the user
+  //           }
+  //         } else {
+  //           console.error(
+  //             "Missing required fields. Data not added to Firestore."
+  //           );
+  //           // Handle the case where required fields are missing, e.g., show an error message to the user
+  //         }
 
-          deleteAllRecordsFromDB();
-          localStorage.removeItem("TempItemsDetailsStorage");
-        } else {
-          // Handle failure to store data, e.g., show an error message to the user
-          console.log("Error storing data.");
-        }
-      } catch (error) {
-        console.error("Error handling payment success:", error);
-      }
-      setsuccessPaymentState(true);
-      // console.error("mock send data success");
-    } else {
-      // Handle case where userId is missing (e.g., if user directly navigates to /success)
-      console.error("Invalid payment response from Stripe.");
-    }
-  };
+  //         deleteAllRecordsFromDB();
+  //         localStorage.removeItem("TempItemsDetailsStorage");
+  //       } else {
+  //         // Handle failure to store data, e.g., show an error message to the user
+  //         console.log("Error storing data.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error handling payment success:", error);
+  //     }
+  //     setsuccessPaymentState(true);
+  //     // console.error("mock send data success");
+  //   } else {
+  //     // Handle case where userId is missing (e.g., if user directly navigates to /success)
+  //     console.error("Invalid payment response from Stripe.");
+  //   }
+  // };
   useEffect(() => {
    console.log('logged')
     // if (!userUID) {

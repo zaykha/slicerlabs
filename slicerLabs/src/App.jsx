@@ -24,7 +24,8 @@ import { setAuthenticationStatus } from "./ReduxStore/actions/Authentication";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import PaymentSuccess from "./Pages/Payment/PaymentSuccess";
 import { DashBoard } from "./Pages/UserProfile/UserProfile";
-import { handlePaymentSuccess } from "./Pages/Payment/SendDataToFireStore";
+import usePaymentSuccessHandler from "./Pages/Payment/SendDataToFireStore";
+
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,6 +38,8 @@ function App() {
   const userDetails = userDetailsParsed.userDetails;
   const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
   const userPurchasedItems = JSON.parse(unparsedStoreditems);
+  const successPaymentState = useSelector((state) => state.paymentState.isSuccessPaymentDone);
+
   const hasMountedRef = useRef(false);
   useEffect(() => {
     if (!hasMountedRef.current) {
@@ -105,11 +108,13 @@ function App() {
               unparsedStoreditems &&
               unparsedStoreditems.length > 0
             ) {
-              handlePaymentSuccess(
+              const { error } = usePaymentSuccessHandler(
                 user.uid,
                 userPurchasedItems,
                 userDetailsParsed,
-                userDetails
+                userDetails,
+                dispatch,
+                successPaymentState
               );
               console.log(
                 "localstorage has purchased item and purchase is success"

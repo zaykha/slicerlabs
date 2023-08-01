@@ -9,65 +9,60 @@ import { PurchasedItemsCollection } from "../../firebase";
 import { setSuccessPaymentState } from "../../ReduxStore/actions/Authentication";
 import { useDispatch, useSelector } from "react-redux";
 
-// const location = useLocation();
-// const userUID = new URLSearchParams(location.search).get("user_id");
-// const userUIDInLocalStorage = localStorage.getItem("uid");
-// const userDetailsUnparsed = localStorage.getItem("userDetails");
-// const userDetailsParsed = JSON.parse(userDetailsUnparsed);
-// const userDetails = userDetailsParsed.userDetails;
-const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
-const userPurchasedItems = JSON.parse(unparsedStoreditems);
-const formatDateTime = (dateTime) => {
-  const options = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  };
-  return new Date(dateTime).toLocaleDateString(undefined, options);
-};
+// const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
+// const userPurchasedItems = JSON.parse(unparsedStoreditems);
 
-const storeDataInFirestore = async (Purchased3dData, userID) => {
-  try {
-    // Upload files to Cloud Firestore Storage
-    const storage = getStorage();
-
-    // Loop through each file in Purchased3dData and upload it to Storage
-    await Promise.all(
-      Purchased3dData.map(async (fileData) => {
-        const { file, id } = fileData;
-        const fileName = fileData.file.name;
-        console.log(fileName);
-        const storageRef = ref(
-          storage,
-          `Purchased3DFiles/${userID}&${fileName}`
-        );
-        await uploadBytes(storageRef, file);
-      })
-    );
-
-    // Return true to indicate success
-    return true;
-  } catch (error) {
-    // Log and handle the error
-    console.error("Error storing data in Firestore:", error);
-
-    // Return false to indicate failure
-    return false;
-  }
-};
 // Handle success payment response from Stripe
-export const handlePaymentSuccess = async (
+ const usePaymentSuccessHandler = async (
   userUID,
   userPurchasedItems,
   userDetailsParsed,
-  userDetails
+  userDetails,
+  dispatch,
+  successPaymentState
 ) => {
   // Modify purchasedItems to an array of objects
-  const dispatch = useDispatch();
-  const successPaymentState = useSelector((state) => state.paymentState.isSuccessPaymentDone);
+  // const [error, setError] = useState(null);
 
+  const formatDateTime = (dateTime) => {
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateTime).toLocaleDateString(undefined, options);
+  };
+  const storeDataInFirestore = async (Purchased3dData, userID) => {
+    try {
+      // Upload files to Cloud Firestore Storage
+      const storage = getStorage();
+  
+      // Loop through each file in Purchased3dData and upload it to Storage
+      await Promise.all(
+        Purchased3dData.map(async (fileData) => {
+          const { file, id } = fileData;
+          const fileName = fileData.file.name;
+          console.log(fileName);
+          const storageRef = ref(
+            storage,
+            `Purchased3DFiles/${userID}&${fileName}`
+          );
+          await uploadBytes(storageRef, file);
+        })
+      );
+  
+      // Return true to indicate success
+      return true;
+    } catch (error) {
+      // Log and handle the error
+      console.error("Error storing data in Firestore:", error);
+  
+      // Return false to indicate failure
+      return false;
+    }
+  };
   let purchasedItems = [];
 
   if (userPurchasedItems?.length > 0) {
@@ -155,3 +150,5 @@ export const handlePaymentSuccess = async (
     console.error("Invalid payment response from Stripe.");
   }
 };
+
+export default usePaymentSuccessHandler;
