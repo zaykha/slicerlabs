@@ -108,7 +108,7 @@ const Cartpage = () => {
   };
   const [shouldFetchData, setShouldFetchData] = useState(true);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+ 
   const [endCoordinates, setEndCoordinates] = useState("");
   const cartItemsDetails = useSelector((state) => state.cartItems.cartItems);
   const userUID = useSelector((state) => state.userDetails.userUID);
@@ -248,14 +248,7 @@ const Cartpage = () => {
     deleteFileFromDB(modelIdToDelete);
   };
 
-  const handleLogout = () => {
-    // Remove jwtToken from local storage
-    localStorage.removeItem("jwtToken");
-
-    // Redirect to the home page
-    dispatch(setAuthenticationStatus(false));
-    navigate("/");
-  };
+ 
   const validatePricesWithMicroservice = async (items) => {
     console.log(items);
     try {
@@ -481,8 +474,8 @@ const Cartpage = () => {
           </>
         )}
       </Step1Container>
-      <NextBtn onClick={handleLogout}>logout</NextBtn>
-      <NextBtn onClick={handleDeleteAllRecords}>deleteAllFromIDB</NextBtn>
+      
+      {/* <NextBtn onClick={handleDeleteAllRecords}>deleteAllFromIDB</NextBtn> */}
 
       <Footer />
     </>

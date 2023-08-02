@@ -35,7 +35,7 @@ function App() {
   };
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetailsParsed = JSON.parse(userDetailsUnparsed);
-  const userDetails = userDetailsParsed.userDetails;
+  const userDetails = userDetailsUnparsed.userDetails;
   const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
   const userPurchasedItems = JSON.parse(unparsedStoreditems);
   const successPaymentState = useSelector((state) => state.paymentState.isSuccessPaymentDone);

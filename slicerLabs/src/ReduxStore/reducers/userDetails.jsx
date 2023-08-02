@@ -12,10 +12,19 @@ const initialState = {
   const userDetailsReducer = (state = initialState, action) => {
     switch (action.type) {
       case 'SET_USER_DETAILS':
-        return {
-          ...state,
-          ...action.payload,
-        };
+        const updatedState = { ...state };
+        const payloadKeys = Object.keys(action.payload);
+        console.log(action.payload);
+        payloadKeys.forEach((key) => {
+          if (state.hasOwnProperty(key)) {
+            updatedState[key] = action.payload[key];
+          } else {
+            // If key does not exist in current state, add it to the updatedState
+            updatedState[key] = action.payload[key];
+          }
+        });
+  
+        return updatedState;
       default:
         return state;
     }

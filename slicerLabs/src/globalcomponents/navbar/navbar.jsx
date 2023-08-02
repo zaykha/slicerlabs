@@ -34,7 +34,7 @@ const Navbar = ({ togglesidebar }) => {
   const { pathname } = useLocation();
 
   const { isAuthenticated } = useSelector((state) => state.authentication);
-  const userDetails = useSelector((state) => state.userDetails);
+  const userDetails = useSelector((state) => state.userDetails.userDetails);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   const hasUndefinedProduct = cartItems.some(
     (item) => !item || !item.options || !item.options.ProductId

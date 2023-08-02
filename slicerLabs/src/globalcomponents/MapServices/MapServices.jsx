@@ -22,25 +22,31 @@ const apiTokenforOneMap = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI4NTMy
 const reverseGeocode = async (postalCode) => {
   const url = `https://developers.onemap.sg/commonapi/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y`;
   const response = await fetch(url);
-
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
 
   const data = await response.json();
+  console.log(data)
+  
+  if (!data.results || data.results.length === 0) {
+    throw new Error("No address found with the provided postal code");
+  }
   return data.results;
 };
 
 // Create the createAsyncThunk for fetching address details
 export const fetchAddressDetails = createAsyncThunk(
   "address/fetchAddressDetails",
-  async (postalCode) => {
+  async (postalCode, { rejectWithValue }) => {
+    console.log(postalCode)
     try {
       const results = await reverseGeocode(postalCode);
       return results; // Return the relevant data from the response
     } catch (error) {
       // The OneMap API does not use error.response.data, so we can just return the error message directly
-      return error.message;
+      console.log(error.message)
+      return  rejectWithValue(error.message);
     }
   }
 );

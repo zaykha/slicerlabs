@@ -20,17 +20,26 @@ import {
   InnerLayersP,
   ItemHeaderprofile,
   SubHeader,
+  UPHeaderFullline1,
 } from "./UserProfileElement";
 import { LoginFromcontainer } from "../Login/LoginComponents/LoginForm/LoginFormelements";
-import { PurchasedItemsCollection, db, firestore, usersCollection } from "../../firebase";
+import {
+  PurchasedItemsCollection,
+  db,
+  firestore,
+  usersCollection,
+} from "../../firebase";
 import { collection, doc, getDoc, getDocs, where } from "firebase/firestore";
 import { query } from "firebase/database";
-import { ItemHeader, StyledAddButton } from "../Cart/Cartpageelement";
+import { ItemHeader, NextBtn, StyledAddButton } from "../Cart/Cartpageelement";
 import { MdEdit } from "react-icons/md";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserDetails } from "../../ReduxStore/actions/userDetails";
 import EditProfileForm from "./EditProfileForm";
+import { fetchAddressDetails } from "../../globalcomponents/MapServices/MapServices";
+import { setAuthenticationStatus } from "../../ReduxStore/actions/Authentication";
+import { useNavigate } from "react-router-dom";
 
 export const DashBoard = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,16 +49,17 @@ export const DashBoard = () => {
   // Initialize an array to store the retrieved documents
   const [purchaseInstances, setPurchaseInstances] = useState([]);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [Loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const userDetails = useSelector((state) => state?.userDetails);
   const [localUser, setLocalUser] = useState(userDetails.userDetails);
   const userUIDInLocalStorage = localStorage.getItem("uid");
-
+  const navigate = useNavigate();
+  // const postalCode = userDetails?.userDetails.postalCode
   // useEffect(() => {
   //   console.log(userDetails.userDetails);
   // }, [userDetails])
-  
-  
+
   useEffect(() => {
     async function getPurchaseInstancesForUser(userId) {
       console.log("userid", userId);
@@ -70,11 +80,13 @@ export const DashBoard = () => {
         return []; // Return an empty array if an error occurs
       }
     }
+
     // Call the function and use async/await to handle the asynchronous nature
     const fetchData = async () => {
       const purchaseInstancesData = await getPurchaseInstancesForUser(
         userUIDInLocalStorage
       );
+      // fetchAddress(postalCode);
       // Handle the fetched data here if needed
       // console.log("fetched data:", purchaseInstancesData);
     };
@@ -82,15 +94,17 @@ export const DashBoard = () => {
     fetchData(); // Call the function
   }, []);
 
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          // Continue with your other logic
-          const USERUID = user.uid;
-          const userDetailsRef = doc(usersCollection, USERUID);
-          const docSnap = await getDoc(userDetailsRef);
+  const EditFormClose = async () => {
+    setLoading(true);
+    setIsEditFormOpen(false);
+    try {
+      
+      // Continue with your other logic
+      const USERUID = userUIDInLocalStorage;
+      const userDetailsRef = doc(usersCollection, USERUID);
+
+      getDoc(userDetailsRef)
+        .then((docSnap) => {
           if (docSnap.exists()) {
             const userDetailsData = docSnap.data();
             const userDetailsWithUid = {
@@ -103,45 +117,39 @@ export const DashBoard = () => {
               "userDetails",
               JSON.stringify(userDetailsWithUid)
             );
-            console.log("Document data:", userDetailsWithUid);
+            console.log("Document data in UserProfile:", userDetailsWithUid);
+            setLoading(false);
           } else {
             console.log("No such document!");
           }
-        } catch (error) {
-          console.error("Error fetching calculatePrice function:", error);
-        }
-      }
-    });
-    return () => {
-      // Unsubscribe from the onAuthStateChanged listener when the component unmounts
-      unsubscribe();
-    };
-  }, [isEditFormOpen])
-  
+        })
+        .catch((error) => {
+          console.error("Error fetching user details:", error);
+        });
+    } catch {
+      console.error("Error gettingdocs:", error);
+    }
+  };
+
   const handleEditClick = () => {
     // Logic to handle the edit click event
     console.log("Edit button clicked");
     setIsEditFormOpen(true);
   };
+  const handleLogout = () => {
+    // Remove jwtToken from local storage
+    localStorage.removeItem("jwtToken");
 
-  const updateUserInFirestore = async (updatedUser) => {
-    const USERUID = userDetails.userUID;
-    const userDetailsRef = doc(usersCollection, USERUID);
-
-    try {
-      await updateDoc(userDetailsRef, updatedUser);
-      console.log("User information updated in Firestore.");
-    } catch (error) {
-      console.error("Error updating user information in Firestore:", error);
-    }
+    // Redirect to the home page
+    dispatch(setAuthenticationStatus(false));
+    navigate("/");
   };
- 
   return (
     <>
       <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
       <Navbar togglesidebar={togglesidebar} />
 
-      <UPHeaderFullline>Welcome</UPHeaderFullline>
+      <UPHeaderFullline1>Welcome  {userDetails?.userDetails?.userName ?? ""}</UPHeaderFullline1>
 
       <LoginFromcontainer>
         <ItemHeaderprofile>Item Status</ItemHeaderprofile>
@@ -242,45 +250,57 @@ export const DashBoard = () => {
         </StyledAddButton>
       </LoginFromcontainer>
 
-      <LoginFromcontainer>
-        <ItemHeaderprofile>Personalization</ItemHeaderprofile>
-        <EditIcon onClick={handleEditClick}>
-          <MdEdit />
-        </EditIcon>
-        <InnerHeaderWrapper>
-          <DisplayHeader>Name</DisplayHeader>
-          <InnerHeaderpersonalize>{userDetails?.userDetails?.userName ?? 'Default Username'}</InnerHeaderpersonalize>
-        </InnerHeaderWrapper>
+      {Loading ? (
+        <LoginFromcontainer>Loading</LoginFromcontainer>
+      ) : (
+        <LoginFromcontainer>
+          <ItemHeaderprofile>Personalization</ItemHeaderprofile>
+          <EditIcon onClick={handleEditClick}>
+            <MdEdit />
+          </EditIcon>
+          <InnerHeaderWrapper>
+            <DisplayHeader>Name</DisplayHeader>
+            <InnerHeaderpersonalize>
+              {userDetails?.userDetails?.userName ?? "Default Username"}
+            </InnerHeaderpersonalize>
+          </InnerHeaderWrapper>
 
-        <InnerHeaderWrapper>
-          <DisplayHeader>Email</DisplayHeader>
-          <InnerHeaderpersonalize>{userDetails?.userDetails?.email ?? 'Default Email'}</InnerHeaderpersonalize>
-        </InnerHeaderWrapper>
+          <InnerHeaderWrapper>
+            <DisplayHeader>Email</DisplayHeader>
+            <InnerHeaderpersonalize>
+              {userDetails?.userDetails?.email ?? "Default Email"}
+            </InnerHeaderpersonalize>
+          </InnerHeaderWrapper>
 
-        <InnerHeaderWrapper>
-          <DisplayHeader>Password</DisplayHeader>
-          <InnerHeaderpersonalize>************</InnerHeaderpersonalize>
-        </InnerHeaderWrapper>
+          <InnerHeaderWrapper>
+            <DisplayHeader>Password</DisplayHeader>
+            <InnerHeaderpersonalize>************</InnerHeaderpersonalize>
+          </InnerHeaderWrapper>
 
-        <InnerHeaderWrapper>
-          <DisplayHeader>Shipping Address</DisplayHeader>
-          <InnerHeaderpersonalize>
-            80 Bendemeer Rd, #05-01, Singapore 339949
-          </InnerHeaderpersonalize>
-        </InnerHeaderWrapper>
+          <InnerHeaderWrapper>
+            <DisplayHeader>Shipping Address</DisplayHeader>
+            <InnerHeaderpersonalize>
+            {userDetails?.userDetails?.displayFullAddress ?? "Default address"}
+            </InnerHeaderpersonalize>
+          </InnerHeaderWrapper>
 
-        <InnerHeaderWrapper>
-          <DisplayHeader>Contact</DisplayHeader>
-          <InnerHeaderpersonalize>{userDetails?.userDetails?.phone ?? 'Default phone'}</InnerHeaderpersonalize>
-        </InnerHeaderWrapper>
-      </LoginFromcontainer>
+          <InnerHeaderWrapper>
+            <DisplayHeader>Contact</DisplayHeader>
+            <InnerHeaderpersonalize>
+              {userDetails?.userDetails?.phone ?? "Default phone"}
+            </InnerHeaderpersonalize>
+          </InnerHeaderWrapper>
+          <NextBtn onClick={handleLogout}>logout</NextBtn>
+        </LoginFromcontainer>
+      )}
+      
       {isEditFormOpen && (
         <EditProfileForm
           user={userDetails.userDetails}
-          onClose={() => setIsEditFormOpen(false)} // Function to close the form
+          onClose={EditFormClose} // Function to close the form
           onSave={(updatedUser) => {
             // Handle saving the updated user data here
-            updateUserInFirestore(updatedUser);
+            // updateUserInFirestore(updatedUser);
             console.log("Updated user data:", updatedUser);
             setIsEditFormOpen(false); // Close the form after saving
           }}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import {
   LoginContainer,
@@ -14,18 +14,32 @@ import {
 } from "../Register/RegisterComponents/Registerformelement";
 import { NextBtn } from "../Cart/Cartpageelement";
 import { NextBtnCancel } from "./UserProfileElement";
-import { getAuth, updateEmail, updatePassword } from "firebase/auth";
+import {
+  getAuth,
+  onAuthStateChanged,
+  updateEmail,
+  updatePassword,
+} from "firebase/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { setUserDetails } from "../../ReduxStore/actions/userDetails";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { usersCollection } from "../../firebase";
+import { fetchAddressDetails } from "../../globalcomponents/MapServices/MapServices";
 
 const EditProfileForm = ({ user, onClose, onSave }) => {
+  const dispatch = useDispatch();
+  const userDetailsOBJ = useSelector((state) => state.userDetails);
+  const userDetails = userDetailsOBJ.userDetails;
   const [formValues, setFormValues] = useState({
-    userName: user.userName,
-    phone: user.phone,
-    email: user.email,
-    postalCode: user.postalCode,
-    blkNumber: user.blkNumber,
-    flatNumber: user.flatNumber,
+    userName: userDetails.userName || "",
+    phone: userDetails.phone || "",
+    email: userDetails.email || "",
+    postalCode: userDetails.postalCode || "",
+    blkNumber: userDetails.blkNumber || "",
+    flatNumber: userDetails.flatNumber || "",
+    displayFullAddress: "",
   });
-  const auth = getAuth();
+  const timeoutIdRef = useRef(null);
   const [newPassword, setNewPassword] = useState("");
   const [error, setError] = useState(null);
   const [formErrors, setFormErrors] = useState({
@@ -37,6 +51,18 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
     blkNumberError: "",
     flatNumberError: "",
   });
+  const [AddressFetched, setAddressFetched] = useState(false);
+  useEffect(() => {
+    setFormValues({
+      userName: userDetails.userName || "",
+      phone: userDetails.phone || "",
+      email: userDetails.email || "",
+      postalCode: userDetails.postalCode || "",
+      blkNumber: userDetails.blkNumber || "",
+      flatNumber: userDetails.flatNumber || "",
+    });
+  }, [userDetails]);
+
   const validateInput = (name, value) => {
     if (!value) {
       return `${name} is required.`;
@@ -65,8 +91,19 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
     }
 
     if (name === "phone") {
+      // const numericValue = value.replace(/\D/g, "");
       // Validate phone number format or any other condition
-      // ...
+      const singaporeMobileRegex = /^(\+65\s?)?[89]\d{3}\s?\d{4}$/;
+
+      const isValidPhone = singaporeMobileRegex.test(value);
+      console.log(isValidPhone)
+      if (!isValidPhone) {
+        // Handle the case when the phone number is not valid
+        return "Please enter a valid Singaporean mobile number"
+      } else {
+        // The phone number is valid, so return null (no error)
+        return null;
+      }
     }
 
     if (name === "postalCode") {
@@ -75,28 +112,90 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
         return "Postal Code must be 6 characters.";
       }
     }
-
     if (name === "blkNumber") {
       // Validate blkNumber format or any other condition
-      if (value.length < 3) {
-        return "Block Number must at least be 3 characters.";
+      const singaporeBlockNumberRegex = /^\d{1,3}[A-Za-z]?$/;
+      const isValidBlockNumber = singaporeBlockNumberRegex.test(value);
+      if (!isValidBlockNumber) {
+        return "Block Number must be in a valid format.";
       }
     }
-
+    
     if (name === "flatNumber") {
       // Validate flatNumber format or any other condition
-      if (value.length < 2) {
-        return "Flat Number must be at least 2 characters.";
+      const singaporeFlatNumberRegex = /^\d{1,3}[A-Za-z]?\-\d{1,3}[A-Za-z]?$/;
+      const isValidFlatNumber = singaporeFlatNumberRegex.test(value);
+      if (!isValidFlatNumber) {
+        return `Flat Number must be in a valid format. Examples: "123-456", "123A-456B", "1-2".`;
       }
     }
 
     return ""; // If validation passes, return an empty string
   };
+  const fetchAddress = async (code) => {
+    try {
+      const result = await dispatch(fetchAddressDetails(code));
+      // console.log(result, "code", code);
+      // handle the result here (e.g., setAddress(result); setError("");)
+
+      if (result.type === "address/fetchAddressDetails/fulfilled") {
+        const { BLK_NO, ROAD_NAME, FLOOR_NO, UNIT_NO, POSTAL } =
+          result.payload[0];
+        const formattedAddress = `${BLK_NO} ${ROAD_NAME}, ${
+          FLOOR_NO && UNIT_NO ? `#${FLOOR_NO}-${UNIT_NO}` : userDetails.flatNumber
+        }, Singapore ${POSTAL}`;
+        setFormValues((prevValues) => ({
+          ...prevValues,
+          blkNumber: BLK_NO || "",
+          flatNumber: FLOOR_NO && UNIT_NO ? `#${FLOOR_NO}-${UNIT_NO}` : userDetails.flatNumber,
+          postalCode: POSTAL || "",
+          displayFullAddress: formattedAddress,
+        }));
+        setFormErrors((prevErrors) => ({
+          ...prevErrors,
+          postalCodeError: "",
+        }));
+
+        // console.log(formattedAddress);
+      } else {
+        // Address not found with the provided postal code
+        setFormErrors((prevErrors) => ({
+          ...prevErrors,
+          postalCodeError: "Address not found with the provided postal code",
+        }));
+      }
+    } catch (error) {
+      // handle the error here (e.g., setAddress(""); setError(error.message);)
+      console.log("address not fetching");
+    }
+  };
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    let formattedValue = value;
+    // Add +65 prefix if the input is empty and user clicks on the field
+  if (name === "phone" && value === "") {
+    formattedValue = "+65 ";
+  } else if (name === "phone") {
+    // Remove all non-numeric characters from the input
+    const numericValue = value.replace(/\D/g, "");
+
+    // Add spaces to the phone number while retaining the "+65" prefix
+    const maxLength = 12; // Maximum length for phone number with "+65" prefix and spaces
+
+    if (numericValue.length > 6) {
+      const firstPart = numericValue.slice(2, 6);
+      const remainingPart = numericValue.slice(6, maxLength);
+      formattedValue = `+65 ${firstPart}`;
+
+      if (remainingPart.length > 0) {
+        formattedValue += " " + remainingPart;
+      }
+    }
+  }
+  console.log(formattedValue)
     setFormValues((prevValues) => ({
       ...prevValues,
-      [name]: value,
+      [name]: formattedValue,
     }));
     setFormErrors((prevErrors) => ({
       ...prevErrors,
@@ -104,11 +203,24 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
     }));
   };
 
+  useEffect(() => {
+    if (formValues.postalCode.length === 6) {
+      console.log(formValues.postalCode);
+      if (timeoutIdRef.current) {
+        // Clear previous timeout if there was any
+        clearTimeout(timeoutIdRef.current);
+      }
+      // Set a new timeout of 2 seconds to fetch the address
+      timeoutIdRef.current = setTimeout(() => {
+        fetchAddress(formValues.postalCode);
+      }, 2000);
+    }
+  }, [formValues.postalCode]);
+
   const handleSave = async () => {
-    console.log("formvalue",formValues)
     if (
       !formValues.userName ||
-    //   !newPassword ||
+      //   !newPassword ||
       !formValues.phone ||
       !formValues.email ||
       !formValues.postalCode ||
@@ -129,45 +241,98 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
           ? "Flat number is required"
           : "",
       }));
+      console.log("error");
       return;
-    }
-    if (formValues.email !== "") {
+    } else {
       try {
-        await updateEmail(auth, formValues.email);
-        setError(null); // Clear any previous errors
-        setNewEmail(""); // Clear the input field
-        // Show a success message to the user if needed
-      } catch (error) {
-        setError("Failed to update email: " + error.message);
-        return;
+        // if (formValues.email !== "") {
+
+        //   try {
+        //     await updateEmail(auth.currentUser, formValues.email);
+        //     setError(null); // Clear any previous errors
+        //   } catch (error) {
+        //     console.log("Failed to update email: " + error.message);
+        //     setError("Failed to update email: " + error.message);
+        //     return;
+        //   }
+        // }
+
+        if (newPassword) {
+          try {
+            await updatePassword(auth.currentUser, newPassword);
+          } catch (error) {
+            setError("Failed to update password: " + error.message);
+            return;
+          }
+        }
+
+        // Save the updated user information
+        // dispatch(setUserDetails(formValues));
+        const auth = getAuth();
+        try {
+          const USERUID = userDetailsOBJ.userUID;
+          const userDetailsRef = doc(usersCollection, USERUID);
+          getDoc(userDetailsRef)
+            .then((docSnap) => {
+              if (docSnap.exists()) {
+                const existingUserDetails = docSnap.data().userDetails;
+                const updatedUserDetails = { ...existingUserDetails };
+
+                // Loop through the keys of the existingUserDetails object
+                Object.keys(existingUserDetails).forEach((key) => {
+                  // Check if the key is present in the formValues object
+                  if (key in formValues) {
+                    // Update the corresponding field with the value from formValues
+                    updatedUserDetails[key] = formValues[key];
+                  } else {
+                    // If the key is not present in formValues, use the value from existingUserDetails
+                    updatedUserDetails[key] = existingUserDetails[key];
+                  }
+                });
+
+                // Now, add any new keys present in formValues to updatedUserDetails
+                Object.keys(formValues).forEach((key) => {
+                  if (!(key in existingUserDetails)) {
+                    updatedUserDetails[key] = formValues[key];
+                  }
+                });
+
+                try {
+                  const updatedData = { userDetails: updatedUserDetails };
+                  setDoc(userDetailsRef, updatedData);
+                  console.log("User information updated in Firestore.");
+                  localStorage.setItem(
+                    "userDetails",
+                    JSON.stringify(userDetailsWithUid)
+                  );
+                } catch (error) {
+                  console.error(
+                    "Error updating user information in Firestore:",
+                    error
+                  );
+                }
+                // localStorage.setItem("userDetails", JSON.stringify(updatedUser));
+                console.log("Document data:", formValues);
+
+                onClose();
+              } else {
+                console.log("No such document!");
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching user details:", error);
+            });
+        } catch (error) {
+          console.error("Error fetching calculatePrice function:", error);
+        }
+        onSave(formValues);
+      } catch {
+        console.error("Error handling payment success:", error);
+        // Handle any errors that occur during the update process
+        // You can set an error state and display it to the user if needed
+        setError("An error occurred while updating user information.");
       }
     }
-
-    if (newPassword !== "") {
-      try {
-        await updatePassword(auth, newPassword);
-        setError(null); // Clear any previous errors
-        setNewPassword(""); // Clear the input field
-        // Show a success message to the user if needed
-      } catch (error) {
-        setError("Failed to update password: " + error.message);
-        return;
-      }
-    }
-
-    // Save the updated user information
-    const updatedUser = {
-      ...user,
-      userName: formValues.userName,
-      email: formValues.email,
-      phone: formValues.phone,
-      flatNumber: formValues.flatNumber,
-      postalCode: formValues.postalCode,
-      blkNumber: formValues.blkNumber,
-    };
-    console.log(updatedUser)
-    onSave(updatedUser);
-    onClose();
   };
 
   return (
@@ -274,7 +439,11 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
                 onChange={handleInputChange}
               />
             </div>
-            <Addressdiv>Address will be displayed here</Addressdiv>
+            {formValues.displayFullAddress !== "" ? (
+              <Addressdiv>{formValues.displayFullAddress}</Addressdiv>
+            ) : (
+              <Addressdiv>Please Type in a valid postal Code</Addressdiv>
+            )}
           </Regflexdiv>
           {formErrors.flatNumberError && (
             <div style={{ color: "red", fontSize: "12px" }}>

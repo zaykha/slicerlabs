@@ -24,7 +24,15 @@ export const ItemHeaderprofile = styled.div`
     text-align: left;
     font-size: 1.4rem;
     margin: 10px auto;
-    color:Grey;
+    color:white;
+`;
+
+export const UPHeaderFullline1 = styled.div`
+  width: 100%;
+  text-align: center;
+  margin: 20px auto 10px auto;
+  color: #d3d3d3;
+  font-size: 1.6rem;
 `;
 export const DisplayHeader = styled.div`
     // display:flex;
@@ -116,12 +124,14 @@ export const InnerHeaderpersonalize = styled.div`
 export const EditIcon = styled.button`
   /* Your styles for the edit icon button */
   background: transparent;
+  width:10%;
   border: none;
   cursor: pointer;
   font-size: 20px;
   color: white;
   position: absolute;
   top:50px;
+  right:0;
   &:hover {
     color: #0056b3;
   }
