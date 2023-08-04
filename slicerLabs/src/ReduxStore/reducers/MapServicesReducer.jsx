@@ -1,14 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { fetchAddressDetails } from '../../globalcomponents/MapServices/MapServices';
 
+const initialState = {
+  addressDetails: null,
+  endCoordinates: '',
+  loading: false,
+  error: null,
+};
+
 const addressSlice = createSlice({
   name: 'address',
-  initialState: {
-    addressDetails: null,
-    endCoordinates:'',
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {
     addAddressDetails: (state, action) => {
         // Assuming the payload contains the new address details object
@@ -20,6 +22,9 @@ const addressSlice = createSlice({
       },
       deleteAddressDetails: (state) => {
         state.addressDetails = null;
+      },
+      resetAddressDetails:(state)=> {
+        return initialState; // Reset the state to the initial value
       },
   },
   extraReducers: (builder) => {
@@ -41,6 +46,6 @@ const addressSlice = createSlice({
     
   },
 });
-export const { addAddressDetails, updateAddressDetails, deleteAddressDetails } =
+export const { addAddressDetails, updateAddressDetails, deleteAddressDetails, resetAddressDetails } =
   addressSlice.actions;
 export default addressSlice.reducer;

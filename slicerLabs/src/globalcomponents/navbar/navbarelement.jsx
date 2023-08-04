@@ -209,3 +209,50 @@ export const ActionItems = styled.div`
     border-bottom: 3px solid #fbae1a;
   }
 `;
+export const NavLinksAdmin = styled(LinkR)`
+  color: #48b2e5;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  padding: 0 1rem;
+  cursor: pointer;
+  transition: all 0.4s ease-in-out;
+  margin-top:10px;
+  margin-bottom:10px;
+  &:hover {
+    color: red;
+  }
+
+  &.active {
+    border-bottom: 3px solid #fbae1a;
+    background: #e6e6e6;
+    border-radius: 11px;
+    padding: 3px 20px;
+    color: #275e78;
+    border: 1px solid #275e78;
+    transition: background-color 1s ease-in-out, border-radius 0.4s ease-in-out;
+  }
+`;
+
+// Styled container for the additional items
+export const DropdownContainer = styled.div`
+  position: relative;
+ 
+  // display: inline-block;
+`;
+
+// Styled dropdown content
+export const DropdownContent = styled.div`
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: linear-gradient(180deg, rgba(8, 51, 71, 0.63) 0%, rgba(0, 80, 118, 0.63) 100%);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  min-width: 160px;
+
+  ${DropdownContainer}:hover & {
+    display: block;
+  }
+`;

@@ -3,3 +3,6 @@ export const setUserDetails = (userDetails) => ({
     payload: userDetails,
   });
   
+  export const resetUserDetails = () => ({
+    type: 'RESET_USER_DETAILS',
+  });

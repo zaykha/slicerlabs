@@ -16,6 +16,9 @@ import {
   NavLinks1,
   Commerce,
   ActionItems,
+  NavLinksAdmin,
+  DropdownContainer,
+  DropdownContent,
 } from "./navbarelement";
 import logo from "../../assets/Asset 4.png";
 import cart from "../../assets/shopping-cart1.png";
@@ -34,11 +37,14 @@ const Navbar = ({ togglesidebar }) => {
   const { pathname } = useLocation();
 
   const { isAuthenticated } = useSelector((state) => state.authentication);
-  const userDetails = useSelector((state) => state.userDetails.userDetails);
+  const userDetails = useSelector((state) => state.userDetails?.userDetails);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   const hasUndefinedProduct = cartItems.some(
     (item) => !item || !item.options || !item.options.ProductId
   );
+  // useEffect(()=>{
+  //  console.log(userDetails?.adminPrivileges) 
+  // },[])
   return (
     <>
       <Nav>
@@ -63,16 +69,35 @@ const Navbar = ({ togglesidebar }) => {
                 </NavItem>
               ))}
               {isAuthenticated ? (
-                <NavItem>
-                  <NavLinks
-                    key={"userDetails"}
-                    to={"/DashBoard"}
-                    className={pathname === "/DashBoard" ? "active" : ""}
-                    // isactive={pathname === "/login"}
-                  >
-                    {userDetails.userDetails.userName}
-                  </NavLinks>
-                </NavItem>
+                userDetails?.adminPrivileges ? (
+                  <NavItem>
+                  <DropdownContainer>
+                    <NavLinks
+                      to="/dashboard"
+                      className={pathname === '/dashboard' ? 'active' : ''}
+                    >
+                      {userDetails.userDetails.userName}
+                    </NavLinks>
+                    
+                    <DropdownContent>
+                      <NavLinksAdmin to="/task">Task Page</NavLinksAdmin>
+                      <NavLinksAdmin to="/config">Config Page</NavLinksAdmin>
+                      <NavLinksAdmin to="/blog">Blog Page</NavLinksAdmin>
+                    </DropdownContent>
+                  </DropdownContainer>
+                 </NavItem>
+                ) : (
+                  <NavItem>
+                    <NavLinks
+                      key={"userDetails"}
+                      to={"/DashBoard"}
+                      className={pathname === "/DashBoard" ? "active" : ""}
+                      // isactive={pathname === "/login"}
+                    >
+                      {userDetails.userDetails.userName}
+                    </NavLinks>
+                  </NavItem>
+                )
               ) : (
                 <NavItem>
                   <NavLinks

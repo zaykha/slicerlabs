@@ -174,7 +174,7 @@ const PaymentSuccess = () => {
   //   }
   // };
   useEffect(() => {
-   console.log('logged')
+  //  console.log('logged')
     // if (!userUID) {
     //   // Handle case where userId is missing (e.g., if the user directly navigates to /success)
     //   console.error("Invalid payment response from Stripe.");

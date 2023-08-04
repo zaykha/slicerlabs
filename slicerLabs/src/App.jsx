@@ -25,17 +25,17 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import PaymentSuccess from "./Pages/Payment/PaymentSuccess";
 import { DashBoard } from "./Pages/UserProfile/UserProfile";
 import usePaymentSuccessHandler from "./Pages/Payment/SendDataToFireStore";
+import TaskPage from "./AdminRelated/TaskPage/TaskPage";
 
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const dispatch = useDispatch();
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-  const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetailsParsed = JSON.parse(userDetailsUnparsed);
-  const userDetails = userDetailsUnparsed.userDetails;
+  
   const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
   const userPurchasedItems = JSON.parse(unparsedStoreditems);
   const successPaymentState = useSelector((state) => state.paymentState.isSuccessPaymentDone);
@@ -98,32 +98,33 @@ function App() {
                 JSON.stringify(userDetailsWithUid)
               );
               console.log("Document data:", userDetailsWithUid);
-            } else {
+              const userDetails = userDetailsWithUid.userDetails.userDetails;
+              const AdminCheck = userDetailsWithUid.userDetails?.adminPrivileges;
+                setIsAdmin(AdminCheck)
+              if (
+                unparsedStoreditems &&
+                unparsedStoreditems.length > 0
+              ) {
+                const { error } = usePaymentSuccessHandler(
+                  user.uid,
+                  userPurchasedItems,
+                  userDetails,
+                  dispatch,
+                  successPaymentState
+                );
+                console.log(
+                  "localstorage has purchased item and purchase is success"
+                );
+              } else {
+                console.log(
+                  "localstorage has no purchased item and no purchase is made"
+                );
+              }
+           } else {
               console.log("No such document!");
             }
             dispatch(setAuthenticationStatus(true));
-            if (
-              userDetailsUnparsed &&
-              userDetailsUnparsed.length > 0 &&
-              unparsedStoreditems &&
-              unparsedStoreditems.length > 0
-            ) {
-              const { error } = usePaymentSuccessHandler(
-                user.uid,
-                userPurchasedItems,
-                userDetailsParsed,
-                userDetails,
-                dispatch,
-                successPaymentState
-              );
-              console.log(
-                "localstorage has purchased item and purchase is success"
-              );
-            } else {
-              console.log(
-                "localstorage has no purchased item and no purchase is made"
-              );
-            }
+          
           } catch (error) {
             console.error("Error fetching calculatePrice function:", error);
           }
@@ -199,7 +200,7 @@ function App() {
     },
     {
       path: "/DashBoard",
-      element: <DashBoard />,
+      element: isAdmin? <TaskPage/>:<DashBoard />,
     },
     {
       path: "/cart",

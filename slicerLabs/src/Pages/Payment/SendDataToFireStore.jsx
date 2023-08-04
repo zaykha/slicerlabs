@@ -16,7 +16,6 @@ import { useDispatch, useSelector } from "react-redux";
  const usePaymentSuccessHandler = async (
   userUID,
   userPurchasedItems,
-  userDetailsParsed,
   userDetails,
   dispatch,
   successPaymentState
@@ -34,7 +33,7 @@ import { useDispatch, useSelector } from "react-redux";
     };
     return new Date(dateTime).toLocaleDateString(undefined, options);
   };
-  const storeDataInFirestore = async (Purchased3dData, userID) => {
+  const storeDataInFirestore = async (Purchased3dData, userUID) => {
     try {
       // Upload files to Cloud Firestore Storage
       const storage = getStorage();
@@ -47,7 +46,7 @@ import { useDispatch, useSelector } from "react-redux";
           console.log(fileName);
           const storageRef = ref(
             storage,
-            `Purchased3DFiles/${userID}&${fileName}`
+            `Purchased3DFiles/${userUID}&${fileName}`
           );
           await uploadBytes(storageRef, file);
         })
@@ -77,6 +76,7 @@ import { useDispatch, useSelector } from "react-redux";
         dimensions,
         quantity,
         price,
+        status:"Pre-Printing Procedures"
       };
     });
   } else {
@@ -96,7 +96,7 @@ import { useDispatch, useSelector } from "react-redux";
         // Handle successful storage, e.g., show success message to the user
         // Add user details to Firestore
         if (
-          userDetailsParsed.userUID &&
+          userUID &&
           userDetails &&
           userDetails.userName &&
           userDetails.email &&
@@ -107,7 +107,7 @@ import { useDispatch, useSelector } from "react-redux";
         ) {
           // Create the data object to be added to Firestore
           const dataToAdd = {
-            userUID: userDetailsParsed.userUID,
+            userUID: userUID,
             userName: userDetails.userName,
             userEmail: userDetails.email,
             userPostal: userDetails.postalCode,
@@ -117,7 +117,7 @@ import { useDispatch, useSelector } from "react-redux";
             purchasedAt: formatDateTime(Date.now()),
           };
           try {
-            const documentId = `${userDetailsParsed.userUID}`;
+            const documentId = `${userUID}`;
             // Add the data to Firestore
             await addDoc(PurchasedItemsCollection, dataToAdd);
             console.log("data sent to firebase");

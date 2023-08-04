@@ -115,6 +115,9 @@ const cartSlice = createSlice({
         state.tempModelId = null;
       } 
     },
+    resetCartState(state) {
+      return initialState; // Reset the state to the initial value
+    },
     // other reducers...
   },
 });
@@ -130,6 +133,7 @@ export const {
   updateDimensions,
   updatePrice,
   updateModel,
-  deleteModel
+  deleteModel,
+  resetCartState
 } = cartSlice.actions;
 export default cartSlice.reducer;

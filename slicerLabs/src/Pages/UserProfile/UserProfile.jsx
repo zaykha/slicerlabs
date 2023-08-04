@@ -35,11 +35,17 @@ import { ItemHeader, NextBtn, StyledAddButton } from "../Cart/Cartpageelement";
 import { MdEdit } from "react-icons/md";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
-import { setUserDetails } from "../../ReduxStore/actions/userDetails";
+import {
+  resetUserDetails,
+  setUserDetails,
+} from "../../ReduxStore/actions/userDetails";
 import EditProfileForm from "./EditProfileForm";
 import { fetchAddressDetails } from "../../globalcomponents/MapServices/MapServices";
 import { setAuthenticationStatus } from "../../ReduxStore/actions/Authentication";
 import { useNavigate } from "react-router-dom";
+import { resetCartCount } from "../../ReduxStore/actions/cartCountActions";
+import { resetCartState } from "../../ReduxStore/reducers/CartItemReducer";
+import { resetAddressDetails } from "../../ReduxStore/reducers/MapServicesReducer";
 
 export const DashBoard = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -65,7 +71,12 @@ export const DashBoard = () => {
       console.log("userid", userId);
       try {
         // Execute the query and get the snapshot of matching documents
-        const querySnapshot = await getDocs(PurchasedItemsCollection, userId);
+        const q = query(
+          PurchasedItemsCollection,
+          where("userUID", "==", userId)
+        );
+        const querySnapshot = await getDocs(q);
+        console.log(querySnapshot)
         const purchaseInstancesData = [];
         // Loop through the snapshot and extract the data from each document
         querySnapshot.forEach((doc) => {
@@ -98,7 +109,6 @@ export const DashBoard = () => {
     setLoading(true);
     setIsEditFormOpen(false);
     try {
-      
       // Continue with your other logic
       const USERUID = userUIDInLocalStorage;
       const userDetailsRef = doc(usersCollection, USERUID);
@@ -137,11 +147,15 @@ export const DashBoard = () => {
     setIsEditFormOpen(true);
   };
   const handleLogout = () => {
-    // Remove jwtToken from local storage
-    localStorage.removeItem("jwtToken");
+    localStorage.clear();
 
-    // Redirect to the home page
+    //reset redux store
     dispatch(setAuthenticationStatus(false));
+    dispatch(resetCartCount());
+    dispatch(resetCartState());
+    dispatch(resetAddressDetails());
+    dispatch(resetUserDetails());
+
     navigate("/");
   };
   return (
@@ -149,7 +163,9 @@ export const DashBoard = () => {
       <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
       <Navbar togglesidebar={togglesidebar} />
 
-      <UPHeaderFullline1>Welcome  {userDetails?.userDetails?.userName ?? ""}</UPHeaderFullline1>
+      <UPHeaderFullline1>
+        Welcome {userDetails?.userDetails?.userName ?? ""}
+      </UPHeaderFullline1>
 
       <LoginFromcontainer>
         <ItemHeaderprofile>Item Status</ItemHeaderprofile>
@@ -175,7 +191,7 @@ export const DashBoard = () => {
                     {item.dimensions.depth} x {item.dimensions.width} x{" "}
                     {item.dimensions.height}
                   </InnerHeader>
-                  <InnerHeader>Pre-Printing Procedures</InnerHeader>
+                  <InnerHeader>{item.status}</InnerHeader>
                   <InnerHeaderLeft>SGD {item.price.toFixed(2)}</InnerHeaderLeft>
                 </InnerHeaderWrapper>
               ))}
@@ -280,7 +296,8 @@ export const DashBoard = () => {
           <InnerHeaderWrapper>
             <DisplayHeader>Shipping Address</DisplayHeader>
             <InnerHeaderpersonalize>
-            {userDetails?.userDetails?.displayFullAddress ?? "Default address"}
+              {userDetails?.userDetails?.displayFullAddress ??
+                "Default address"}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
@@ -293,7 +310,7 @@ export const DashBoard = () => {
           <NextBtn onClick={handleLogout}>logout</NextBtn>
         </LoginFromcontainer>
       )}
-      
+
       {isEditFormOpen && (
         <EditProfileForm
           user={userDetails.userDetails}
