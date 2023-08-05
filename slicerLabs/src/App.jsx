@@ -35,7 +35,7 @@ function App() {
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-  
+  const [isLoading, setIsLoading] = useState(true);
   const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
   const userPurchasedItems = JSON.parse(unparsedStoreditems);
   const successPaymentState = useSelector((state) => state.paymentState.isSuccessPaymentDone);
@@ -131,6 +131,7 @@ function App() {
         }
       });
       hasMountedRef.current = true;
+      setIsLoading(false); 
       return () => {
         // Unsubscribe from the onAuthStateChanged listener when the component unmounts
         unsubscribe();
@@ -221,8 +222,11 @@ function App() {
   return (
     <Provider store={store}>
       {/* <CartCountContext.Provider value={{ cartCount, setCartCount }}> */}
+      {isLoading ? (
+          <div>Loading...</div>
+          ) : (
       <RouterProvider router={router} />
-      {/* </CartCountContext.Provider> */}
+      )}
     </Provider>
   );
 }

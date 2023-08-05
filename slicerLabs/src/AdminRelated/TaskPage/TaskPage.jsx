@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../globalcomponents/SidebarMenu/Sidebar";
@@ -31,7 +31,14 @@ import {
   firestore,
   usersCollection,
 } from "../../firebase";
-import { collection, doc, getDoc, getDocs, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import {
   ItemHeader,
   NextBtn,
@@ -41,11 +48,16 @@ import { MdEdit } from "react-icons/md";
 import Footer from "../../globalcomponents/Footer/footer";
 import { fetchAddressDetails } from "../../globalcomponents/MapServices/MapServices";
 import StatusDropdown from "../../globalcomponents/DropDown/customDropDown";
+import SpinningLoader from "../../globalcomponents/DropDown/SpinningLoader";
 
 const TaskPage = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [FetchingData, setFetchingData] = useState(false);
+  const [statusUpdateInProgress, setStatusUpdateInProgress] = useState(false);
+
   const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
   const [totalItemToDisplay, settotalItemToDisplay] = useState(0);
+  const [TotalDeliveredItems, setTotalDeliveredItems] = useState(0);
   const [pendingPrintJobs, setPendingPrintJobs] = useState([]);
   const [purchaseInstances, setPurchaseInstances] = useState([]);
   const [Loading, setLoading] = useState(false);
@@ -53,6 +65,7 @@ const TaskPage = () => {
   const userDetails = useSelector((state) => state?.userDetails);
   const [localUser, setLocalUser] = useState(userDetails.userDetails);
   const userUIDInLocalStorage = localStorage.getItem("uid");
+  const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
   const [formattedAddresses, setFormattedAddresses] = useState([]);
   const statusOptions = [
@@ -62,68 +75,82 @@ const TaskPage = () => {
     "Ready To Deliver",
     "Delivered",
   ];
-  let itemCountChecker=0;
-  const [selectedStatus, setSelectedStatus] = useState("");
-  useEffect(() => {
-    async function getPurchaseInstancesForUser(userId) {
-      try {
-        const querySnapshot = await getDocs(PurchasedItemsCollection, userId);
-        const purchaseInstancesData = [];
-        const addresses = [];
-        let purchaseTotalItems =0;
-        // Loop through the snapshot and extract the data from each document
-        for (const doc of querySnapshot.docs) {
-          const purchaseInstanceData = doc.data();
-          
-          const addressResult = await dispatch(
-            fetchAddressDetails(purchaseInstanceData.userPostal)
-          );
+  let itemCountChecker = 0;
+  let DelivereditemCountChecker = 0;
+  async function getPurchaseInstancesForUser(userId) {
+    try {
+      const querySnapshot = await getDocs(PurchasedItemsCollection, userId);
+      const purchaseInstancesData = [];
+      const addresses = [];
+      let purchaseTotalItems = 0;
+      let purchaseTotalDeliveredItems = 0;
+      // Loop through the snapshot and extract the data from each document
+      for (const doc of querySnapshot.docs) {
+        const purchaseInstanceData = doc.data();
 
-          if (addressResult.type === "address/fetchAddressDetails/fulfilled") {
-            const { BLK_NO, ROAD_NAME, FLOOR_NO, UNIT_NO, POSTAL } =
-              addressResult.payload[0];
-            const formattedAddress = `${BLK_NO} ${ROAD_NAME}, ${
-              FLOOR_NO && UNIT_NO
-                ? `#${FLOOR_NO}-${UNIT_NO}`
-                : purchaseInstanceData.userFlatNumber
-            }, Singapore ${POSTAL}`;
-            addresses.push(formattedAddress);
-            // Add the formatted address to the purchase instance data
-            // purchaseInstanceData.formattedAddress = formattedAddress;
-          } else {
-            addresses.push("Address not found");
-            // Handle address not found
-            // purchaseInstanceData.formattedAddress = 'Address not found';
-          }
-
-          // Fetch the address for this purchase instance
-          setFormattedAddresses(addresses);
-
-          // Add the purchase instance data to the array
-          purchaseInstancesData.push(purchaseInstanceData);
-          
+        const addressResult = await dispatch(
+          fetchAddressDetails(purchaseInstanceData.userPostal)
+        );
+        purchaseInstanceData.purchasedItems.forEach((item) => {
+          setItemStatuses((prevStatuses) => ({
+            ...prevStatuses,
+            [item.itemId]: item.status,
+          }));
+        });
+        if (addressResult.type === "address/fetchAddressDetails/fulfilled") {
+          const { BLK_NO, ROAD_NAME, FLOOR_NO, UNIT_NO, POSTAL } =
+            addressResult.payload[0];
+          const formattedAddress = `${BLK_NO} ${ROAD_NAME}, ${
+            FLOOR_NO && UNIT_NO
+              ? `#${FLOOR_NO}-${UNIT_NO}`
+              : purchaseInstanceData.userFlatNumber
+          }, Singapore ${POSTAL}`;
+          addresses.push(formattedAddress);
+          // Add the formatted address to the purchase instance data
+          // purchaseInstanceData.formattedAddress = formattedAddress;
+        } else {
+          addresses.push("Address not found");
+          // Handle address not found
+          // purchaseInstanceData.formattedAddress = 'Address not found';
         }
-       
-        console.log("purchaseInstances", purchaseInstancesData);
-        purchaseInstancesData.map((instance)=>{
-          // console.log("instances in map",instance.purchasedItems.length)
-          purchaseTotalItems += instance.purchasedItems.length; 
-          
-        })
-        settotalItemToDisplay(purchaseTotalItems);
-        setPurchaseInstances(purchaseInstancesData);
-        
-      } catch (error) {
-        console.error("Error retrieving purchase instances:", error);
-        setPurchaseInstances([]); // Set an empty array if an error occurs
-      }
-    }
 
+        // Fetch the address for this purchase instance
+        setFormattedAddresses(addresses);
+
+        // Add the purchase instance data to the array
+        purchaseInstancesData.push(purchaseInstanceData);
+      }
+
+      console.log("purchaseInstances", purchaseInstancesData);
+      purchaseInstancesData.map((instance) => {
+        instance.purchasedItems.forEach((item) => {
+          if (item.status === "Delivered") {
+            purchaseTotalDeliveredItems++;
+          } else {
+            purchaseTotalItems++;
+          }
+        });
+      });
+      settotalItemToDisplay(purchaseTotalItems);
+      setTotalDeliveredItems(purchaseTotalDeliveredItems);
+
+      setPurchaseInstances(purchaseInstancesData);
+    } catch (error) {
+      console.error("Error retrieving purchase instances:", error);
+      setPurchaseInstances([]); // Set an empty array if an error occurs
+    }
+  }
+  const [itemStatuses, setItemStatuses] = useState({});
+  useEffect(() => {   
     // Call the function on component mount
-    getPurchaseInstancesForUser(userUIDInLocalStorage);
-  }, [dispatch, userUIDInLocalStorage]);
+    if (!FetchingData && !statusUpdateInProgress) {
+      // setFetchingData(true);
+      getPurchaseInstancesForUser(userUIDInLocalStorage);
+      // setFetchingData(false);
+    }
+  }, [FetchingData, statusUpdateInProgress]);
   // Function to handle status change
- 
+
 
   const toggleDropdown = (index) => {
     setOpenDropdownIndex((prevIndex) => (prevIndex === index ? null : index));
@@ -131,23 +158,48 @@ const TaskPage = () => {
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-  const handleStatusChange = (selectedOption, index) => {
-    setSelectedStatus(selectedOption);
-    setOpenDropdownIndex((prevIndex) => (prevIndex === index ? null : index));
-    // Call your update status function here
-  };
-  const handleLogout = () => {
-    localStorage.clear();
 
-    //reset redux store
-    dispatch(setAuthenticationStatus(false));
-    dispatch(resetCartCount());
-    dispatch(resetCartState());
-    dispatch(resetAddressDetails());
-    dispatch(resetUserDetails());
+  const handleStatusChange = async (selectedOption, itemId) => {
+    setStatusUpdateInProgress(true);
+    // setFetchingData(true);
+    try {
+      setItemStatuses((prevStatuses) => ({
+        ...prevStatuses,
+        [itemId]: selectedOption,
+      }));
+      
+      // Get the reference to the document containing the purchasedItems array
+      const querySnapshot = await getDocs(
+        PurchasedItemsCollection,
+        userUIDInLocalStorage
+      );
 
-    navigate("/");
+      for (const doc of querySnapshot.docs) {
+        const purchaseInstanceData = doc.data();
+        const updatedItems = purchaseInstanceData.purchasedItems.map((item) => {
+          if (item.itemId === itemId) {
+            return {
+              ...item,
+              status: selectedOption,
+            };
+          }
+          return item;
+        });
+
+        // Update the Firestore document with the updated items
+        await updateDoc(doc.ref, { purchasedItems: updatedItems });
+      }
+      setStatusUpdateInProgress(false);
+    } catch (error) {
+      console.error("Error updating status:", error);
+      setFetchingData(false)
+    }
+    setOpenDropdownIndex(null);
+    setStatusUpdateInProgress(false);
+    // setFetchingData(false);
   };
+
+
   // Function to update print job status
   const updatePrintJobStatus = (printJobId, newStatus) => {
     // Update print job status in Firebase Firestore here
@@ -159,12 +211,98 @@ const TaskPage = () => {
       <Sidebar isOpen={isOpen} togglesidebar={toggleSidebar} />
       <Navbar togglesidebar={toggleSidebar} />
 
-      <UPHeaderFullline1>
-        Welcome {userDetails?.userDetails?.userName ?? ""}
-      </UPHeaderFullline1>
+      <UPHeaderFullline1>Admin Task Page</UPHeaderFullline1>
 
       <LoginFromcontainer>
-        <ItemHeaderprofile>Item Status</ItemHeaderprofile>
+        <ItemHeaderprofile>Pending Tasks</ItemHeaderprofile>
+        {FetchingData ? (
+          <SpinningLoader />
+        ) : (
+          <>
+            <InnerHeaderWrapper>
+              <InnerHeader1></InnerHeader1>
+              <DisplayHeader>Product Details</DisplayHeader>
+              <DisplayHeader>Address</DisplayHeader>
+              <DisplayHeader>Status</DisplayHeader>
+              <DisplayHeader>Price Paid</DisplayHeader>
+            </InnerHeaderWrapper>
+            {purchaseInstances.length > 0 ? (
+              purchaseInstances.map((purchaseInstance, outerIndex) => (
+                <div key={outerIndex}>
+                  {purchaseInstance.purchasedItems
+                    .filter((item) => item.status !== "Delivered")
+                    .map((item, index) => {
+                      itemCountChecker++;
+
+                      return (
+                        <InnerHeaderWrapper key={item.itemId}>
+                          <InnerHeader>
+                            <InnerLayersP>User: </InnerLayersP>
+                            <InnerLayerP>
+                              {purchaseInstance.userName}
+                            </InnerLayerP>
+                            <InnerLayersP>
+                              Contact: {purchaseInstance.userPhone}
+                            </InnerLayersP>
+                            <InnerLayersP>
+                              {item.fileName.substring(6)}
+                            </InnerLayersP>
+                          </InnerHeader>
+                          <InnerHeader>
+                            <InnerLayerP>
+                              FDM Printing({item.color})
+                            </InnerLayerP>
+                            <InnerLayersP>with</InnerLayersP>
+                            <InnerLayerP>
+                              {item.material} {item.dimensions.depth} x{" "}
+                              {item.dimensions.width} x {item.dimensions.height}
+                            </InnerLayerP>
+                            <InnerLayersP>Quantity of </InnerLayersP>
+                            <InnerLayerP>{item.quantity}</InnerLayerP>
+                          </InnerHeader>
+                          <InnerHeaderP>
+                            {formattedAddresses[outerIndex]}
+                          </InnerHeaderP>
+                          <InnerHeader>
+                            <StatusDropdown
+                              options={statusOptions}
+                              selectedOption={itemStatuses[item.itemId]}
+                              onSelect={(selectedOption) =>
+                                handleStatusChange(selectedOption, item.itemId)
+                              }
+                              isOpen={openDropdownIndex === item.itemId}
+                              onClick={() => toggleDropdown(item.itemId)}
+                              isLastItemTrue={
+                                itemCountChecker === totalItemToDisplay
+                              }
+                              itemCount={totalItemToDisplay}
+                            />
+                          </InnerHeader>
+                          <InnerHeaderLeft>
+                            SGD {item.price.toFixed(2)}
+                            <InnerLayersP>Purchased Date:</InnerLayersP>
+                            <InnerLayerP>
+                              {purchaseInstance.purchasedAt}
+                            </InnerLayerP>
+                          </InnerHeaderLeft>
+                        </InnerHeaderWrapper>
+                      );
+                    })}
+                </div>
+              ))
+            ) : (
+              <></>
+            )}
+          </>
+        )}
+      </LoginFromcontainer>
+
+      <LoginFromcontainer>
+        <ItemHeaderprofile>Completed Tasks</ItemHeaderprofile>
+        {FetchingData ? (
+          <SpinningLoader />
+        ) : (
+          <>
         <InnerHeaderWrapper>
           <InnerHeader1></InnerHeader1>
           <DisplayHeader>Product Details</DisplayHeader>
@@ -175,78 +313,67 @@ const TaskPage = () => {
         {purchaseInstances.length > 0 ? (
           purchaseInstances.map((purchaseInstance, outerIndex) => (
             <div key={outerIndex}>
-              {purchaseInstance.purchasedItems.map((item, index) =>{
-                
-                itemCountChecker++;
-              return(
-                <InnerHeaderWrapper key={item.itemId}>
-                  <InnerHeader>
-                    <InnerLayersP>User: </InnerLayersP>
-                    <InnerLayerP>{purchaseInstance.userName}</InnerLayerP>
-                    <InnerLayersP>
-                      Contact: {purchaseInstance.userPhone}
-                    </InnerLayersP>
-                    <InnerLayersP>{item.fileName.substring(6)}</InnerLayersP>
-                  </InnerHeader>
-                  <InnerHeader>
-                    <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
-                    <InnerLayersP>with</InnerLayersP>
-                    <InnerLayerP>
-                      {item.material} {item.dimensions.depth} x{" "}
-                      {item.dimensions.width} x {item.dimensions.height}
-                    </InnerLayerP>
-                    <InnerLayersP>Quantity of </InnerLayersP>
-                    <InnerLayerP>{item.quantity}</InnerLayerP>
-                  </InnerHeader>
-                  <InnerHeaderP>{formattedAddresses[outerIndex]}</InnerHeaderP>
-                  <InnerHeader>
-                    <StatusDropdown
-                      options={statusOptions}
-                      selectedOption={item.status}
-                      onSelect={(selectedOption) =>
-                        handleStatusChange(selectedOption, item.itemId)
-                      }
-                      isOpen={openDropdownIndex ===item.itemId}
-                      onClick={() => toggleDropdown(item.itemId)}
-                      isLastItemTrue={itemCountChecker === totalItemToDisplay}
-                      itemCount={totalItemToDisplay}
-                    />
-                  </InnerHeader>
-                  <InnerHeaderLeft>
-                    SGD {item.price.toFixed(2)}
-                    <InnerLayersP>Purchased Date:</InnerLayersP>
-                    <InnerLayerP>{purchaseInstance.purchasedAt}</InnerLayerP>
-                  </InnerHeaderLeft>
-                </InnerHeaderWrapper>
-              )})}
+              {purchaseInstance.purchasedItems
+                .filter((item) => item.status == "Delivered")
+                .map((item, index) => {
+                  DelivereditemCountChecker++;
+                  return (
+                    <InnerHeaderWrapper key={item.itemId}>
+                      <InnerHeader>
+                        <InnerLayersP>User: </InnerLayersP>
+                        <InnerLayerP>{purchaseInstance.userName}</InnerLayerP>
+                        <InnerLayersP>
+                          Contact: {purchaseInstance.userPhone}
+                        </InnerLayersP>
+                        <InnerLayersP>
+                          {item.fileName.substring(6)}
+                        </InnerLayersP>
+                      </InnerHeader>
+                      <InnerHeader>
+                        <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
+                        <InnerLayersP>with</InnerLayersP>
+                        <InnerLayerP>
+                          {item.material} {item.dimensions.depth} x{" "}
+                          {item.dimensions.width} x {item.dimensions.height}
+                        </InnerLayerP>
+                        <InnerLayersP>Quantity of </InnerLayersP>
+                        <InnerLayerP>{item.quantity}</InnerLayerP>
+                      </InnerHeader>
+                      <InnerHeaderP>
+                        {formattedAddresses[outerIndex]}
+                      </InnerHeaderP>
+                      <InnerHeader>
+                        <StatusDropdown
+                          options={statusOptions}
+                          selectedOption={itemStatuses[item.itemId]}
+                          onSelect={(selectedOption) =>
+                            handleStatusChange(selectedOption, item.itemId)
+                          }
+                          isOpen={openDropdownIndex === item.itemId}
+                          onClick={() => toggleDropdown(item.itemId)}
+                          isLastItemTrue={
+                            DelivereditemCountChecker === TotalDeliveredItems
+                          }
+                          itemCount={TotalDeliveredItems}
+                        />
+                      </InnerHeader>
+                      <InnerHeaderLeft>
+                        SGD {item.price.toFixed(2)}
+                        <InnerLayersP>Purchased Date:</InnerLayersP>
+                        <InnerLayerP>
+                          {purchaseInstance.purchasedAt}
+                        </InnerLayerP>
+                      </InnerHeaderLeft>
+                    </InnerHeaderWrapper>
+                  );
+                })}
             </div>
           ))
         ) : (
           <></>
         )}
-      </LoginFromcontainer>
-
-      <LoginFromcontainer>
-        <ItemHeaderprofile>Purchase History</ItemHeaderprofile>
-        <InnerHeaderWrapper>
-          <InnerHeader1></InnerHeader1>
-          <DisplayHeader>Material & color</DisplayHeader>
-          <DisplayHeader>Dimension</DisplayHeader>
-          <DisplayHeader>Delivered On</DisplayHeader>
-          <DisplayHeader>Price Paid</DisplayHeader>
-        </InnerHeaderWrapper>
-
-        <InnerHeaderWrapper>
-          <InnerHeader>Item 1</InnerHeader>
-          <InnerHeader>
-            <InnerLayerP>FDM Printing(Black)</InnerLayerP>
-            <InnerLayersP>with</InnerLayersP>
-            <InnerLayerP>ABS</InnerLayerP>
-          </InnerHeader>
-          <InnerHeader>10 x 10 x 10</InnerHeader>
-          <InnerHeader>25th July 2023</InnerHeader>
-          <InnerHeaderLeft>SGD 80.33</InnerHeaderLeft>
-        </InnerHeaderWrapper>
+         </>
+        )}
       </LoginFromcontainer>
 
       <LoginFromcontainer>

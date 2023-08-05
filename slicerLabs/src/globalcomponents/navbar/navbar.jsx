@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
 import {
   IMGTAG,
@@ -19,11 +19,17 @@ import {
   NavLinksAdmin,
   DropdownContainer,
   DropdownContent,
+  NavLinksAdminLogout,
 } from "./navbarelement";
 import logo from "../../assets/Asset 4.png";
 import cart from "../../assets/shopping-cart1.png";
 
 import { useDispatch, useSelector } from "react-redux";
+import { setAuthenticationStatus } from "../../ReduxStore/actions/Authentication";
+import { resetCartCount } from "../../ReduxStore/actions/cartCountActions";
+import { resetCartState } from "../../ReduxStore/reducers/CartItemReducer";
+import { resetAddressDetails } from "../../ReduxStore/reducers/MapServicesReducer";
+import { resetUserDetails } from "../../ReduxStore/actions/userDetails";
 const NavLinksarray = [
   { title: "Home", path: "/" },
   { title: "Services", path: "/services" },
@@ -35,16 +41,33 @@ const NavLinksarray = [
 
 const Navbar = ({ togglesidebar }) => {
   const { pathname } = useLocation();
-
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(true); 
   const { isAuthenticated } = useSelector((state) => state.authentication);
-  const userDetails = useSelector((state) => state.userDetails?.userDetails);
+  const userDetails = useSelector((state) => state.userDetails.userDetails);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   const hasUndefinedProduct = cartItems.some(
     (item) => !item || !item.options || !item.options.ProductId
   );
-  // useEffect(()=>{
-  //  console.log(userDetails?.adminPrivileges) 
-  // },[])
+  useEffect(() => {
+    if (userDetails) {
+      console.log(userDetails)
+      setIsLoading(false); // Set isLoading to false when userDetails is available
+    }
+  }, [userDetails]);
+  const handleLogout = () => {
+    localStorage.clear();
+
+    //reset redux store
+    dispatch(setAuthenticationStatus(false));
+    dispatch(resetCartCount());
+    dispatch(resetCartState());
+    dispatch(resetAddressDetails());
+    dispatch(resetUserDetails());
+
+    navigate("/");
+  };
   return (
     <>
       <Nav>
@@ -69,20 +92,22 @@ const Navbar = ({ togglesidebar }) => {
                 </NavItem>
               ))}
               {isAuthenticated ? (
-                userDetails?.adminPrivileges ? (
+               userDetails.userDetails && userDetails.adminPrivileges ? (
                   <NavItem>
                   <DropdownContainer>
                     <NavLinks
                       to="/dashboard"
                       className={pathname === '/dashboard' ? 'active' : ''}
                     >
-                      {userDetails.userDetails.userName}
+                    {userDetails.userDetails && userDetails.userDetails.userName}
+
                     </NavLinks>
                     
                     <DropdownContent>
-                      <NavLinksAdmin to="/task">Task Page</NavLinksAdmin>
+                      <NavLinksAdmin to="/dashBoard">Task Page</NavLinksAdmin>
                       <NavLinksAdmin to="/config">Config Page</NavLinksAdmin>
                       <NavLinksAdmin to="/blog">Blog Page</NavLinksAdmin>
+                      <NavLinksAdminLogout to="/" onClick={handleLogout}>LogOut</NavLinksAdminLogout>
                     </DropdownContent>
                   </DropdownContainer>
                  </NavItem>
@@ -94,7 +119,8 @@ const Navbar = ({ togglesidebar }) => {
                       className={pathname === "/DashBoard" ? "active" : ""}
                       // isactive={pathname === "/login"}
                     >
-                      {userDetails.userDetails.userName}
+                      {userDetails.userDetails && userDetails.userDetails.userName}
+
                     </NavLinks>
                   </NavItem>
                 )

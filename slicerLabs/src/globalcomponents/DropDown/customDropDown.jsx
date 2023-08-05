@@ -9,7 +9,11 @@ const DropdownContainer = styled.div`
 
 const DropdownButton = styled.button`
   display: flex;
-  background: linear-gradient(180deg, rgba(8, 51, 71, 0.93) 0%, rgba(0, 80, 118, 0.93) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(8, 51, 71, 0.93) 0%,
+    rgba(0, 80, 118, 0.93) 100%
+  );
 
   color: #ffffff;
   border: none;
@@ -42,7 +46,9 @@ const DropdownList = styled.ul`
   display: ${(props) => (props.isOpen ? "block" : "none")};
   z-index: 4;
   top: ${(props) =>
-    props.isLastItemTrue ? `calc(100% - ${props.itemCount * 63}px)` : "100%"};
+    props.isLastItemTrue
+      ? "-460%"
+      : "100%"};
 `;
 
 const DropdownListItem = styled.li`
@@ -63,16 +69,20 @@ const StatusDropdown = ({
   isOpen,
   onClick,
   isLastItemTrue,
-  itemCount
+  itemCount,
 }) => {
   return (
     <DropdownContainer>
       <DropdownButton onClick={onClick}>
         {selectedOption || "Select Status"}
       </DropdownButton>
-      <DropdownList isOpen={isOpen} isLastItemTrue={isLastItemTrue} itemCount={itemCount}>
+      <DropdownList
+        isOpen={isOpen}
+        isLastItemTrue={isLastItemTrue}
+        itemCount={itemCount}
+      >
         {options.map((option, index) => (
-          <DropdownListItem key={index} onClick={() => onSelect(option)} >
+          <DropdownListItem key={index} onClick={() => onSelect(option)}>
             {option}
           </DropdownListItem>
         ))}

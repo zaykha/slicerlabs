@@ -56,11 +56,11 @@ export const DashBoard = () => {
   const [purchaseInstances, setPurchaseInstances] = useState([]);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [Loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const userDetails = useSelector((state) => state?.userDetails);
   const [localUser, setLocalUser] = useState(userDetails.userDetails);
   const userUIDInLocalStorage = localStorage.getItem("uid");
-  const navigate = useNavigate();
   // const postalCode = userDetails?.userDetails.postalCode
   // useEffect(() => {
   //   console.log(userDetails.userDetails);

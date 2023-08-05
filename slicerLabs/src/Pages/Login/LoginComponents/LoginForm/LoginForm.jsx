@@ -96,7 +96,15 @@ const LoginForm = () => {
           console.log("No such document!");
         }
         dispatch(setAuthenticationStatus(true));
-        navigate("/cart");
+
+        // Return a promise after dispatching user details and authentication status
+        const navigationPromise = new Promise((resolve) => {
+          resolve();
+        });
+        // Use the returned promise to navigate after data is set
+        navigationPromise.then(() => {
+          navigate("/cart");
+        });
       } catch (error) {
         alert(error.message);
       }
