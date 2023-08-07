@@ -33,7 +33,7 @@ import { collection, doc, getDoc, getDocs, where } from "firebase/firestore";
 import { query } from "firebase/database";
 import { ItemHeader, NextBtn, StyledAddButton } from "../Cart/Cartpageelement";
 import { MdEdit } from "react-icons/md";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
 import {
   resetUserDetails,
@@ -147,32 +147,38 @@ export const DashBoard = () => {
   };
   const handleLogout = () => {
     const auth = getAuth();
+    signOut(auth).then(() => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        // This callback function will be triggered when the auth state changes
+        // However, we're only interested in the logout event here
+        if (!user) {
+          try {
+            unsubscribe(); // Unsubscribe to avoid further notifications
+            localStorage.clear();
+            console.log("logout")
+            // Reset redux store and navigate
+            dispatch(setAuthenticationStatus(false));
+            dispatch(resetCartCount());
+            dispatch(resetCartState());
+            dispatch(resetAddressDetails());
+            dispatch(resetUserDetails());
+    
+            navigate("/");
+          } catch (error) {
+            console.error("Error during logout:", error);
+          }
+        }
+      }, (error) => {
+        // Handle any error that occurs while listening for the auth state changes
+        console.error("Error in onAuthStateChanged:", error);
+      });
+    }).catch((error) => {
+      // An error happened.
+      console.error("Error in signout:", error);
+    });
     
     // Unsubscribe from the onAuthStateChanged listener
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // This callback function will be triggered when the auth state changes
-      // However, we're only interested in the logout event here
-      if (!user) {
-        try {
-          unsubscribe(); // Unsubscribe to avoid further notifications
-          localStorage.clear();
-          console.log("logout")
-          // Reset redux store and navigate
-          dispatch(setAuthenticationStatus(false));
-          dispatch(resetCartCount());
-          dispatch(resetCartState());
-          dispatch(resetAddressDetails());
-          dispatch(resetUserDetails());
-  
-          navigate("/");
-        } catch (error) {
-          console.error("Error during logout:", error);
-        }
-      }
-    }, (error) => {
-      // Handle any error that occurs while listening for the auth state changes
-      console.error("Error in onAuthStateChanged:", error);
-    });
+    
   };
   
   return (
