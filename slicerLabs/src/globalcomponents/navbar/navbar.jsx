@@ -30,6 +30,7 @@ import { resetCartCount } from "../../ReduxStore/actions/cartCountActions";
 import { resetCartState } from "../../ReduxStore/reducers/CartItemReducer";
 import { resetAddressDetails } from "../../ReduxStore/reducers/MapServicesReducer";
 import { resetUserDetails } from "../../ReduxStore/actions/userDetails";
+import { doc, getDoc } from "firebase/firestore";
 const NavLinksarray = [
   { title: "Home", path: "/" },
   { title: "Services", path: "/services" },
@@ -39,32 +40,25 @@ const NavLinksarray = [
   // { title: "Login", path: "/login" },
 ];
 
-const Navbar = ({ togglesidebar }) => {
+const Navbar = ({ togglesidebar, userName }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [name, setName] = useState("");
   const { isAuthenticated } = useSelector((state) => state.authentication);
+
   
-  const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetails = JSON.parse(userDetailsUnparsed);
-  const userName = userDetails?.userDetails?.userName
-  const isAdmin = useSelector(
-    (state) => state.userDetails?.adminPrivileges
-  );
+  const isAdmin = useSelector((state) => state.userDetails?.adminPrivileges);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   const hasUndefinedProduct = cartItems.some(
     (item) => !item || !item.options || !item.options.ProductId
   );
+
   useEffect(() => {
-    // console.log(userDetails, isAdmin);
-    if (userName) {
-      // console.log("function Fired");
-      setName(userName);
-      setIsLoading(false); // Set isLoading to false when userDetails is available
-    }
-  }, [dispatch,userName]);
+    console.log(userName)
+    setName(userName)
+  }, [dispatch]);
   const handleLogout = () => {
     localStorage.clear();
 
@@ -101,7 +95,7 @@ const Navbar = ({ togglesidebar }) => {
                 </NavItem>
               ))}
               {isAuthenticated ? (
-                userName && isAdmin ? (
+                isAdmin ? (
                   <NavItem>
                     <DropdownContainer>
                       <NavLinks
@@ -129,11 +123,7 @@ const Navbar = ({ togglesidebar }) => {
                       className={pathname === "/DashBoard" ? "active" : ""}
                       // isactive={pathname === "/login"}
                     >
-                      {isLoading ? (
-                        <p>Loading...</p>
-                      ) : (
-                        <p>{name ? name : "no name"}</p>
-                      )}
+                      <p>{name ? name : "Profile"}</p>
                     </NavLinks>
                   </NavItem>
                 )

@@ -63,6 +63,7 @@ export const DashBoard = () => {
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetails = JSON.parse(userDetailsUnparsed);
   const [localUser, setLocalUser] = useState(userDetails.userDetails);
+  const cartItems = useSelector((state) => state.cartItems.cartItems);
   const userUIDInLocalStorage = localStorage.getItem("uid");
   // const postalCode = userDetails?.userDetails.postalCode
   // useEffect(() => {
@@ -71,7 +72,7 @@ export const DashBoard = () => {
 
   useEffect(() => {
     async function getPurchaseInstancesForUser(userId) {
-      console.log("userDetilas", userDetails);
+      console.log("userDetails", userDetails);
       try {
         // Execute the query and get the snapshot of matching documents
         const q = query(
@@ -146,45 +147,88 @@ export const DashBoard = () => {
     setIsEditFormOpen(true);
   };
   const handleLogout = () => {
+   
     const auth = getAuth();
-    signOut(auth).then(() => {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        // This callback function will be triggered when the auth state changes
-        // However, we're only interested in the logout event here
-        if (!user) {
-          try {
-            unsubscribe(); // Unsubscribe to avoid further notifications
-            localStorage.clear();
-            console.log("logout")
-            // Reset redux store and navigate
-            dispatch(setAuthenticationStatus(false));
-            dispatch(resetCartCount());
-            dispatch(resetCartState());
-            dispatch(resetAddressDetails());
-            dispatch(resetUserDetails());
-    
-            navigate("/");
-          } catch (error) {
-            console.error("Error during logout:", error);
+    // Prompt the user for confirmation before logging out
+    let confirmClearTempItems = false;
+  if (cartItems.length > 0) {
+    const confirmClearCart = window.confirm(
+      "You have items in your cart that are not checked out. Proceeding with logout will remove these items. Are you sure you want to continue?"
+    );
+      
+    if (!confirmClearCart) {
+      return; // Abort logout if user cancels
+    }
+    confirmClearTempItems = true;
+  } else {
+    const confirmLogout = window.confirm("Are you sure you want to log out?");
+    if (!confirmLogout) {
+      return; // Abort logout if user cancels
+    }
+    confirmClearTempItems = true;
+  }
+
+    signOut(auth)
+      .then(() => {
+        const unsubscribe = onAuthStateChanged(
+          auth,
+          (user) => {
+            // This callback function will be triggered when the auth state changes
+            // However, we're only interested in the logout event here
+            if (!user) {
+              try {
+                unsubscribe(); // Unsubscribe to avoid further notifications
+
+                // Clear localStorage based on user confirmation
+                if (confirmClearTempItems) {
+                  // Get the calculatePriceFunction from localStorage
+                  const calculatePriceFunction = localStorage.getItem(
+                    "calculatePriceFunction"
+                  );
+
+                  localStorage.clear();
+                  if (calculatePriceFunction) {
+                    localStorage.setItem(
+                      "calculatePriceFunction",
+                      calculatePriceFunction
+                    );
+                  }
+                  console.log("logout");
+                  // Reset redux store and navigate
+                  dispatch(setAuthenticationStatus(false));
+                  dispatch(resetCartCount());
+                  dispatch(resetCartState());
+                  dispatch(resetAddressDetails());
+                  dispatch(resetUserDetails());
+
+                  navigate("/");
+                }
+              } catch (error) {
+                console.error("Error during logout:", error);
+              }
+            }
+          },
+          (error) => {
+            // Handle any error that occurs while listening for the auth state changes
+            console.error("Error in onAuthStateChanged:", error);
           }
-        }
-      }, (error) => {
-        // Handle any error that occurs while listening for the auth state changes
-        console.error("Error in onAuthStateChanged:", error);
+        );
+      })
+      .catch((error) => {
+        // An error happened.
+        console.error("Error in signout:", error);
       });
-    }).catch((error) => {
-      // An error happened.
-      console.error("Error in signout:", error);
-    });
-    
+
     // Unsubscribe from the onAuthStateChanged listener
-    
   };
-  
+
   return (
     <>
       <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-      <Navbar togglesidebar={togglesidebar} />
+      <Navbar
+        togglesidebar={togglesidebar}
+        userName={userDetails.userDetails.userName}
+      />
 
       <UPHeaderFullline1>
         Welcome {userDetails?.userDetails?.userName ?? ""}

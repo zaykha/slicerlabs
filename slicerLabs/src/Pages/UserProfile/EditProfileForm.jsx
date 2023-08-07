@@ -299,6 +299,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
 
                 try {
                   const updatedData = { userDetails: updatedUserDetails };
+                  dispatch(setUserDetails(updatedData));
                   setDoc(userDetailsRef, updatedData);
                   // console.log("User information updated in Firestore.");
                   localStorage.setItem(

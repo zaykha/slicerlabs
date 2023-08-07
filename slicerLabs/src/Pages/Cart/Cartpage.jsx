@@ -57,6 +57,7 @@ import {
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { MeshNormalMaterial, Box3, Vector3, Mesh, LoadingManager } from "three";
+import { getAuth } from "firebase/auth";
 
 const getStripeKey = async () => {
   try {
@@ -108,7 +109,7 @@ const Cartpage = () => {
   };
   const [shouldFetchData, setShouldFetchData] = useState(true);
   const dispatch = useDispatch();
- 
+  const navigate = useNavigate();
   const [endCoordinates, setEndCoordinates] = useState("");
   const cartItemsDetails = useSelector((state) => state.cartItems.cartItems);
   const userUID = useSelector((state) => state.userDetails.userUID);
@@ -276,6 +277,23 @@ const Cartpage = () => {
   // const totalAmountInCents = Math.round(TTLPriceBeforeRouting * 100); // Convert dollars to cents
 
   const handleProceedToPayment = async () => {
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+  
+    // Check if the user is logged in
+    if (!user) {
+      // User is not logged in, prompt them to log in and redirect to the login page
+      const confirmLogin = window.confirm(
+        "Please log in or create an account to proceed to payment."
+      );
+  
+      if (confirmLogin) {
+        navigate("/login"); // Redirect to the login page
+      }
+      return; // Stop the function if the user is not logged in
+    }
+
     const stripe = await getStripeKey();
     if (!stripe) {
       return console.log("error with stripeapiKey fetching");

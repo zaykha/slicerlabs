@@ -16,17 +16,25 @@ import {
   SocialIcon,
 } from "./LoginFormelements";
 import { auth, db, usersCollection } from "../../../../firebase";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 import { get, ref } from "firebase/database";
 import googleicon from "../../../../assets/Googlelogo.png";
 import whatsappicon from "../../../../assets/whatsapp.png";
 import facebookicon from "../../../../assets/facebook.png";
 import linkedinicon from "../../../../assets/linkedin.png";
 import { Navigate, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setAuthenticationStatus } from "../../../../ReduxStore/actions/Authentication";
 import { setUserDetails } from "../../../../ReduxStore/actions/userDetails";
 import { doc, getDoc } from "firebase/firestore";
+import RotatingLoader from "../../../../globalcomponents/DropDown/RotatingLoader";
+import SpinningLoader from "../../../../globalcomponents/DropDown/SpinningLoader";
+import PasswordResetPrompt from "./PasswordReset";
 
 const LoginForm = () => {
   const [email, onChangeEmail] = React.useState("");
@@ -35,6 +43,11 @@ const LoginForm = () => {
   const dispatch = useDispatch();
   const [password, onChangePassword] = React.useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const cartItems = useSelector((state) => state.cartItems.cartItems);
+  const [showPasswordResetPrompt, setShowPasswordResetPrompt] = useState(
+    false
+  );
   const validateEmail = (inputEmail) => {
     if (!inputEmail) {
       return "Email field is required.";
@@ -43,6 +56,15 @@ const LoginForm = () => {
       return "Invalid email address.";
     }
     return "";
+  };
+
+  
+  const handleForgotPasswordClick = () => {
+    setShowPasswordResetPrompt(true);
+  };
+
+  const handleClosePasswordResetPrompt = () => {
+    setShowPasswordResetPrompt(false);
   };
 
   const validatePassword = (inputPassword) => {
@@ -70,7 +92,7 @@ const LoginForm = () => {
   const handleLogin = async () => {
     const emailValidationError = validateEmail(email);
     const passwordValidationError = validatePassword(password);
-
+    setIsLoggingIn(true);
     if (emailValidationError || passwordValidationError) {
       alert(emailValidationError || passwordValidationError);
     } else {
@@ -83,19 +105,21 @@ const LoginForm = () => {
         const user = userCredentials.user;
         const uid = user.uid;
         const token = await user.getIdToken();
-        localStorage.setItem("jwtToken", token);
+        localStorage.setItem("idToken", token);
         localStorage.setItem("uid", uid);
 
         const userDetailsRef = doc(usersCollection, uid);
         const docSnap = await getDoc(userDetailsRef);
         if (docSnap.exists()) {
           dispatch(setUserDetails(docSnap.data().userDetails));
+          dispatch(setAuthenticationStatus(true));
+          localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
+
           console.log("Document data in Login:", docSnap.data().userDetails);
         } else {
           // docSnap.data() will be undefined in this case
           console.log("No such document!");
         }
-        dispatch(setAuthenticationStatus(true));
 
         // Return a promise after dispatching user details and authentication status
         const navigationPromise = new Promise((resolve) => {
@@ -103,11 +127,72 @@ const LoginForm = () => {
         });
         // Use the returned promise to navigate after data is set
         navigationPromise.then(() => {
-          navigate("/cart");
+          cartItems.length > 0 ? navigate("/cart") : navigate("/");
         });
+        setIsLoggingIn(false);
       } catch (error) {
         alert(error.message);
+        setIsLoggingIn(false);
       }
+    }
+    setIsLoggingIn(false);
+  };
+  const handleSSO = async (provider) => {
+    try {
+      let authProvider;
+      if (provider === "google") {
+        authProvider = new GoogleAuthProvider();
+      } else if (provider === "facebook") {
+        authProvider = new FacebookAuthProvider();
+      }
+
+      await signInWithPopup(auth, authProvider)
+        .then((result) => {
+          // This gives you a Google Access Token. You can use it to access the Google API.
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential.accessToken;
+          // The signed-in user info.
+          const user = result.user;
+          // IdP data available using getAdditionalUserInfo(result)
+          // ...
+          // Handle successful sign-in
+
+          const uid = user.uid;
+
+          localStorage.setItem("jwtToken", token);
+          localStorage.setItem("uid", uid);
+
+          const userDetailsRef = doc(usersCollection, uid);
+          const docSnap = getDoc(userDetailsRef);
+          if (docSnap.exists()) {
+            dispatch(setUserDetails(docSnap.data().userDetails));
+            dispatch(setAuthenticationStatus(true));
+            localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
+
+            console.log("Document data in SSO:", docSnap.data().userDetails);
+
+            // Navigate to the desired page after successful sign-in
+            navigate("/cart");
+          } else {
+            // docSnap.data() will be undefined in this case
+            console.log("No such document!");
+          }
+        })
+        .catch((error) => {
+          // Handle Errors here.
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          // The email of the user's account used.
+          const email = error.customData.email;
+          // The AuthCredential type that was used.
+          const credential = GoogleAuthProvider.credentialFromError(error);
+          // ...
+          console.log(error);
+        });
+      // Handle successful sign-in (e.g., navigate to dashboard)
+    } catch (error) {
+      // Handle error (e.g., display error message)
+      console.error("SSO Error:", error);
     }
   };
   return (
@@ -117,41 +202,57 @@ const LoginForm = () => {
 
         <LoginName
           type="text"
-          placeholder="User Name"
+          placeholder="Login Email"
           value={email}
           onChange={handleEmailChange}
-        ></LoginName>
+          borderColor={
+            emailError
+              ? "red"
+              : email !== ""
+              ? "green"
+              : null
+          }
+        />
         {emailError && <div style={{ color: "red" }}>{emailError}</div>}
         <LoginPassword
           type="password"
           placeholder="Password"
           value={password}
           onChange={handlePasswordChange}
+          borderColor={
+            passwordError
+              ? "red"
+              : password !== ""
+              ? "green"
+              : null
+          }
         />
         {passwordError && <div style={{ color: "red" }}>{passwordError}</div>}
         <LoginFlexdiv>
           <RememberMe type="checkbox" />
           <RememberMelabel>Remember me</RememberMelabel>
 
-          <LoginBTN onClick={handleLogin}>Login</LoginBTN>
+          {isLoggingIn?
+          <SpinningLoader/>
+          :<LoginBTN onClick={handleLogin}>Login</LoginBTN>}
         </LoginFlexdiv>
 
         <LoginFlexdiv>
           <LoginLink to="/registerPage">Register Now</LoginLink>
-          <LoginLink2>Forget Password?</LoginLink2>
+          <LoginLink2 onClick={handleForgotPasswordClick}>Forget Password?</LoginLink2>
         </LoginFlexdiv>
       </LoginContainer>
-
+      {showPasswordResetPrompt &&  <PasswordResetPrompt onClose={handleClosePasswordResetPrompt} />}
       <LoginShortcuts>
-        <SocialDiv>
+        <SocialDiv onClick={() => handleSSO("google")}>
           <SocialIcon src={googleicon}></SocialIcon>
           Google
         </SocialDiv>
-        <SocialDiv>
+        <SocialDiv onClick={() => handleSSO("whatsapp")}>
           <SocialIcon src={whatsappicon}></SocialIcon>
           Whatsapp
         </SocialDiv>
-        <SocialDiv>
+        <SocialDiv onClick={() => handleSSO("facebook")}>
           <SocialIcon src={facebookicon}></SocialIcon>
           Facebook
         </SocialDiv>

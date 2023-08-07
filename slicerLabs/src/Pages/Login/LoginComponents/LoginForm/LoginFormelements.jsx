@@ -54,7 +54,7 @@ export const LoginName = styled.input`
     width:100%;
     height:40px;
     background: rgba(87, 87, 87, 0.43);
-    border: 1px solid #A5A5A5;
+    border: 1px solid ${({ borderColor }) => borderColor || "#a5a5a5"}; 
     border-radius: 10px;
     text-align:center;
     outline:none;
@@ -77,7 +77,7 @@ export const LoginPassword = styled.input`
     width:100%;
     height:40px;
     background: rgba(87, 87, 87, 0.43);
-    border: 1px solid #A5A5A5;
+    border: 1px solid ${({ borderColor }) => borderColor || "#a5a5a5"}; 
     border-radius: 10px;
     text-align:center;
     outline:none;

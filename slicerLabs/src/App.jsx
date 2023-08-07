@@ -30,6 +30,7 @@ import { resetCartCount } from "./ReduxStore/actions/cartCountActions";
 import { resetCartState } from "./ReduxStore/reducers/CartItemReducer";
 import { resetAddressDetails } from "./ReduxStore/reducers/MapServicesReducer";
 import { startAuthListener } from "./authListener";
+import TermsAndPolicies from "./Pages/Register/RegisterComponents/TermsAndPolicies";
 
 
 function App() {
@@ -231,6 +232,10 @@ function App() {
     {
       path: "/success",
       element: <PaymentSuccess />,
+    },
+    {
+      path: "/terms&policies",
+      element: <TermsAndPolicies />,
     },
   ]);
 
