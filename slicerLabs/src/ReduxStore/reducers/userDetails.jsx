@@ -18,10 +18,11 @@ const userDetailsReducer = (state = initialState, action) => {
       payloadKeys.forEach((key) => {
         if (state.hasOwnProperty(key)) {
           updatedState[key] = action.payload[key];
-        } else {
-          // If key does not exist in current state, add it to the updatedState
-          updatedState[key] = action.payload[key];
-        }
+        } 
+        // else {
+        //   // If key does not exist in current state, add it to the updatedState
+        //   updatedState[key] = action.payload[key];
+        // }
       });
 
       return updatedState;

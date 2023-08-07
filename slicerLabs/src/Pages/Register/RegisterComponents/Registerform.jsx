@@ -174,16 +174,14 @@ const Registerform = () => {
       const USERUID = user.uid;
       // Store additional user information to Firestore
       const userDetails = {
-        userDetails: {
+          userUID:USERUID,
           userName: formValues.userName,
           occupation: formValues.occupation,
           phone: formValues.phone,
           email: formValues.email,
           postalCode: formValues.postalCode,
           blkNumber: formValues.blkNumber,
-          flatNumber: formValues.flatNumber,
-        },
-        userUID:USERUID
+          flatNumber: formValues.flatNumber,  
       };
 
       // Add the userDetails to the "users" collection in Firestore

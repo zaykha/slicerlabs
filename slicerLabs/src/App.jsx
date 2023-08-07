@@ -17,7 +17,7 @@ import Services from "./Pages/Services/Services";
 import StartPrinting from "./Pages/StartPrinting/StartPrinting";
 import { db, usersCollection } from "./firebase";
 import { useDispatch } from "react-redux";
-import { setUserDetails } from "./ReduxStore/actions/userDetails";
+import { resetUserDetails, setUserDetails } from "./ReduxStore/actions/userDetails";
 import { doc, getDoc } from "firebase/firestore";
 import { useSelector } from "react-redux";
 import { setAuthenticationStatus } from "./ReduxStore/actions/Authentication";
@@ -26,6 +26,10 @@ import PaymentSuccess from "./Pages/Payment/PaymentSuccess";
 import { DashBoard } from "./Pages/UserProfile/UserProfile";
 import usePaymentSuccessHandler from "./Pages/Payment/SendDataToFireStore";
 import TaskPage from "./AdminRelated/TaskPage/TaskPage";
+import { resetCartCount } from "./ReduxStore/actions/cartCountActions";
+import { resetCartState } from "./ReduxStore/reducers/CartItemReducer";
+import { resetAddressDetails } from "./ReduxStore/reducers/MapServicesReducer";
+import { startAuthListener } from "./authListener";
 
 
 function App() {
@@ -44,6 +48,7 @@ function App() {
   useEffect(() => {
     if (!hasMountedRef.current) {
       const auth = getAuth();
+      // startAuthListener();
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
           // If the user is logged in, get the ID token
@@ -90,14 +95,14 @@ function App() {
               const userDetailsData = docSnap.data();
               const userDetailsWithUid = {
                 ...userDetailsData,
-                userUID: docSnap.id,
+                // userUID: docSnap.id,
               };
-              dispatch(setUserDetails(userDetailsWithUid));
+              dispatch(setUserDetails(userDetailsData));
               localStorage.setItem(
                 "userDetails",
                 JSON.stringify(userDetailsWithUid)
               );
-              console.log("Document data:", userDetailsWithUid);
+              console.log("Document data in APP.jsx:", userDetailsData);
               const userDetails = userDetailsWithUid.userDetails.userDetails;
               const AdminCheck = userDetailsWithUid.userDetails?.adminPrivileges;
                 setIsAdmin(AdminCheck)
@@ -128,10 +133,20 @@ function App() {
           } catch (error) {
             console.error("Error fetching calculatePrice function:", error);
           }
+        }else{
+           // User is logged out
+        dispatch(setAuthenticationStatus(false));
+        dispatch(resetCartCount());
+        dispatch(resetCartState());
+        dispatch(resetAddressDetails());
+        dispatch(resetUserDetails());
+        console.log("userloggedout",user)
         }
+        setIsLoading(false); 
+        
       });
       hasMountedRef.current = true;
-      setIsLoading(false); 
+     
       return () => {
         // Unsubscribe from the onAuthStateChanged listener when the component unmounts
         unsubscribe();

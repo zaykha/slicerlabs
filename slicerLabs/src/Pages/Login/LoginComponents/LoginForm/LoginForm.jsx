@@ -90,7 +90,7 @@ const LoginForm = () => {
         const docSnap = await getDoc(userDetailsRef);
         if (docSnap.exists()) {
           dispatch(setUserDetails(docSnap.data().userDetails));
-          console.log("Document data:", docSnap.data().userDetails);
+          console.log("Document data in Login:", docSnap.data().userDetails);
         } else {
           // docSnap.data() will be undefined in this case
           console.log("No such document!");

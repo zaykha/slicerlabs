@@ -28,8 +28,9 @@ import { fetchAddressDetails } from "../../globalcomponents/MapServices/MapServi
 
 const EditProfileForm = ({ user, onClose, onSave }) => {
   const dispatch = useDispatch();
-  const userDetailsOBJ = useSelector((state) => state.userDetails);
-  const userDetails = userDetailsOBJ.userDetails;
+  const userDetailsUnparsed = localStorage.getItem("userDetails");
+  const userDetails = JSON.parse(userDetailsUnparsed).userDetails;
+  
   const [formValues, setFormValues] = useState({
     userName: userDetails.userName || "",
     phone: userDetails.phone || "",
@@ -61,7 +62,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
       blkNumber: userDetails.blkNumber || "",
       flatNumber: userDetails.flatNumber || "",
     });
-  }, [userDetails]);
+  }, [dispatch]);
 
   const validateInput = (name, value) => {
     if (!value) {
@@ -270,14 +271,13 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
         // dispatch(setUserDetails(formValues));
         const auth = getAuth();
         try {
-          const USERUID = userDetailsOBJ.userUID;
+          const USERUID = userDetails.userUID;
           const userDetailsRef = doc(usersCollection, USERUID);
           getDoc(userDetailsRef)
             .then((docSnap) => {
               if (docSnap.exists()) {
                 const existingUserDetails = docSnap.data().userDetails;
                 const updatedUserDetails = { ...existingUserDetails };
-
                 // Loop through the keys of the existingUserDetails object
                 Object.keys(existingUserDetails).forEach((key) => {
                   // Check if the key is present in the formValues object
@@ -300,10 +300,10 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
                 try {
                   const updatedData = { userDetails: updatedUserDetails };
                   setDoc(userDetailsRef, updatedData);
-                  console.log("User information updated in Firestore.");
+                  // console.log("User information updated in Firestore.");
                   localStorage.setItem(
                     "userDetails",
-                    JSON.stringify(userDetailsWithUid)
+                    JSON.stringify(updatedData)
                   );
                 } catch (error) {
                   console.error(

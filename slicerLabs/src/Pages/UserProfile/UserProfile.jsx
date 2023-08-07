@@ -46,6 +46,7 @@ import { useNavigate } from "react-router-dom";
 import { resetCartCount } from "../../ReduxStore/actions/cartCountActions";
 import { resetCartState } from "../../ReduxStore/reducers/CartItemReducer";
 import { resetAddressDetails } from "../../ReduxStore/reducers/MapServicesReducer";
+import { stopAuthListener } from "../../authListener";
 
 export const DashBoard = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,7 +59,9 @@ export const DashBoard = () => {
   const [Loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const userDetails = useSelector((state) => state?.userDetails);
+  // const userDetails = useSelector((state) => state?.userDetails);
+  const userDetailsUnparsed = localStorage.getItem("userDetails");
+  const userDetails = JSON.parse(userDetailsUnparsed);
   const [localUser, setLocalUser] = useState(userDetails.userDetails);
   const userUIDInLocalStorage = localStorage.getItem("uid");
   // const postalCode = userDetails?.userDetails.postalCode
@@ -68,7 +71,7 @@ export const DashBoard = () => {
 
   useEffect(() => {
     async function getPurchaseInstancesForUser(userId) {
-      console.log("userid", userId);
+      console.log("userDetilas", userDetails);
       try {
         // Execute the query and get the snapshot of matching documents
         const q = query(
@@ -76,7 +79,7 @@ export const DashBoard = () => {
           where("userUID", "==", userId)
         );
         const querySnapshot = await getDocs(q);
-        console.log(querySnapshot)
+        // console.log(querySnapshot)
         const purchaseInstancesData = [];
         // Loop through the snapshot and extract the data from each document
         querySnapshot.forEach((doc) => {
@@ -117,17 +120,13 @@ export const DashBoard = () => {
         .then((docSnap) => {
           if (docSnap.exists()) {
             const userDetailsData = docSnap.data();
-            const userDetailsWithUid = {
-              ...userDetailsData,
-              userUID: docSnap.id,
-            };
-            setLocalUser(userDetailsWithUid);
-            dispatch(setUserDetails(userDetailsWithUid));
+            setLocalUser(userDetailsData);
+            dispatch(setUserDetails(userDetailsData));
             localStorage.setItem(
               "userDetails",
-              JSON.stringify(userDetailsWithUid)
+              JSON.stringify(userDetailsData)
             );
-            console.log("Document data in UserProfile:", userDetailsWithUid);
+            console.log("Document data in UserProfile:", userDetailsData);
             setLoading(false);
           } else {
             console.log("No such document!");
@@ -147,17 +146,35 @@ export const DashBoard = () => {
     setIsEditFormOpen(true);
   };
   const handleLogout = () => {
-    localStorage.clear();
-
-    //reset redux store
-    dispatch(setAuthenticationStatus(false));
-    dispatch(resetCartCount());
-    dispatch(resetCartState());
-    dispatch(resetAddressDetails());
-    dispatch(resetUserDetails());
-
-    navigate("/");
+    const auth = getAuth();
+    
+    // Unsubscribe from the onAuthStateChanged listener
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      // This callback function will be triggered when the auth state changes
+      // However, we're only interested in the logout event here
+      if (!user) {
+        try {
+          unsubscribe(); // Unsubscribe to avoid further notifications
+          localStorage.clear();
+          console.log("logout")
+          // Reset redux store and navigate
+          dispatch(setAuthenticationStatus(false));
+          dispatch(resetCartCount());
+          dispatch(resetCartState());
+          dispatch(resetAddressDetails());
+          dispatch(resetUserDetails());
+  
+          navigate("/");
+        } catch (error) {
+          console.error("Error during logout:", error);
+        }
+      }
+    }, (error) => {
+      // Handle any error that occurs while listening for the auth state changes
+      console.error("Error in onAuthStateChanged:", error);
+    });
   };
+  
   return (
     <>
       <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />

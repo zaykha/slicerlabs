@@ -43,19 +43,28 @@ const Navbar = ({ togglesidebar }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(true);
+  const [name, setName] = useState("");
   const { isAuthenticated } = useSelector((state) => state.authentication);
-  const userDetails = useSelector((state) => state.userDetails.userDetails);
+  
+  const userDetailsUnparsed = localStorage.getItem("userDetails");
+  const userDetails = JSON.parse(userDetailsUnparsed);
+  const userName = userDetails?.userDetails?.userName
+  const isAdmin = useSelector(
+    (state) => state.userDetails?.adminPrivileges
+  );
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   const hasUndefinedProduct = cartItems.some(
     (item) => !item || !item.options || !item.options.ProductId
   );
   useEffect(() => {
-    if (userDetails) {
-      console.log(userDetails)
+    // console.log(userDetails, isAdmin);
+    if (userName) {
+      // console.log("function Fired");
+      setName(userName);
       setIsLoading(false); // Set isLoading to false when userDetails is available
     }
-  }, [userDetails]);
+  }, [dispatch,userName]);
   const handleLogout = () => {
     localStorage.clear();
 
@@ -92,25 +101,26 @@ const Navbar = ({ togglesidebar }) => {
                 </NavItem>
               ))}
               {isAuthenticated ? (
-               userDetails.userDetails && userDetails.adminPrivileges ? (
+                userName && isAdmin ? (
                   <NavItem>
-                  <DropdownContainer>
-                    <NavLinks
-                      to="/dashboard"
-                      className={pathname === '/dashboard' ? 'active' : ''}
-                    >
-                    {userDetails.userDetails && userDetails.userDetails.userName}
+                    <DropdownContainer>
+                      <NavLinks
+                        to="/dashboard"
+                        className={pathname === "/dashboard" ? "active" : ""}
+                      >
+                        {"Admin"}
+                      </NavLinks>
 
-                    </NavLinks>
-                    
-                    <DropdownContent>
-                      <NavLinksAdmin to="/dashBoard">Task Page</NavLinksAdmin>
-                      <NavLinksAdmin to="/config">Config Page</NavLinksAdmin>
-                      <NavLinksAdmin to="/blog">Blog Page</NavLinksAdmin>
-                      <NavLinksAdminLogout to="/" onClick={handleLogout}>LogOut</NavLinksAdminLogout>
-                    </DropdownContent>
-                  </DropdownContainer>
-                 </NavItem>
+                      <DropdownContent>
+                        <NavLinksAdmin to="/dashBoard">Task Page</NavLinksAdmin>
+                        <NavLinksAdmin to="/config">Config Page</NavLinksAdmin>
+                        <NavLinksAdmin to="/blog">Blog Page</NavLinksAdmin>
+                        <NavLinksAdminLogout to="/" onClick={handleLogout}>
+                          LogOut
+                        </NavLinksAdminLogout>
+                      </DropdownContent>
+                    </DropdownContainer>
+                  </NavItem>
                 ) : (
                   <NavItem>
                     <NavLinks
@@ -119,8 +129,11 @@ const Navbar = ({ togglesidebar }) => {
                       className={pathname === "/DashBoard" ? "active" : ""}
                       // isactive={pathname === "/login"}
                     >
-                      {userDetails.userDetails && userDetails.userDetails.userName}
-
+                      {isLoading ? (
+                        <p>Loading...</p>
+                      ) : (
+                        <p>{name ? name : "no name"}</p>
+                      )}
                     </NavLinks>
                   </NavItem>
                 )
