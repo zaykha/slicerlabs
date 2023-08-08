@@ -14,7 +14,7 @@ const LoaderContainer = styled.div`
   display: inline-block;
   width: 40px;
   height: 40px;
-  border: 4px solid ${({ theme }) => theme.lightBlue};
+  border: 4px solid lightblue;
   border-top: 4px solid transparent;
   border-radius: 50%;
   animation: ${rotate} 1s linear infinite;

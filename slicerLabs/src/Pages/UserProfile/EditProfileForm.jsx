@@ -11,10 +11,12 @@ import {
   InputelemSmall,
   Regflexdiv,
   RegsubHeader,
+  ValidateEmailButton,
 } from "../Register/RegisterComponents/Registerformelement";
 import { NextBtn } from "../Cart/Cartpageelement";
 import { NextBtnCancel } from "./UserProfileElement";
 import {
+  EmailAuthProvider,
   getAuth,
   onAuthStateChanged,
   updateEmail,
@@ -25,12 +27,17 @@ import { setUserDetails } from "../../ReduxStore/actions/userDetails";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { usersCollection } from "../../firebase";
 import { fetchAddressDetails } from "../../globalcomponents/MapServices/MapServices";
+import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
 
 const EditProfileForm = ({ user, onClose, onSave }) => {
   const dispatch = useDispatch();
+ 
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetails = JSON.parse(userDetailsUnparsed).userDetails;
-  
+  const [isEmailValid, setIsEmailValid] = useState(true);
+  const [isValidatingEmail, setIsValidatingEmail] = useState(false);
+  const [fetchingAddress, setFetchingAddress] = useState(false);
+  const auth = getAuth();
   const [formValues, setFormValues] = useState({
     userName: userDetails.userName || "",
     phone: userDetails.phone || "",
@@ -52,7 +59,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
     blkNumberError: "",
     flatNumberError: "",
   });
-  const [AddressFetched, setAddressFetched] = useState(false);
+
   useEffect(() => {
     setFormValues({
       userName: userDetails.userName || "",
@@ -87,7 +94,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
     if (name === "email") {
       // Validate email format or any other condition
       if (!/\S+@\S+\.\S+/.test(value)) {
-        return "Invalid email address.";
+        return "Invalid email format.";
       }
     }
 
@@ -97,10 +104,10 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
       const singaporeMobileRegex = /^(\+65\s?)?[89]\d{3}\s?\d{4}$/;
 
       const isValidPhone = singaporeMobileRegex.test(value);
-      console.log(isValidPhone)
+      console.log(isValidPhone);
       if (!isValidPhone) {
         // Handle the case when the phone number is not valid
-        return "Please enter a valid Singaporean mobile number"
+        return "Please enter a valid Singaporean mobile number";
       } else {
         // The phone number is valid, so return null (no error)
         return null;
@@ -121,7 +128,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
         return "Block Number must be in a valid format.";
       }
     }
-    
+
     if (name === "flatNumber") {
       // Validate flatNumber format or any other condition
       const singaporeFlatNumberRegex = /^\d{1,3}[A-Za-z]?\-\d{1,3}[A-Za-z]?$/;
@@ -143,12 +150,17 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
         const { BLK_NO, ROAD_NAME, FLOOR_NO, UNIT_NO, POSTAL } =
           result.payload[0];
         const formattedAddress = `${BLK_NO} ${ROAD_NAME}, ${
-          FLOOR_NO && UNIT_NO ? `#${FLOOR_NO}-${UNIT_NO}` : userDetails.flatNumber
+          FLOOR_NO && UNIT_NO
+            ? `#${FLOOR_NO}-${UNIT_NO}`
+            : userDetails.flatNumber
         }, Singapore ${POSTAL}`;
         setFormValues((prevValues) => ({
           ...prevValues,
           blkNumber: BLK_NO || "",
-          flatNumber: FLOOR_NO && UNIT_NO ? `#${FLOOR_NO}-${UNIT_NO}` : userDetails.flatNumber,
+          flatNumber:
+            FLOOR_NO && UNIT_NO
+              ? `#${FLOOR_NO}-${UNIT_NO}`
+              : userDetails.flatNumber,
           postalCode: POSTAL || "",
           displayFullAddress: formattedAddress,
         }));
@@ -174,26 +186,29 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
     const { name, value } = e.target;
     let formattedValue = value;
     // Add +65 prefix if the input is empty and user clicks on the field
-  if (name === "phone" && value === "") {
-    formattedValue = "+65 ";
-  } else if (name === "phone") {
-    // Remove all non-numeric characters from the input
-    const numericValue = value.replace(/\D/g, "");
+    if (name === "phone" && value === "") {
+      formattedValue = "+65 ";
+    } else if (name === "phone") {
+      // Remove all non-numeric characters from the input
+      const numericValue = value.replace(/\D/g, "");
 
-    // Add spaces to the phone number while retaining the "+65" prefix
-    const maxLength = 12; // Maximum length for phone number with "+65" prefix and spaces
+      // Add spaces to the phone number while retaining the "+65" prefix
+      const maxLength = 12; // Maximum length for phone number with "+65" prefix and spaces
 
-    if (numericValue.length > 6) {
-      const firstPart = numericValue.slice(2, 6);
-      const remainingPart = numericValue.slice(6, maxLength);
-      formattedValue = `+65 ${firstPart}`;
+      if (numericValue.length > 6) {
+        const firstPart = numericValue.slice(2, 6);
+        const remainingPart = numericValue.slice(6, maxLength);
+        formattedValue = `+65 ${firstPart}`;
 
-      if (remainingPart.length > 0) {
-        formattedValue += " " + remainingPart;
+        if (remainingPart.length > 0) {
+          formattedValue += " " + remainingPart;
+        }
       }
+    } else if (name === "email") {
+      setIsEmailValid(false);
     }
-  }
-  console.log(formattedValue)
+
+    console.log(formattedValue);
     setFormValues((prevValues) => ({
       ...prevValues,
       [name]: formattedValue,
@@ -206,6 +221,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
 
   useEffect(() => {
     if (formValues.postalCode.length === 6) {
+      setFetchingAddress(true);
       console.log(formValues.postalCode);
       if (timeoutIdRef.current) {
         // Clear previous timeout if there was any
@@ -214,6 +230,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
       // Set a new timeout of 2 seconds to fetch the address
       timeoutIdRef.current = setTimeout(() => {
         fetchAddress(formValues.postalCode);
+        setFetchingAddress(false);
       }, 2000);
     }
   }, [formValues.postalCode]);
@@ -223,7 +240,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
       !formValues.userName ||
       //   !newPassword ||
       !formValues.phone ||
-      !formValues.email ||
+      // !formValues.email ||
       !formValues.postalCode ||
       !formValues.blkNumber ||
       !formValues.flatNumber
@@ -246,30 +263,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
       return;
     } else {
       try {
-        // if (formValues.email !== "") {
-
-        //   try {
-        //     await updateEmail(auth.currentUser, formValues.email);
-        //     setError(null); // Clear any previous errors
-        //   } catch (error) {
-        //     console.log("Failed to update email: " + error.message);
-        //     setError("Failed to update email: " + error.message);
-        //     return;
-        //   }
-        // }
-
-        if (newPassword) {
-          try {
-            await updatePassword(auth.currentUser, newPassword);
-          } catch (error) {
-            setError("Failed to update password: " + error.message);
-            return;
-          }
-        }
-
-        // Save the updated user information
-        // dispatch(setUserDetails(formValues));
-        const auth = getAuth();
+        
         try {
           const USERUID = userDetails.userUID;
           const userDetailsRef = doc(usersCollection, USERUID);
@@ -336,6 +330,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
     }
   };
 
+ 
   return (
     <PopupContainer>
       <LoginFromcontainer>
@@ -347,25 +342,21 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
             name="userName"
             value={formValues.userName}
             onChange={handleInputChange}
+            borderColor={
+              formErrors.userNameError
+                ? "red"
+                : formValues.userName !== ""
+                ? "green"
+                : null
+            }
           />
           {formErrors.userNameError && (
             <div style={{ color: "red", fontSize: "12px" }}>
               {formErrors.userNameError}
             </div>
           )}
-          <Inputelem
-            type="email"
-            placeholder="Email"
-            name="email"
-            value={formValues.email}
-            onChange={handleInputChange}
-          />
-          {formErrors.emailError && (
-            <div style={{ color: "red", fontSize: "12px" }}>
-              {formErrors.emailError}
-            </div>
-          )}
-          <Inputelem
+         
+          {/* <Inputelem
             type="password"
             placeholder="Password"
             name="password"
@@ -376,7 +367,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
             <div style={{ color: "red", fontSize: "12px" }}>
               {formErrors.passwordError}
             </div>
-          )}
+          )} */}
           <Regflexdiv>
             <div
               style={{
@@ -390,6 +381,13 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
                 name="postalCode"
                 value={formValues.postalCode}
                 onChange={handleInputChange}
+                borderColor={
+                  formErrors.postalCodeError
+                    ? "red"
+                    : formValues.postalCode !== ""
+                    ? "green"
+                    : null
+                }
               />
               {formErrors.postalCodeError && (
                 <div style={{ color: "red", fontSize: "12px" }}>
@@ -409,6 +407,13 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
                 name="blkNumber"
                 value={formValues.blkNumber}
                 onChange={handleInputChange}
+                borderColor={
+                  formErrors.blkNumberError
+                    ? "red"
+                    : formValues.blkNumber !== ""
+                    ? "green"
+                    : null
+                }
               />
               {formErrors.blkNumberError && (
                 <div style={{ color: "red", fontSize: "12px" }}>
@@ -438,10 +443,19 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
                 name="flatNumber"
                 value={formValues.flatNumber}
                 onChange={handleInputChange}
+                borderColor={
+                  formErrors.flatNumberError
+                    ? "red"
+                    : formValues.flatNumber !== ""
+                    ? "green"
+                    : null
+                }
               />
             </div>
-            {formValues.displayFullAddress !== "" ? (
+            {formValues.displayFullAddress !== "" && !fetchingAddress ? (
               <Addressdiv>{formValues.displayFullAddress}</Addressdiv>
+            ) : fetchingAddress ? (
+              <RotatingLoader/>
             ) : (
               <Addressdiv>Please Type in a valid postal Code</Addressdiv>
             )}
@@ -459,6 +473,13 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
             name="phone"
             value={formValues.phone}
             onChange={handleInputChange}
+            borderColor={
+              formErrors.phoneError
+                ? "red"
+                : formValues.phone !== ""
+                ? "green"
+                : null
+            }
           />
           {formErrors.phoneError && (
             <div style={{ color: "red", fontSize: "12px" }}>

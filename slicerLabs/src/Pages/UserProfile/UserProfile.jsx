@@ -10,6 +10,8 @@ import {
 import {
   DisplayHeader,
   EditIcon,
+  EditIconLoginDetails,
+  EditIconLoginDetails1,
   InnerHeader,
   InnerHeader1,
   InnerHeaderLeft,
@@ -24,6 +26,7 @@ import {
 } from "./UserProfileElement";
 import { LoginFromcontainer } from "../Login/LoginComponents/LoginForm/LoginFormelements";
 import {
+  ProductConcernCollection,
   PurchasedItemsCollection,
   db,
   firestore,
@@ -38,6 +41,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   resetUserDetails,
   setUserDetails,
+  updateUserEmail,
 } from "../../ReduxStore/actions/userDetails";
 import EditProfileForm from "./EditProfileForm";
 import { fetchAddressDetails } from "../../globalcomponents/MapServices/MapServices";
@@ -47,6 +51,9 @@ import { resetCartCount } from "../../ReduxStore/actions/cartCountActions";
 import { resetCartState } from "../../ReduxStore/reducers/CartItemReducer";
 import { resetAddressDetails } from "../../ReduxStore/reducers/MapServicesReducer";
 import { stopAuthListener } from "../../authListener";
+import EditLoginDetailForm from "./EditLoginDetailForm";
+import EditPasswordForm from "./EditPasswordForm";
+import ProductConcernPrompt from "../../globalcomponents/ProductConcern/ProductConcernPrompt";
 
 export const DashBoard = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,7 +62,14 @@ export const DashBoard = () => {
   };
   // Initialize an array to store the retrieved documents
   const [purchaseInstances, setPurchaseInstances] = useState([]);
+  const [productIssue, setProductIssue] = useState([]);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [isEditLoginDetailsFormOpen, setIsEditLoginDetailsFormOpen] =
+    useState(false);
+  const [isEditPasswordFormOpen, setIsEditPasswordFormOpen] = useState(false);
+  const [isProductConcernFormOpen, setIsProductConcernFormOpen] =
+    useState(false);
+  setIsEditLoginDetailsFormOpen;
   const [Loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -95,12 +109,37 @@ export const DashBoard = () => {
         return []; // Return an empty array if an error occurs
       }
     }
+    async function getProductIssueForUser(userId) {
+      try {
+       
+        const q = query(
+          ProductConcernCollection,
+          where("userUID", "==", userId)
+        );
+        const querySnapshot = await getDocs(q);
+        // console.log(querySnapshot)
+        const ProductIssueData = [];
+        // Loop through the snapshot and extract the data from each document
+        querySnapshot.forEach((doc) => {
+          // Extract the data from the document and add it to the array
+          const ProductIssueDatatoPush = doc.data();
+          
+          ProductIssueData.push(ProductIssueDatatoPush);
+        });
+        console.log("Product Issue", ProductIssueData);
+        setProductIssue(ProductIssueData);
+      } catch (error) {
+        console.error("Error retrieving Product Issue:", error);
+        return []; // Return an empty array if an error occurs
+      }
+    }
 
     // Call the function and use async/await to handle the asynchronous nature
     const fetchData = async () => {
       const purchaseInstancesData = await getPurchaseInstancesForUser(
         userUIDInLocalStorage
       );
+      const productIDData = await getProductIssueForUser(userUIDInLocalStorage);
       // fetchAddress(postalCode);
       // Handle the fetched data here if needed
       // console.log("fetched data:", purchaseInstancesData);
@@ -131,42 +170,88 @@ export const DashBoard = () => {
             setLoading(false);
           } else {
             console.log("No such document!");
+            setLoading(false);
           }
         })
         .catch((error) => {
           console.error("Error fetching user details:", error);
+          setLoading(false);
         });
     } catch {
       console.error("Error gettingdocs:", error);
+      setLoading(false);
     }
   };
 
   const handleEditClick = () => {
-    // Logic to handle the edit click event
-    console.log("Edit button clicked");
     setIsEditFormOpen(true);
   };
+
+  const handleEditLoginDetailsClick = () => {
+    setIsEditLoginDetailsFormOpen(true);
+  };
+
+  const EditLoginDetailsFormClose = async () => {
+    setLoading(true);
+    setIsEditLoginDetailsFormOpen(false);
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      // console.log(user)
+      if (user !== null) {
+        user.providerData.forEach((profile) => {
+          // console.log(profile)
+          dispatch(updateUserEmail(profile.email));
+          setLoading(false);
+          // console.log("Sign-in provider: " + profile.providerId);
+          // console.log("  Provider-specific UID: " + profile.uid);
+          // console.log("  Name: " + profile.displayName);
+          // console.log("  Email: " + profile.email);
+          // console.log("  Photo URL: " + profile.photoURL);
+        });
+      }
+    } catch {
+      setLoading(false);
+      console.error("Error gettingdocs:", error);
+    }
+  };
+
+  const handleProductConcernClick = () => {
+    setIsProductConcernFormOpen(true);
+  };
+  const handleEditPasswordClick = () => {
+    setIsEditPasswordFormOpen(true);
+  };
+
+  const EditPasswordFormClose = async () => {
+    // setLoading(true);
+    setIsEditPasswordFormOpen(false);
+  };
+
+  const onSubmitProductConcern = () => {
+    setIsProductConcernFormOpen(false);
+  };
+
   const handleLogout = () => {
-   
     const auth = getAuth();
     // Prompt the user for confirmation before logging out
     let confirmClearTempItems = false;
-  if (cartItems.length > 0) {
-    const confirmClearCart = window.confirm(
-      "You have items in your cart that are not checked out. Proceeding with logout will remove these items. Are you sure you want to continue?"
-    );
-      
-    if (!confirmClearCart) {
-      return; // Abort logout if user cancels
+    if (cartItems.length > 0) {
+      const confirmClearCart = window.confirm(
+        "You have items in your cart that are not checked out. Proceeding with logout will remove these items. Are you sure you want to continue?"
+      );
+
+      if (!confirmClearCart) {
+        return; // Abort logout if user cancels
+      }
+      confirmClearTempItems = true;
+    } else {
+      const confirmLogout = window.confirm("Are you sure you want to log out?");
+      if (!confirmLogout) {
+        return; // Abort logout if user cancels
+      }
+      confirmClearTempItems = true;
     }
-    confirmClearTempItems = true;
-  } else {
-    const confirmLogout = window.confirm("Are you sure you want to log out?");
-    if (!confirmLogout) {
-      return; // Abort logout if user cancels
-    }
-    confirmClearTempItems = true;
-  }
 
     signOut(auth)
       .then(() => {
@@ -235,35 +320,48 @@ export const DashBoard = () => {
       </UPHeaderFullline1>
 
       <LoginFromcontainer>
-        <ItemHeaderprofile>Item Status</ItemHeaderprofile>
-        <InnerHeaderWrapper>
-          <InnerHeader1></InnerHeader1>
-          <DisplayHeader>Material & color</DisplayHeader>
-          <DisplayHeader>Dimension</DisplayHeader>
-          <DisplayHeader>Status</DisplayHeader>
-          <DisplayHeader>Price Paid</DisplayHeader>
-        </InnerHeaderWrapper>
+        <ItemHeaderprofile>In Production</ItemHeaderprofile>
+        {purchaseInstances.length > 0 &&
+        purchaseInstances[0].status !== "Delivered" ? (
+          <InnerHeaderWrapper>
+            <InnerHeader1></InnerHeader1>
+            <DisplayHeader>Product Details</DisplayHeader>
+            <DisplayHeader>Delivery Date</DisplayHeader>
+            <DisplayHeader>Status</DisplayHeader>
+            <DisplayHeader>Price Paid</DisplayHeader>
+          </InnerHeaderWrapper>
+        ) : (
+          <DisplayHeader>No Outstanding Unshipped Items</DisplayHeader>
+        )}
         {purchaseInstances.length > 0 ? (
-          purchaseInstances.map((purchaseInstance, index) => (
-            <div key={index}>
-              {purchaseInstance.purchasedItems.map((item) => (
-                <InnerHeaderWrapper key={item.itemId}>
-                  <InnerHeader>{item.fileName.substring(6)}</InnerHeader>
-                  <InnerHeader>
-                    <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
-                    <InnerLayersP>with</InnerLayersP>
-                    <InnerLayerP>{item.material}</InnerLayerP>
-                  </InnerHeader>
-                  <InnerHeader>
-                    {item.dimensions.depth} x {item.dimensions.width} x{" "}
-                    {item.dimensions.height}
-                  </InnerHeader>
-                  <InnerHeader>{item.status}</InnerHeader>
-                  <InnerHeaderLeft>SGD {item.price.toFixed(2)}</InnerHeaderLeft>
-                </InnerHeaderWrapper>
-              ))}
-            </div>
-          ))
+          purchaseInstances
+            .filter((item) => item.status !== "Delivered")
+            .map((purchaseInstance, index) => (
+              <div key={index}>
+                {purchaseInstance.purchasedItems.map((item) => (
+                  <InnerHeaderWrapper key={item.itemId}>
+                    <InnerHeader>
+                      <InnerLayerP> {item.fileName}</InnerLayerP>
+                    </InnerHeader>
+                    <InnerHeader>
+                      <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
+                      <InnerLayersP>with</InnerLayersP>
+                      <InnerLayerP>
+                        {item.material} {item.dimensions.depth} x{" "}
+                        {item.dimensions.width} x {item.dimensions.height}
+                      </InnerLayerP>
+                      <InnerLayersP>Quantity of </InnerLayersP>
+                      <InnerLayerP>{item.quantity}</InnerLayerP>
+                    </InnerHeader>
+                    <InnerHeader>{purchaseInstance.approxDeliDate ||"TBD"}</InnerHeader>
+                    <InnerHeader>{item.status}</InnerHeader>
+                    <InnerHeaderLeft>
+                      SGD {item.price.toFixed(2)}
+                    </InnerHeaderLeft>
+                  </InnerHeaderWrapper>
+                ))}
+              </div>
+            ))
         ) : (
           <></>
         )}
@@ -271,64 +369,101 @@ export const DashBoard = () => {
 
       <LoginFromcontainer>
         <ItemHeaderprofile>Purchase History</ItemHeaderprofile>
-        <InnerHeaderWrapper>
-          <InnerHeader1></InnerHeader1>
-          <DisplayHeader>Material & color</DisplayHeader>
-          <DisplayHeader>Dimension</DisplayHeader>
-          <DisplayHeader>Delivered On</DisplayHeader>
-          <DisplayHeader>Price Paid</DisplayHeader>
-        </InnerHeaderWrapper>
+        {purchaseInstances.length > 0 &&
+        purchaseInstances[0].status === "Delivered" ? (
+          <InnerHeaderWrapper>
+            <InnerHeader1></InnerHeader1>
+            <DisplayHeader>Material & color</DisplayHeader>
+            <DisplayHeader>Dimension</DisplayHeader>
+            <DisplayHeader>Delivered On</DisplayHeader>
+            <DisplayHeader>Price Paid</DisplayHeader>
+          </InnerHeaderWrapper>
+        ) : (
+          <DisplayHeader>No Items Have Been Delivered</DisplayHeader>
+        )}
 
-        <InnerHeaderWrapper>
-          <InnerHeader>Item 1</InnerHeader>
-          <InnerHeader>
-            <InnerLayerP>FDM Printing(Black)</InnerLayerP>
-            <InnerLayersP>with</InnerLayersP>
-            <InnerLayerP>ABS</InnerLayerP>
-          </InnerHeader>
-          <InnerHeader>10 x 10 x 10</InnerHeader>
-          <InnerHeader>25th July 2023</InnerHeader>
-          <InnerHeaderLeft>SGD 80.33</InnerHeaderLeft>
-        </InnerHeaderWrapper>
+        {purchaseInstances.length > 0 ? (
+          purchaseInstances
+            .filter((item) => item.status === "Delivered")
+            .map((purchaseInstance, index) => (
+              <div key={index}>
+                {purchaseInstance.purchasedItems.map((item) => (
+                  <InnerHeaderWrapper key={item.itemId}>
+                    <InnerHeader>{item.fileName.substring(6)}</InnerHeader>
+                    <InnerHeader>
+                      <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
+                      <InnerLayersP>with</InnerLayersP>
+                      <InnerLayerP>
+                        {item.material} {item.dimensions.depth} x{" "}
+                        {item.dimensions.width} x {item.dimensions.height}
+                      </InnerLayerP>
+                      <InnerLayersP>Quantity of </InnerLayersP>
+                      <InnerLayerP>{item.quantity}</InnerLayerP>
+                    </InnerHeader>
+                    <InnerHeader>TBD</InnerHeader>
+                    <InnerHeader>{item.status}</InnerHeader>
+                    <InnerHeaderLeft>
+                      SGD {item.price.toFixed(2)}
+                    </InnerHeaderLeft>
+                  </InnerHeaderWrapper>
+                ))}
+              </div>
+            ))
+        ) : (
+          <></>
+        )}
       </LoginFromcontainer>
 
       <LoginFromcontainer>
-        <ItemHeaderprofile>Issue Status</ItemHeaderprofile>
+        <ItemHeaderprofile>Product Concern</ItemHeaderprofile>
         <InnerHeaderWrapper>
           <DisplayHeader></DisplayHeader>
-          <DisplayHeader>Material & color</DisplayHeader>
-          <DisplayHeader>Dimension</DisplayHeader>
+          <DisplayHeader>Product Details</DisplayHeader>
           <DisplayHeader>Status</DisplayHeader>
           <DisplayHeader>Last updated</DisplayHeader>
           <DisplayHeader>Note</DisplayHeader>
+         
+
         </InnerHeaderWrapper>
 
-        <InnerHeaderWrapper>
-          <InnerHeader>Ticket 1</InnerHeader>
-          <InnerHeader>
-            <InnerLayerP>FDM Printing(Black)</InnerLayerP>
-            <InnerLayersP>with</InnerLayersP>
-            <InnerLayerP>ABS</InnerLayerP>
-          </InnerHeader>
-          <InnerHeader>10 x 10 x 10</InnerHeader>
-          <InnerHeader>Resolved</InnerHeader>
-          <InnerHeaderLeft>25th July 2023</InnerHeaderLeft>
-          <InnerHeader>Printed wrong dimension</InnerHeader>
-        </InnerHeaderWrapper>
-
-        <InnerHeaderWrapper>
-          <InnerHeader>Ticket 2</InnerHeader>
-          <InnerHeader>
-            <InnerLayerP>FDM Printing(Transparent)</InnerLayerP>
-            <InnerLayersP>with</InnerLayersP>
-            <InnerLayerP>PLA</InnerLayerP>
-          </InnerHeader>
-          <InnerHeader>10 x 10 x 10</InnerHeader>
-          <InnerHeader>Resolved</InnerHeader>
-          <InnerHeaderLeft>15th July 2023</InnerHeaderLeft>
-          <InnerHeader>Printed wrong material</InnerHeader>
-        </InnerHeaderWrapper>
-        <StyledAddButton to="/">
+        {purchaseInstances.length > 0 ? (
+          purchaseInstances
+            .filter((item) => item.status !== "Delivered")
+            .map((purchaseInstance, index) => (
+              <div key={index}>
+                {purchaseInstance.purchasedItems.map((item) =>
+                productIssue.map((issue)=>{
+                  if(issue.productId === item.itemId){
+                    return(
+                      <InnerHeaderWrapper key={item.itemId}>
+                        <InnerHeader>
+                          <InnerLayerP> {item.fileName}</InnerLayerP>
+                        </InnerHeader>
+                        <InnerHeader>
+                          <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
+                          <InnerLayersP>with</InnerLayersP>
+                          <InnerLayerP>
+                            {item.material} {item.dimensions.depth} x{" "}
+                            {item.dimensions.width} x {item.dimensions.height}
+                          </InnerLayerP>
+                          <InnerLayersP>Quantity of </InnerLayersP>
+                          <InnerLayerP>{item.quantity}</InnerLayerP>
+                        </InnerHeader>
+                        <InnerHeader>{issue.status || "pending"}</InnerHeader>
+                        <InnerHeader>{issue.lastUpdate || ""}</InnerHeader>
+                        <InnerHeader>{issue.concernNote}</InnerHeader>
+                      
+                      </InnerHeaderWrapper>
+                    )
+                  }
+                })
+                  )}
+              </div>
+            ))
+        ) : (
+          <></>
+        )}
+        <StyledAddButton onClick={handleProductConcernClick}>
           <span style={plusSignStyle}>+</span>
         </StyledAddButton>
       </LoginFromcontainer>
@@ -349,18 +484,6 @@ export const DashBoard = () => {
           </InnerHeaderWrapper>
 
           <InnerHeaderWrapper>
-            <DisplayHeader>Email</DisplayHeader>
-            <InnerHeaderpersonalize>
-              {userDetails?.userDetails?.email ?? "Default Email"}
-            </InnerHeaderpersonalize>
-          </InnerHeaderWrapper>
-
-          <InnerHeaderWrapper>
-            <DisplayHeader>Password</DisplayHeader>
-            <InnerHeaderpersonalize>************</InnerHeaderpersonalize>
-          </InnerHeaderWrapper>
-
-          <InnerHeaderWrapper>
             <DisplayHeader>Shipping Address</DisplayHeader>
             <InnerHeaderpersonalize>
               {userDetails?.userDetails?.displayFullAddress ??
@@ -374,8 +497,39 @@ export const DashBoard = () => {
               {userDetails?.userDetails?.phone ?? "Default phone"}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
-          <NextBtn onClick={handleLogout}>logout</NextBtn>
         </LoginFromcontainer>
+      )}
+
+      <LoginFromcontainer>
+        <ItemHeaderprofile>Login Details</ItemHeaderprofile>
+
+        <InnerHeaderWrapper>
+          <DisplayHeader>Email</DisplayHeader>
+          <InnerHeaderpersonalize>
+            {userDetails?.userDetails?.email ?? "Default Email"}
+          </InnerHeaderpersonalize>
+          <EditIconLoginDetails1 onClick={handleEditLoginDetailsClick}>
+            Change Login Email
+          </EditIconLoginDetails1>
+        </InnerHeaderWrapper>
+
+        <InnerHeaderWrapper>
+          <DisplayHeader>Password</DisplayHeader>
+          <InnerHeaderpersonalize>************</InnerHeaderpersonalize>
+          <EditIconLoginDetails1 onClick={handleEditPasswordClick}>
+            Change Password
+          </EditIconLoginDetails1>
+        </InnerHeaderWrapper>
+        <NextBtn onClick={handleLogout}>logout</NextBtn>
+        
+      </LoginFromcontainer>
+
+      {isProductConcernFormOpen && (
+        <ProductConcernPrompt
+          purchaseInstances={purchaseInstances}
+          onSubmitProductConcern={onSubmitProductConcern}
+          onClose={onSubmitProductConcern}
+        />
       )}
 
       {isEditFormOpen && (
@@ -388,6 +542,18 @@ export const DashBoard = () => {
             console.log("Updated user data:", updatedUser);
             setIsEditFormOpen(false); // Close the form after saving
           }}
+        />
+      )}
+
+      {isEditLoginDetailsFormOpen && (
+        <EditLoginDetailForm
+          onClose={EditLoginDetailsFormClose} // Function to close the form
+        />
+      )}
+
+      {isEditPasswordFormOpen && (
+        <EditPasswordForm
+          onClose={EditPasswordFormClose} // Function to close the form
         />
       )}
       <Footer />

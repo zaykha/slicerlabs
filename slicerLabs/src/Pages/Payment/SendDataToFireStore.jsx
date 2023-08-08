@@ -9,11 +9,11 @@ import { PurchasedItemsCollection } from "../../firebase";
 import { setSuccessPaymentState } from "../../ReduxStore/actions/Authentication";
 import { useDispatch, useSelector } from "react-redux";
 
-// const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
-// const userPurchasedItems = JSON.parse(unparsedStoreditems);
+const unparsedStoreditems = localStorage.getItem("TTLprice");
+const TTLprice = JSON.parse(unparsedStoreditems);
 
 // Handle success payment response from Stripe
- const usePaymentSuccessHandler = async (
+const usePaymentSuccessHandler = async (
   userUID,
   userPurchasedItems,
   userDetails,
@@ -22,6 +22,54 @@ import { useDispatch, useSelector } from "react-redux";
 ) => {
   // Modify purchasedItems to an array of objects
   // const [error, setError] = useState(null);
+  const BrevoOptions = {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      "api-key":
+        "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",
+    },
+    body: JSON.stringify({
+      sender: { name: "SlicerLabs", email: "zaykha@gmail.com" },
+      to: [{ email: userDetails.email, name: userDetails.userName }],
+      // bcc: [{ email: "helen9766@example.com", name: "Helen" }],
+      // cc: [{ email: "ann6533@example.com", name: "Ann" }],
+      // htmlContent:
+      //   "<!DOCTYPE html> <html> <body> <h1>Confirm you email</h1> <p>Please confirm your email address by clicking on the link below</p> </body> </html>",
+      // textContent:
+      //   "Please confirm your email address by clicking on the link https://text.domain.com",
+      subject: "Purchase Confirmation With SlicerLabs",
+      // replyTo: { email: "ann6533@example.com", name: "Ann" },
+      // attachment: [
+      //   {
+      //     url: "https://attachment.domain.com/myAttachmentFromUrl.jpg",
+      //     content: "b3JkZXIucGRm",
+      //     name: "myAttachment.png",
+      //   },
+      // ],
+      // headers: {
+      //   "sender.ip": "1.2.3.4",
+      //   "X-Mailin-custom": "some_custom_header",
+      //   idempotencyKey: "abc-123",
+      // },
+      templateId: 1,
+      params: { TTLprice:TTLprice },
+      // messageVersions: [
+      //   {
+      //     to: [{ email: "zzaayykkhhaa@gmail.com", name: "Jimmy" }],
+      //     params: { FNAME: "Joe", LNAME: "Doe" },
+      //     // bcc: [{ email: "helen9766@example.com", name: "Helen" }],
+      //     // cc: [{ email: "ann6533@example.com", name: "Ann" }],
+      //     // replyTo: { email: "ann6533@example.com", name: "Ann" },
+      //     subject: "Login Email confirmation",
+      //   },
+      // ],
+      // tags: ["tag1"],
+      // scheduledAt: "2022-04-05T12:30:00+02:00",
+      // batchId: "5c6cfa04-eed9-42c2-8b5c-6d470d978e9d",
+    }),
+  };
 
   const formatDateTime = (dateTime) => {
     const options = {
@@ -33,11 +81,13 @@ import { useDispatch, useSelector } from "react-redux";
     };
     return new Date(dateTime).toLocaleDateString(undefined, options);
   };
+  const currentDate = new Date();
+  currentDate.setDate(currentDate.getDate() + 2);
   const storeDataInFirestore = async (Purchased3dData, userUID) => {
     try {
       // Upload files to Cloud Firestore Storage
       const storage = getStorage();
-  
+
       // Loop through each file in Purchased3dData and upload it to Storage
       await Promise.all(
         Purchased3dData.map(async (fileData) => {
@@ -51,13 +101,13 @@ import { useDispatch, useSelector } from "react-redux";
           await uploadBytes(storageRef, file);
         })
       );
-  
+
       // Return true to indicate success
       return true;
     } catch (error) {
       // Log and handle the error
       console.error("Error storing data in Firestore:", error);
-  
+
       // Return false to indicate failure
       return false;
     }
@@ -76,7 +126,7 @@ import { useDispatch, useSelector } from "react-redux";
         dimensions,
         quantity,
         price,
-        status:"Pre-Printing Procedures"
+        status: "Pre-Printing Procedures",
       };
     });
   } else {
@@ -115,12 +165,24 @@ import { useDispatch, useSelector } from "react-redux";
             userPhone: userDetails.phone,
             purchasedItems,
             purchasedAt: formatDateTime(Date.now()),
+            approxDeliDate: formatDateTime(currentDate),
           };
           try {
             const documentId = `${userUID}`;
             // Add the data to Firestore
             await addDoc(PurchasedItemsCollection, dataToAdd);
             console.log("data sent to firebase");
+
+            fetch('https://api.brevo.com/v3/smtp/email', BrevoOptions)
+            .then(response => response.json())
+            .then(response => {
+              console.log("Email sent with Brevo:", response);
+              // Rest of your code after successful API call
+            })
+            .catch(err => {
+              console.error("Error sending email with Brevo:", err);
+              // Handle the error, e.g., show an error message to the user
+            });
             // Rest of your code after successful addition to Firestore
           } catch (error) {
             console.error("Error adding document to Firestore:", error);

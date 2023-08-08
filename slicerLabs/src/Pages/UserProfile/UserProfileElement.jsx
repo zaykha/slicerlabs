@@ -10,6 +10,7 @@ export const SubHeader = styled.div`
 export const InnerHeaderWrapper = styled.div`
   display: flex;
   flex-direction: row;
+  align-items:center;
   margin-top: 20px;
 `;
 export const InnerHeaderWrapperbtm = styled.div`
@@ -150,7 +151,37 @@ export const EditIcon = styled.button`
     color: #0056b3;
   }
 `;
-
+export const EditIconLoginDetails = styled.button`
+  /* Your styles for the edit icon button */
+  background: transparent;
+  width: 10%;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: white;
+  position: absolute;
+  top: 80px;
+  right: 0;
+  &:hover {
+    color: #0056b3;
+  }
+`;
+export const EditIconLoginDetails1 = styled.button`
+  /* Your styles for the edit icon button */
+  background: transparent;
+  width: 25%;
+  border: none;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: white;
+  // position: absolute;
+  top: 35%;
+  right: 20%;
+  text-decoration: underline;
+  &:hover {
+    color: #0056b3;
+  }
+`;
 export const NextBtnCancel = styled.button`
   box-sizing: border-box;
   text-decoration: none;

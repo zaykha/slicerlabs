@@ -49,14 +49,14 @@ const Navbar = ({ togglesidebar, userName }) => {
   const { isAuthenticated } = useSelector((state) => state.authentication);
 
   
-  const isAdmin = useSelector((state) => state.userDetails?.adminPrivileges);
+  const isAdmin = useSelector((state) => state.userDetails);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   const hasUndefinedProduct = cartItems.some(
     (item) => !item || !item.options || !item.options.ProductId
   );
 
   useEffect(() => {
-    console.log(userName)
+    console.log(isAdmin)
     setName(userName)
   }, [dispatch]);
   const handleLogout = () => {

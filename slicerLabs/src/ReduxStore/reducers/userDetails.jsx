@@ -18,7 +18,7 @@ const userDetailsReducer = (state = initialState, action) => {
       payloadKeys.forEach((key) => {
         if (state.hasOwnProperty(key)) {
           updatedState[key] = action.payload[key];
-        } 
+        }
         // else {
         //   // If key does not exist in current state, add it to the updatedState
         //   updatedState[key] = action.payload[key];
@@ -26,6 +26,13 @@ const userDetailsReducer = (state = initialState, action) => {
       });
 
       return updatedState;
+
+    case "UPDATE_EMAIL":
+      console.log(action.payload);
+      return {
+        ...state,
+        email: action.payload,
+      };
 
     case "RESET_USER_DETAILS":
       return initialState; // Reset the state to the initial value

@@ -318,6 +318,7 @@ const Cartpage = () => {
         userUID,
       });
     });
+    localStorage.setItem("TTLprice",JSON.stringify({totalPrice:TTLPriceBeforeRouting.toFixed(2)}));
     localStorage.setItem("TempItemsDetailsStorage",JSON.stringify(itemsForValidation));
     // // Check if there is any data in localStorage
     // if (storedItems) {

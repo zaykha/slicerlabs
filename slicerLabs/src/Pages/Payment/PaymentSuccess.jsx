@@ -223,8 +223,7 @@ const PaymentSuccess = () => {
             <DropzoneContainer>
               <UPHeaderFullline>Payment Successful</UPHeaderFullline>
               <UPFullline>
-                A confirmation email has been sent to {userDetails.email}, along
-                with all the details.
+                A confirmation email has been sent to {userDetails.email}.
               </UPFullline>
               <UPFullline>
                 Feel Free to Contact Us at support@silcerlabs.com
