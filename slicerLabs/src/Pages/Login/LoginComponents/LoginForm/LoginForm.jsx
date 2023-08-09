@@ -35,6 +35,8 @@ import { doc, getDoc } from "firebase/firestore";
 import RotatingLoader from "../../../../globalcomponents/DropDown/RotatingLoader";
 import SpinningLoader from "../../../../globalcomponents/DropDown/SpinningLoader";
 import PasswordResetPrompt from "./PasswordReset";
+import { EyeIcon, InputContainer, Inputelem } from "../../../Register/RegisterComponents/Registerformelement";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 const LoginForm = () => {
   const [email, onChangeEmail] = React.useState("");
@@ -43,11 +45,10 @@ const LoginForm = () => {
   const dispatch = useDispatch();
   const [password, onChangePassword] = React.useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
-  const [showPasswordResetPrompt, setShowPasswordResetPrompt] = useState(
-    false
-  );
+  const [showPasswordResetPrompt, setShowPasswordResetPrompt] = useState(false);
   const validateEmail = (inputEmail) => {
     if (!inputEmail) {
       return "Email field is required.";
@@ -58,7 +59,6 @@ const LoginForm = () => {
     return "";
   };
 
-  
   const handleForgotPasswordClick = () => {
     setShowPasswordResetPrompt(true);
   };
@@ -120,15 +120,15 @@ const LoginForm = () => {
           // docSnap.data() will be undefined in this case
           console.log("No such document!");
         }
-
+        navigate("/cart");
         // Return a promise after dispatching user details and authentication status
-        const navigationPromise = new Promise((resolve) => {
-          resolve();
-        });
-        // Use the returned promise to navigate after data is set
-        navigationPromise.then(() => {
-          cartItems.length > 0 ? navigate("/cart") : navigate("/");
-        });
+        // const navigationPromise = new Promise((resolve) => {
+        //   resolve();
+        // });
+        // // Use the returned promise to navigate after data is set
+        // navigationPromise.then(() => {
+        //   cartItems.length > 0 ? navigate("/cart") : navigate("/");
+        // });
         setIsLoggingIn(false);
       } catch (error) {
         alert(error.message);
@@ -200,49 +200,54 @@ const LoginForm = () => {
       <LoginContainer>
         <LoginHeader>Login</LoginHeader>
 
-        <LoginName
+        <Inputelem
           type="text"
           placeholder="Login Email"
           value={email}
           onChange={handleEmailChange}
-          borderColor={
-            emailError
-              ? "red"
-              : email !== ""
-              ? "green"
-              : null
-          }
+          borderColor={emailError ? "red" : email !== "" ? "green" : null}
         />
         {emailError && <div style={{ color: "red" }}>{emailError}</div>}
-        <LoginPassword
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={handlePasswordChange}
-          borderColor={
-            passwordError
-              ? "red"
-              : password !== ""
-              ? "green"
-              : null
-          }
-        />
+        <InputContainer>
+          <Inputelem
+            type={passwordVisible ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={handlePasswordChange}
+            borderColor={
+              passwordError ? "red" : password !== "" ? "green" : null
+            }
+          />
+          <EyeIcon onClick={() => setPasswordVisible(!passwordVisible)}>
+            {passwordVisible ? (
+              <AiOutlineEyeInvisible size={24} color="white" />
+            ) : (
+              <AiOutlineEye size={24} color="white" />
+            )}
+          </EyeIcon>
+        </InputContainer>
         {passwordError && <div style={{ color: "red" }}>{passwordError}</div>}
         <LoginFlexdiv>
           <RememberMe type="checkbox" />
           <RememberMelabel>Remember me</RememberMelabel>
 
-          {isLoggingIn?
-          <SpinningLoader/>
-          :<LoginBTN onClick={handleLogin}>Login</LoginBTN>}
+          {isLoggingIn ? (
+            <SpinningLoader />
+          ) : (
+            <LoginBTN onClick={handleLogin}>Login</LoginBTN>
+          )}
         </LoginFlexdiv>
 
         <LoginFlexdiv>
           <LoginLink to="/registerPage">Register Now</LoginLink>
-          <LoginLink2 onClick={handleForgotPasswordClick}>Forget Password?</LoginLink2>
+          <LoginLink2 onClick={handleForgotPasswordClick}>
+            Forget Password?
+          </LoginLink2>
         </LoginFlexdiv>
       </LoginContainer>
-      {showPasswordResetPrompt &&  <PasswordResetPrompt onClose={handleClosePasswordResetPrompt} />}
+      {showPasswordResetPrompt && (
+        <PasswordResetPrompt onClose={handleClosePasswordResetPrompt} />
+      )}
       <LoginShortcuts>
         <SocialDiv onClick={() => handleSSO("google")}>
           <SocialIcon src={googleicon}></SocialIcon>

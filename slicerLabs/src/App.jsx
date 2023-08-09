@@ -2,7 +2,11 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 // import { Route, Routes } from 'react-router-dom';
 import { Provider } from "react-redux";
 import store from "./ReduxStore/store";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  BrowserRouter,
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
 import Footer from "./globalcomponents/Footer/footer";
 import Navbar from "./globalcomponents/navbar/navbar";
 import Sidebar from "./globalcomponents/SidebarMenu/Sidebar";
@@ -17,7 +21,10 @@ import Services from "./Pages/Services/Services";
 import StartPrinting from "./Pages/StartPrinting/StartPrinting";
 import { db, usersCollection } from "./firebase";
 import { useDispatch } from "react-redux";
-import { resetUserDetails, setUserDetails } from "./ReduxStore/actions/userDetails";
+import {
+  resetUserDetails,
+  setUserDetails,
+} from "./ReduxStore/actions/userDetails";
 import { doc, getDoc } from "firebase/firestore";
 import { useSelector } from "react-redux";
 import { setAuthenticationStatus } from "./ReduxStore/actions/Authentication";
@@ -32,19 +39,24 @@ import { resetAddressDetails } from "./ReduxStore/reducers/MapServicesReducer";
 import { startAuthListener } from "./authListener";
 import TermsAndPolicies from "./Pages/Register/RegisterComponents/TermsAndPolicies";
 
-
 function App() {
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const dispatch = useDispatch();
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+  
+  const [isOpen, setIsOpen] = useState(false);
+  const togglesidebar = () => {
+     setIsOpen(!isOpen);
+  }  
   const [isLoading, setIsLoading] = useState(true);
   const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
   const userPurchasedItems = JSON.parse(unparsedStoreditems);
-  const successPaymentState = useSelector((state) => state.paymentState.isSuccessPaymentDone);
-
+  const successPaymentState = useSelector(
+    (state) => state.paymentState.isSuccessPaymentDone
+  );
+  const { isAuthenticated } = useSelector((state) => state.authentication);
+  const userDetails = useSelector((state) => state.userDetails);
+  const cartItems = useSelector((state) => state?.cartItems?.cartItems);
   const hasMountedRef = useRef(false);
   useEffect(() => {
     if (!hasMountedRef.current) {
@@ -105,12 +117,10 @@ function App() {
               );
               console.log("Document data in APP.jsx:", userDetailsData);
               const userDetails = userDetailsWithUid.userDetails.userDetails;
-              const AdminCheck = userDetailsWithUid.userDetails?.adminPrivileges;
-                setIsAdmin(AdminCheck)
-              if (
-                unparsedStoreditems &&
-                unparsedStoreditems.length > 0
-              ) {
+              const AdminCheck =
+                userDetailsWithUid.userDetails?.adminPrivileges;
+              setIsAdmin(AdminCheck);
+              if (unparsedStoreditems && unparsedStoreditems.length > 0) {
                 const { error } = usePaymentSuccessHandler(
                   user.uid,
                   userPurchasedItems,
@@ -126,28 +136,26 @@ function App() {
                   "localstorage has no purchased item and no purchase is made"
                 );
               }
-           } else {
+            } else {
               console.log("No such document!");
             }
             dispatch(setAuthenticationStatus(true));
-          
           } catch (error) {
             console.error("Error fetching calculatePrice function:", error);
           }
-        }else{
-           // User is logged out
-        dispatch(setAuthenticationStatus(false));
-        dispatch(resetCartCount());
-        dispatch(resetCartState());
-        dispatch(resetAddressDetails());
-        dispatch(resetUserDetails());
-        console.log("userloggedout",user)
+        } else {
+          // User is logged out
+          dispatch(setAuthenticationStatus(false));
+          dispatch(resetCartCount());
+          dispatch(resetCartState());
+          dispatch(resetAddressDetails());
+          dispatch(resetUserDetails());
+          console.log("userloggedout", user);
         }
-        setIsLoading(false); 
-        
+        setIsLoading(false);
       });
       hasMountedRef.current = true;
-     
+
       return () => {
         // Unsubscribe from the onAuthStateChanged listener when the component unmounts
         unsubscribe();
@@ -185,69 +193,178 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <HomePage />,
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar 
+          togglesidebar={togglesidebar} 
+          />
+          <HomePage />
+          <Footer />
+        </>
+      ),
     },
     {
       path: "/services",
-      element: <Services />,
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <Services />
+          <Footer />
+        </>
+      ),
     },
     {
       path: "/Materials",
-      element: <Materials />,
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <Materials />
+          <Footer />
+        </>
+      ),
     },
     {
       path: "/Learn",
-      element: <Learn />,
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <Learn />
+          <Footer />
+        </>
+      ),
     },
     {
       path: "/ContactUs",
-      element: <ContactUs />,
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <ContactUs />
+          <Footer />
+        </>
+      ),
     },
     {
       path: "/Login",
-      element: <Login />,
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <Login />
+          <Footer />
+        </>
+      ),
     },
     {
       path: "/registerPage",
-      element: <RegisterPage />,
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <RegisterPage />
+          <Footer />
+        </>
+      ),
     },
     {
       path: "/Start3dPrinting",
-      element: <StartPrinting />,
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <StartPrinting />
+          <Footer />
+        </>
+      ),
     },
     {
       path: "/DashBoard",
-      element: isAdmin? <TaskPage/>:<DashBoard />,
+      element: isAdmin ? (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar 
+          togglesidebar={togglesidebar} 
+          userDetails={userDetails}
+          cartItems={cartItems}
+          isAuthenticated={isAuthenticated}
+          />
+          <TaskPage />
+          <Footer />
+        </>
+      ) : (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar 
+          togglesidebar={togglesidebar} 
+          userDetails={userDetails}
+          cartItems={cartItems}
+          isAuthenticated={isAuthenticated}
+          />
+          <DashBoard />
+          <Footer />
+        </>
+      ),
     },
     {
       path: "/cart",
       element: (
-        <Cartpage
-        // showPrompt={showPrompt}
-        // handleOk={handleOk}
-        // handleHidePrompt={handleHidePrompt}
-        />
+        (
+          <>
+            <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+            <Navbar togglesidebar={togglesidebar} />
+            <Cartpage />
+            <Footer />
+          </>
+        )
       ),
     },
     {
       path: "/success",
-      element: <PaymentSuccess />,
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <PaymentSuccess />
+          <Footer />
+        </>
+      ),
     },
     {
       path: "/terms&policies",
-      element: <TermsAndPolicies />,
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <TermsAndPolicies />
+          <Footer />
+        </>
+      ),
     },
   ]);
 
   return (
-    <Provider store={store}>
-      {/* <CartCountContext.Provider value={{ cartCount, setCartCount }}> */}
-      {isLoading ? (
-          <div>Loading...</div>
-          ) : (
-      <RouterProvider router={router} />
-      )}
-    </Provider>
+    // <Provider store={store}>
+    //   {/* <CartCountContext.Provider value={{ cartCount, setCartCount }}> */}
+    //   {isLoading ? (
+    //       <div>Loading...</div>
+    //       ) : (
+    //         <>
+    //         <Navbar/>
+    //          <RouterProvider router={router} />
+    //          <Footer/>
+    //         </>
+
+    //   )}
+    // </Provider>
+    <>
+      <Provider store={store}>
+        <RouterProvider router={router}></RouterProvider>
+      </Provider>
+    </>
   );
 }
 

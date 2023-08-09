@@ -12,22 +12,18 @@ import ToServices from './HomepageComponents/ToServices/ToServices'
 
 const HomePage = () => {
 
-  const [isOpen, setIsOpen] = useState(false);
-  const togglesidebar = () => {
-     setIsOpen(!isOpen);
-  }  
 
   return (
     <HomepageContiner>
-        <Sidebar isOpen={isOpen} togglesidebar={togglesidebar}/>
-        <Navbar togglesidebar={togglesidebar}/>
+        {/* <Sidebar isOpen={isOpen} togglesidebar={togglesidebar}/>
+        <Navbar togglesidebar={togglesidebar}/> */}
         <Hero/>
         <HomeStats/>
         <InfoCTA/>
         <ToServices/>
         <ToMaterial/>
         <Testimonials/>
-        <Footer/>
+        {/* <Footer/> */}
     </HomepageContiner>
         
         

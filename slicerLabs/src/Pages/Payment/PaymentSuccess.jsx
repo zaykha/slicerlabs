@@ -25,10 +25,7 @@ import {
   Tocartflexdiv,
 } from "../StartPrinting/StartPrintingComponents/MaterialsOptions/MaterialsOptionselements";
 const PaymentSuccess = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const togglesidebar = () => {
-    setIsOpen(!isOpen);
-  };
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const aboveDivRef = useRef(null);
@@ -214,8 +211,7 @@ const PaymentSuccess = () => {
 
   return (
     <>
-      <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-      <Navbar togglesidebar={togglesidebar} />
+     
       {successPaymentState ? (
         <>
         <ContainerforResponse ref={aboveDivRef}>
@@ -259,7 +255,7 @@ const PaymentSuccess = () => {
       )}
     
       {/* Additional content for the success page */}
-      <Footer />
+     
     </>
   );
 };

@@ -10,14 +10,10 @@ import SMaterials from './ServicesComponents/SMaterials/SMaterials'
 import { Sheader1, SSpan } from './Serviceselement'
 
 const Services = () => {
-  const [isOpen, setIsOpen] = useState(false);
-    const togglesidebar = () => {
-       setIsOpen(!isOpen);
-    }
+  
   return (
     <>
-     <Sidebar isOpen={isOpen} togglesidebar={togglesidebar}/>
-        <Navbar togglesidebar={togglesidebar}/>
+  
       <Sheader1>OUR <SSpan> SERVICES</SSpan>
         </Sheader1>
       <ServicesHero/>
@@ -25,7 +21,7 @@ const Services = () => {
       <PApplications/>
       <SMaterials/>
       <OurWorks/>
-    <Footer/>
+ 
     </>
     
   )

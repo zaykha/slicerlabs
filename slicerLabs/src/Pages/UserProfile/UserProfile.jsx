@@ -54,12 +54,11 @@ import { stopAuthListener } from "../../authListener";
 import EditLoginDetailForm from "./EditLoginDetailForm";
 import EditPasswordForm from "./EditPasswordForm";
 import ProductConcernPrompt from "../../globalcomponents/ProductConcern/ProductConcernPrompt";
+import SpinningLoader from "../../globalcomponents/DropDown/SpinningLoader";
 
 export const DashBoard = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const togglesidebar = () => {
-    setIsOpen(!isOpen);
-  };
+
+  const [FetchingData, setFetchingData] = useState(false);
   // Initialize an array to store the retrieved documents
   const [purchaseInstances, setPurchaseInstances] = useState([]);
   const [productIssue, setProductIssue] = useState([]);
@@ -85,6 +84,7 @@ export const DashBoard = () => {
   // }, [userDetails])
 
   useEffect(() => {
+    setFetchingData(true);
     async function getPurchaseInstancesForUser(userId) {
       console.log("userDetails", userDetails);
       try {
@@ -111,7 +111,6 @@ export const DashBoard = () => {
     }
     async function getProductIssueForUser(userId) {
       try {
-       
         const q = query(
           ProductConcernCollection,
           where("userUID", "==", userId)
@@ -123,7 +122,7 @@ export const DashBoard = () => {
         querySnapshot.forEach((doc) => {
           // Extract the data from the document and add it to the array
           const ProductIssueDatatoPush = doc.data();
-          
+
           ProductIssueData.push(ProductIssueDatatoPush);
         });
         console.log("Product Issue", ProductIssueData);
@@ -146,7 +145,8 @@ export const DashBoard = () => {
     };
 
     fetchData(); // Call the function
-  }, []);
+    setFetchingData(false);
+  }, [FetchingData]);
 
   const EditFormClose = async () => {
     setLoading(true);
@@ -309,11 +309,6 @@ export const DashBoard = () => {
 
   return (
     <>
-      <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-      <Navbar
-        togglesidebar={togglesidebar}
-        userName={userDetails.userDetails.userName}
-      />
 
       <UPHeaderFullline1>
         Welcome {userDetails?.userDetails?.userName ?? ""}
@@ -333,13 +328,16 @@ export const DashBoard = () => {
         ) : (
           <DisplayHeader>No Outstanding Unshipped Items</DisplayHeader>
         )}
+
         {purchaseInstances.length > 0 ? (
-          purchaseInstances
-            .filter((item) => item.status !== "Delivered")
-            .map((purchaseInstance, index) => (
-              <div key={index}>
-                {purchaseInstance.purchasedItems.map((item) => (
-                  <InnerHeaderWrapper key={item.itemId}>
+          purchaseInstances.map((purchaseInstance, outerIndex) => (
+            <div key={outerIndex}>
+              {purchaseInstance.purchasedItems
+                .filter((item) => item.status !== "Delivered")
+                .map((item, index) => {             
+
+                  return (
+                    <InnerHeaderWrapper key={item.itemId}>
                     <InnerHeader>
                       <InnerLayerP> {item.fileName}</InnerLayerP>
                     </InnerHeader>
@@ -353,15 +351,18 @@ export const DashBoard = () => {
                       <InnerLayersP>Quantity of </InnerLayersP>
                       <InnerLayerP>{item.quantity}</InnerLayerP>
                     </InnerHeader>
-                    <InnerHeader>{purchaseInstance.approxDeliDate ||"TBD"}</InnerHeader>
+                    <InnerHeader>
+                      {purchaseInstance.approxDeliDate || "TBD"}
+                    </InnerHeader>
                     <InnerHeader>{item.status}</InnerHeader>
                     <InnerHeaderLeft>
                       SGD {item.price.toFixed(2)}
                     </InnerHeaderLeft>
                   </InnerHeaderWrapper>
-                ))}
-              </div>
-            ))
+                  );
+                })}
+            </div>
+          ))
         ) : (
           <></>
         )}
@@ -370,7 +371,11 @@ export const DashBoard = () => {
       <LoginFromcontainer>
         <ItemHeaderprofile>Purchase History</ItemHeaderprofile>
         {purchaseInstances.length > 0 &&
-        purchaseInstances[0].status === "Delivered" ? (
+        purchaseInstances.map((purchaseInstance) => {
+          purchaseInstance.purchasedItems.filter(
+            (item) => item.status == "Delivered"
+          );
+        }) ? (
           <InnerHeaderWrapper>
             <InnerHeader1></InnerHeader1>
             <DisplayHeader>Material & color</DisplayHeader>
@@ -381,34 +386,39 @@ export const DashBoard = () => {
         ) : (
           <DisplayHeader>No Items Have Been Delivered</DisplayHeader>
         )}
-
         {purchaseInstances.length > 0 ? (
-          purchaseInstances
-            .filter((item) => item.status === "Delivered")
-            .map((purchaseInstance, index) => (
-              <div key={index}>
-                {purchaseInstance.purchasedItems.map((item) => (
-                  <InnerHeaderWrapper key={item.itemId}>
-                    <InnerHeader>{item.fileName.substring(6)}</InnerHeader>
-                    <InnerHeader>
-                      <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
-                      <InnerLayersP>with</InnerLayersP>
-                      <InnerLayerP>
-                        {item.material} {item.dimensions.depth} x{" "}
-                        {item.dimensions.width} x {item.dimensions.height}
-                      </InnerLayerP>
-                      <InnerLayersP>Quantity of </InnerLayersP>
-                      <InnerLayerP>{item.quantity}</InnerLayerP>
-                    </InnerHeader>
-                    <InnerHeader>TBD</InnerHeader>
-                    <InnerHeader>{item.status}</InnerHeader>
-                    <InnerHeaderLeft>
-                      SGD {item.price.toFixed(2)}
-                    </InnerHeaderLeft>
-                  </InnerHeaderWrapper>
-                ))}
-              </div>
-            ))
+          purchaseInstances.map((purchaseInstance, outerIndex) => (
+            <div key={outerIndex}>
+              {purchaseInstance.purchasedItems
+                .filter((item) => item.status == "Delivered")
+                .map((item, index) => {
+                  return (
+                    <InnerHeaderWrapper key={item.itemId}>
+                      <InnerHeader>
+                        <InnerLayerP> {item.fileName}</InnerLayerP>
+                      </InnerHeader>
+                      <InnerHeader>
+                        <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
+                        <InnerLayersP>with</InnerLayersP>
+                        <InnerLayerP>
+                          {item.material} {item.dimensions.depth} x{" "}
+                          {item.dimensions.width} x {item.dimensions.height}
+                        </InnerLayerP>
+                        <InnerLayersP>Quantity of </InnerLayersP>
+                        <InnerLayerP>{item.quantity}</InnerLayerP>
+                      </InnerHeader>
+                      <InnerHeader>
+                        {purchaseInstance.approxDeliDate || "TBD"}
+                      </InnerHeader>
+                      <InnerHeader>{item.status}</InnerHeader>
+                      <InnerHeaderLeft>
+                        SGD {item.price.toFixed(2)}
+                      </InnerHeaderLeft>
+                    </InnerHeaderWrapper>
+                  );
+                })}
+            </div>
+          ))
         ) : (
           <></>
         )}
@@ -416,14 +426,16 @@ export const DashBoard = () => {
 
       <LoginFromcontainer>
         <ItemHeaderprofile>Product Concern</ItemHeaderprofile>
+        {FetchingData ? (
+          <SpinningLoader />
+        ) : (
+          <>
         <InnerHeaderWrapper>
           <DisplayHeader></DisplayHeader>
           <DisplayHeader>Product Details</DisplayHeader>
           <DisplayHeader>Status</DisplayHeader>
           <DisplayHeader>Last updated</DisplayHeader>
           <DisplayHeader>Note</DisplayHeader>
-         
-
         </InnerHeaderWrapper>
 
         {purchaseInstances.length > 0 ? (
@@ -432,32 +444,33 @@ export const DashBoard = () => {
             .map((purchaseInstance, index) => (
               <div key={index}>
                 {purchaseInstance.purchasedItems.map((item) =>
-                productIssue.map((issue)=>{
-                  if(issue.productId === item.itemId){
-                    return(
-                      <InnerHeaderWrapper key={item.itemId}>
-                        <InnerHeader>
-                          <InnerLayerP> {item.fileName}</InnerLayerP>
-                        </InnerHeader>
-                        <InnerHeader>
-                          <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
-                          <InnerLayersP>with</InnerLayersP>
-                          <InnerLayerP>
-                            {item.material} {item.dimensions.depth} x{" "}
-                            {item.dimensions.width} x {item.dimensions.height}
-                          </InnerLayerP>
-                          <InnerLayersP>Quantity of </InnerLayersP>
-                          <InnerLayerP>{item.quantity}</InnerLayerP>
-                        </InnerHeader>
-                        <InnerHeader>{issue.status || "pending"}</InnerHeader>
-                        <InnerHeader>{issue.lastUpdate || ""}</InnerHeader>
-                        <InnerHeader>{issue.concernNote}</InnerHeader>
-                      
-                      </InnerHeaderWrapper>
-                    )
-                  }
-                })
-                  )}
+                  productIssue.map((issue) => {
+                    if (issue.productId === item.itemId) {
+                      return (
+                        <InnerHeaderWrapper key={item.itemId}>
+                          <InnerHeader>
+                            <InnerLayerP> {item.fileName}</InnerLayerP>
+                          </InnerHeader>
+                          <InnerHeader>
+                            <InnerLayerP>
+                              FDM Printing({item.color})
+                            </InnerLayerP>
+                            <InnerLayersP>with</InnerLayersP>
+                            <InnerLayerP>
+                              {item.material} {item.dimensions.depth} x{" "}
+                              {item.dimensions.width} x {item.dimensions.height}
+                            </InnerLayerP>
+                            <InnerLayersP>Quantity of </InnerLayersP>
+                            <InnerLayerP>{item.quantity}</InnerLayerP>
+                          </InnerHeader>
+                          <InnerHeader>{issue.status || "pending"}</InnerHeader>
+                          <InnerHeader>{issue.lastUpdate || ""}</InnerHeader>
+                          <InnerHeader>{issue.concernNote}</InnerHeader>
+                        </InnerHeaderWrapper>
+                      );
+                    }
+                  })
+                )}
               </div>
             ))
         ) : (
@@ -466,6 +479,7 @@ export const DashBoard = () => {
         <StyledAddButton onClick={handleProductConcernClick}>
           <span style={plusSignStyle}>+</span>
         </StyledAddButton>
+        </>)}
       </LoginFromcontainer>
 
       {Loading ? (
@@ -521,7 +535,6 @@ export const DashBoard = () => {
           </EditIconLoginDetails1>
         </InnerHeaderWrapper>
         <NextBtn onClick={handleLogout}>logout</NextBtn>
-        
       </LoginFromcontainer>
 
       {isProductConcernFormOpen && (
@@ -556,7 +569,7 @@ export const DashBoard = () => {
           onClose={EditPasswordFormClose} // Function to close the form
         />
       )}
-      <Footer />
+      
     </>
   );
 };

@@ -386,8 +386,7 @@ const Cartpage = () => {
   };
   return (
     <>
-      <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-      <Navbar togglesidebar={togglesidebar} />
+     
       <CUheader>
         Shopping <SSpan>Cart</SSpan>
       </CUheader>
@@ -496,7 +495,7 @@ const Cartpage = () => {
       
       {/* <NextBtn onClick={handleDeleteAllRecords}>deleteAllFromIDB</NextBtn> */}
 
-      <Footer />
+     
     </>
   );
 };

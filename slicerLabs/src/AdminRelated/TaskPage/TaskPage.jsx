@@ -26,6 +26,7 @@ import {
 } from "../../Pages/UserProfile/UserProfileElement";
 import { LoginFromcontainer } from "../../Pages/Login/LoginComponents/LoginForm/LoginFormelements";
 import {
+  ProductConcernCollection,
   PurchasedItemsCollection,
   db,
   firestore,
@@ -49,15 +50,22 @@ import Footer from "../../globalcomponents/Footer/footer";
 import { fetchAddressDetails } from "../../globalcomponents/MapServices/MapServices";
 import StatusDropdown from "../../globalcomponents/DropDown/customDropDown";
 import SpinningLoader from "../../globalcomponents/DropDown/SpinningLoader";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { setAuthenticationStatus } from "../../ReduxStore/actions/Authentication";
+import { resetCartCount } from "../../ReduxStore/actions/cartCountActions";
+import { resetCartState } from "../../ReduxStore/reducers/CartItemReducer";
+import { resetAddressDetails } from "../../ReduxStore/reducers/MapServicesReducer";
+import { resetUserDetails } from "../../ReduxStore/actions/userDetails";
 
 const TaskPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [FetchingData, setFetchingData] = useState(false);
   const [statusUpdateInProgress, setStatusUpdateInProgress] = useState(false);
-
+  const [productIssue, setProductIssue] = useState([]);
   const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
   const [totalItemToDisplay, settotalItemToDisplay] = useState(0);
   const [TotalDeliveredItems, setTotalDeliveredItems] = useState(0);
+  const [TotalIssueItems, setTotalIssueItems] = useState(0);
   const [pendingPrintJobs, setPendingPrintJobs] = useState([]);
   const [purchaseInstances, setPurchaseInstances] = useState([]);
   const [Loading, setLoading] = useState(false);
@@ -68,6 +76,8 @@ const TaskPage = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
   const [formattedAddresses, setFormattedAddresses] = useState([]);
+  const [itemStatuses, setItemStatuses] = useState({});
+  const [itemIssueStatuses, setItemIssueStatuses] = useState({});
   const statusOptions = [
     "Pre-Printing Procedures",
     "Printing",
@@ -75,6 +85,17 @@ const TaskPage = () => {
     "Ready To Deliver",
     "Delivered",
   ];
+  const issueOptions = [
+    "Pending",
+    "Under Review",
+    "Investigating",
+    "Pending Resolution",
+    "Solution Proposed",
+    "Customer Feedback",
+    "Resolved",
+    "Closed"
+  ];
+  const cartItems = useSelector((state) => state.cartItems.cartItems);
   let itemCountChecker = 0;
   let DelivereditemCountChecker = 0;
   async function getPurchaseInstancesForUser(userId) {
@@ -84,6 +105,7 @@ const TaskPage = () => {
       const addresses = [];
       let purchaseTotalItems = 0;
       let purchaseTotalDeliveredItems = 0;
+      
       // Loop through the snapshot and extract the data from each document
       for (const doc of querySnapshot.docs) {
         const purchaseInstanceData = doc.data();
@@ -140,17 +162,49 @@ const TaskPage = () => {
       setPurchaseInstances([]); // Set an empty array if an error occurs
     }
   }
-  const [itemStatuses, setItemStatuses] = useState({});
+ 
+  async function getProductIssueForUser(userId) {
+    try {
+      let purchasedIssueItems =0;
+     
+      const querySnapshot = await getDocs(ProductConcernCollection, userId);
+      // const querySnapshot = await getDocs(q);
+      // console.log(querySnapshot)
+      const ProductIssueData = [];
+      // Loop through the snapshot and extract the data from each document
+      querySnapshot.forEach((doc) => {
+        // Extract the data from the document and add it to the array
+        const ProductIssueDatatoPush = doc.data();
+        
+        ProductIssueData.push(ProductIssueDatatoPush);
+      });
+      console.log("Product Issue", ProductIssueData);
+      ProductIssueData.map((instance) => {
+       
+          if (instance.status) {
+            purchasedIssueItems++;
+          } else {
+            return console.log("no issue attached");
+          }
+        
+      });
+      setTotalIssueItems(purchasedIssueItems);
+      setProductIssue(ProductIssueData);
+    } catch (error) {
+      console.error("Error retrieving Product Issue:", error);
+      return []; // Return an empty array if an error occurs
+    }
+  }
   useEffect(() => {   
     // Call the function on component mount
     if (!FetchingData && !statusUpdateInProgress) {
       // setFetchingData(true);
       getPurchaseInstancesForUser(userUIDInLocalStorage);
       // setFetchingData(false);
+      getProductIssueForUser(userUIDInLocalStorage);
     }
   }, [FetchingData, statusUpdateInProgress]);
   // Function to handle status change
-
 
   const toggleDropdown = (index) => {
     setOpenDropdownIndex((prevIndex) => (prevIndex === index ? null : index));
@@ -199,17 +253,124 @@ const TaskPage = () => {
     // setFetchingData(false);
   };
 
+  const handleIssueStatusChange = async (selectedOption, itemId) => {
+    setStatusUpdateInProgress(true);
+    // setFetchingData(true);
+    try {
+      setItemIssueStatuses((prevStatuses) => ({
+        ...prevStatuses,
+        [itemId]: selectedOption,
+      }));
+      
+      // Get the reference to the document containing the purchasedItems array
+      const querySnapshot = await getDocs(
+        ProductConcernCollection,
+        userUIDInLocalStorage
+      );
 
-  // Function to update print job status
-  const updatePrintJobStatus = (printJobId, newStatus) => {
-    // Update print job status in Firebase Firestore here
+      for (const doc of querySnapshot.docs) {
+        const ProductConcernData = doc.data();
+        const updatedItems = ProductConcernData.map((item) => {
+          if (item.itemId === itemId) {
+            return {
+              ...item,
+              status: selectedOption,
+            };
+          }
+          return item;
+        });
+
+        // Update the Firestore document with the updated items
+        await updateDoc(doc.ref, { updatedItems });
+      }
+      setStatusUpdateInProgress(false);
+    } catch (error) {
+      console.error("Error updating status:", error);
+      setFetchingData(false)
+    }
+    setOpenDropdownIndex(null);
+    setStatusUpdateInProgress(false);
+    // setFetchingData(false);
+  };
+  const handleLogout = () => {
+    const auth = getAuth();
+    // Prompt the user for confirmation before logging out
+    let confirmClearTempItems = false;
+    if (cartItems.length > 0) {
+      const confirmClearCart = window.confirm(
+        "You have items in your cart that are not checked out. Proceeding with logout will remove these items. Are you sure you want to continue?"
+      );
+
+      if (!confirmClearCart) {
+        return; // Abort logout if user cancels
+      }
+      confirmClearTempItems = true;
+    } else {
+      const confirmLogout = window.confirm("Are you sure you want to log out?");
+      if (!confirmLogout) {
+        return; // Abort logout if user cancels
+      }
+      confirmClearTempItems = true;
+    }
+
+    signOut(auth)
+      .then(() => {
+        const unsubscribe = onAuthStateChanged(
+          auth,
+          (user) => {
+            // This callback function will be triggered when the auth state changes
+            // However, we're only interested in the logout event here
+            if (!user) {
+              try {
+                unsubscribe(); // Unsubscribe to avoid further notifications
+
+                // Clear localStorage based on user confirmation
+                if (confirmClearTempItems) {
+                  // Get the calculatePriceFunction from localStorage
+                  const calculatePriceFunction = localStorage.getItem(
+                    "calculatePriceFunction"
+                  );
+
+                  localStorage.clear();
+                  if (calculatePriceFunction) {
+                    localStorage.setItem(
+                      "calculatePriceFunction",
+                      calculatePriceFunction
+                    );
+                  }
+                  console.log("logout");
+                  // Reset redux store and navigate
+                  dispatch(setAuthenticationStatus(false));
+                  dispatch(resetCartCount());
+                  dispatch(resetCartState());
+                  dispatch(resetAddressDetails());
+                  dispatch(resetUserDetails());
+
+                  navigate("/");
+                }
+              } catch (error) {
+                console.error("Error during logout:", error);
+              }
+            }
+          },
+          (error) => {
+            // Handle any error that occurs while listening for the auth state changes
+            console.error("Error in onAuthStateChanged:", error);
+          }
+        );
+      })
+      .catch((error) => {
+        // An error happened.
+        console.error("Error in signout:", error);
+      });
+
+    // Unsubscribe from the onAuthStateChanged listener
   };
 
   // Your rendering logic here
   return (
     <>
-      <Sidebar isOpen={isOpen} togglesidebar={toggleSidebar} />
-      <Navbar togglesidebar={toggleSidebar} />
+      
 
       <UPHeaderFullline1>Admin Task Page</UPHeaderFullline1>
 
@@ -380,41 +541,66 @@ const TaskPage = () => {
         <ItemHeaderprofile>Issue Status</ItemHeaderprofile>
         <InnerHeaderWrapper>
           <DisplayHeader></DisplayHeader>
-          <DisplayHeader>Material & color</DisplayHeader>
-          <DisplayHeader>Dimension</DisplayHeader>
+          <DisplayHeader>Product Details</DisplayHeader>         
           <DisplayHeader>Status</DisplayHeader>
           <DisplayHeader>Last updated</DisplayHeader>
           <DisplayHeader>Note</DisplayHeader>
         </InnerHeaderWrapper>
 
-        <InnerHeaderWrapper>
-          <InnerHeader>Ticket 1</InnerHeader>
-          <InnerHeader>
-            <InnerLayerP>FDM Printing(Black)</InnerLayerP>
-            <InnerLayersP>with</InnerLayersP>
-            <InnerLayerP>ABS</InnerLayerP>
-          </InnerHeader>
-          <InnerHeader>10 x 10 x 10</InnerHeader>
-          <InnerHeader>Resolved</InnerHeader>
-          <InnerHeaderLeft>25th July 2023</InnerHeaderLeft>
-          <InnerHeader>Printed wrong dimension</InnerHeader>
-        </InnerHeaderWrapper>
-
-        <InnerHeaderWrapper>
-          <InnerHeader>Ticket 2</InnerHeader>
-          <InnerHeader>
-            <InnerLayerP>FDM Printing(Transparent)</InnerLayerP>
-            <InnerLayersP>with</InnerLayersP>
-            <InnerLayerP>PLA</InnerLayerP>
-          </InnerHeader>
-          <InnerHeader>10 x 10 x 10</InnerHeader>
-          <InnerHeader>Resolved</InnerHeader>
-          <InnerHeaderLeft>15th July 2023</InnerHeaderLeft>
-          <InnerHeader>Printed wrong material</InnerHeader>
-        </InnerHeaderWrapper>
-        <StyledAddButton to="/">
+        {purchaseInstances.length > 0 ? (
+          purchaseInstances
+            .filter((item) => item.status !== "Delivered")
+            .map((purchaseInstance, index) => (
+              <div key={index}>
+                {purchaseInstance.purchasedItems.map((item) =>
+                productIssue.map((issue)=>{
+                  if(issue.productId === item.itemId){
+                    return(
+                      <InnerHeaderWrapper key={item.itemId}>
+                        <InnerHeader>
+                          <InnerLayerP> {item.fileName}</InnerLayerP>
+                        </InnerHeader>
+                        <InnerHeader>
+                          <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
+                          <InnerLayersP>with</InnerLayersP>
+                          <InnerLayerP>
+                            {item.material} {item.dimensions.depth} x{" "}
+                            {item.dimensions.width} x {item.dimensions.height}
+                          </InnerLayerP>
+                          <InnerLayersP>Quantity of </InnerLayersP>
+                          <InnerLayerP>{item.quantity}</InnerLayerP>
+                        </InnerHeader>
+                        <InnerHeader>
+                        <StatusDropdown
+                          options={issueOptions}
+                          selectedOption={itemIssueStatuses[item.productId]}
+                          onSelect={(selectedOption) =>
+                            handleIssueStatusChange(selectedOption, item.productId)
+                          }
+                          isOpen={openDropdownIndex === item.productId}
+                          onClick={() => toggleDropdown(item.productId)}
+                          isLastItemTrue={
+                            DelivereditemCountChecker === TotalIssueItems
+                          }
+                          itemCount={TotalIssueItems}
+                        />
+                      </InnerHeader>
+                        <InnerHeader>{issue.lastUpdate || ""}</InnerHeader>
+                        <InnerHeader>{issue.concernNote}</InnerHeader>
+                      
+                      </InnerHeaderWrapper>
+                    )
+                  }
+                })
+                  )}
+              </div>
+            ))
+        ) : (
+          <></>
+        )}
+        {/* <StyledAddButton to="/">
           <span style={plusSignStyle}>+</span>
-        </StyledAddButton>
+        </StyledAddButton> */}
       </LoginFromcontainer>
 
       {/* {Loading ? (
@@ -462,7 +648,7 @@ const TaskPage = () => {
       </LoginFromcontainer>
     )} */}
 
-      <Footer />
+<NextBtn onClick={handleLogout}>logout</NextBtn>
     </>
   );
 };

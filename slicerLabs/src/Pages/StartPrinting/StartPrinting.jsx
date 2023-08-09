@@ -31,11 +31,6 @@ const StartPrinting = () => {
   const [isAddedToCart, setIsAddedToCart] = useState(cart.cartItems.length > 0);
   const [isFormFilled, setisFormFilled] = useState(false);
   const StoreItems = useSelector((state) => state.cartItems.cartItems);
-
-  const [isOpen, setIsOpen] = useState(false);
-  const togglesidebar = () => {
-    setIsOpen(!isOpen);
-  };
   const [tempModelId, setTempModelId] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const navigate = useNavigate();
@@ -112,8 +107,7 @@ const StartPrinting = () => {
           </PMAlertBox>
         </PMContainer>
       )}
-      <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-      <Navbar togglesidebar={togglesidebar} />
+      
       <CUheader>
         UPLOAD <SSpan>FILE</SSpan>
       </CUheader>
@@ -181,7 +175,7 @@ const StartPrinting = () => {
       ) : (
         <></>
       )}
-      <Footer />
+   
     </>
   );
 };

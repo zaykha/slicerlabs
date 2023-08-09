@@ -6,17 +6,13 @@ import ContactUsForm from './ContactUsComponents/ContactUSForm/ContactUsForm'
 import ContactUsHero from './ContactUsComponents/ContactUsHero/ContactUsHero'
 
 const ContactUs = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const togglesidebar = () => {
-     setIsOpen(!isOpen);
-  }  
+ 
   return (
     <>
-      <Sidebar isOpen={isOpen} togglesidebar={togglesidebar}/>
-      <Navbar togglesidebar={togglesidebar}/>
+      
       <ContactUsHero/>
       <ContactUsForm/>
-      <Footer/>
+ 
     </>
   )
 }

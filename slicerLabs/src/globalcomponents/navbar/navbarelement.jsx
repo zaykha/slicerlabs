@@ -132,7 +132,7 @@ export const NavLinks = styled(LinkR)`
   padding: 0 1rem;
   // height: 100%;
   cursor: pointer;
-  transition: all 0.4s ease-in-out;
+  // transition: all 0.4s ease-in-out;
 
   &:hover {
     color: #fff;
@@ -145,7 +145,7 @@ export const NavLinks = styled(LinkR)`
     padding: 3px 20px;
     color: #275e78;
     border: 1px solid #275e78;
-    transition: background-color 1s ease-in-out, border-radius 0.4s ease-in-out;
+    // transition: background-color 1s ease-in-out, border-radius 0.4s ease-in-out;
   }
 `;
 export const NavLinks1 = styled(LinkR)`
@@ -278,4 +278,15 @@ export const DropdownContent = styled.div`
   ${DropdownContainer}:hover & {
     display: block;
   }
+`;
+export const CancelIcon = styled.div`
+ position:absolute;
+ top: 40px;
+ left:92%;
+ font-size:1.3rem;
+ color:white;
+ cursor:pointer;
+ &:hover {
+  color: lightblue;
+}
 `;

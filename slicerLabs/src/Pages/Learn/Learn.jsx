@@ -10,20 +10,16 @@ import { ToBlogs } from './LearnComponents/ToBlogs/ToBlogs'
 
 const Learn = () => {
 
-  const [isOpen, setIsOpen] = useState(false);
-  const togglesidebar = () => {
-     setIsOpen(!isOpen);
-  }  
+
   return (
     <>
-      <Sidebar isOpen={isOpen} togglesidebar={togglesidebar}/>
-        <Navbar togglesidebar={togglesidebar}/>
+ 
       <LearnHero/>
       <ToBlogs/>
       <LearnTech/>
       <LearnMaterials/>
       <LearnServices/>
-      <Footer/>
+   
     </>
   )
 }

@@ -6,17 +6,13 @@ import { Welcometext } from '../Login/LoginComponents/LoginForm/LoginFormelement
 import Registerform from './RegisterComponents/Registerform'
 
 const RegisterPage = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const togglesidebar = () => {
-       setIsOpen(!isOpen);
-    }  
+ 
   return (
     <>
-       <Sidebar isOpen={isOpen} togglesidebar={togglesidebar}/>
-        <Navbar togglesidebar={togglesidebar}/>
+     
       <Welcometext>Welcome!</Welcometext>
       <Registerform/>
-      <Footer/>
+    
     </>
   )
 }

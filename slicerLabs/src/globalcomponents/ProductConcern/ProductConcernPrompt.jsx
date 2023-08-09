@@ -15,6 +15,7 @@ import {
 } from "../../Pages/UserProfile/UserProfileElement";
 import { doc, setDoc } from "firebase/firestore";
 import { ProductConcernCollection } from "../../firebase";
+import { CancelIcon } from "../navbar/navbarelement";
 
 const PromptContainer = styled.div`
   display: flex;
@@ -173,6 +174,7 @@ const ProductConcernPrompt = ({
   return (
     <PopupContainer>
       <LoginFromcontainer>
+        <CancelIcon onClick={onClose}>X</CancelIcon>
         <LoginHeader>Report Issue with Product</LoginHeader>
         <RegsubHeader>Choose a Faulty Product</RegsubHeader>
 
@@ -181,22 +183,37 @@ const ProductConcernPrompt = ({
           value={selectedProduct}
           onChange={handleProductChange}
         >
-          <option value="">Select a product</option>
+          {purchaseInstances.length > 0 &&
+          purchaseInstances.map((purchaseInstance) => {
+            purchaseInstance.purchasedItems.filter(
+              (item) => item.status === "Delivered"
+            );
+          }) ? (
+            <option value=""> Select an Item </option>
+          ) : (
+            <option value="">No Items Have Been Delivered</option>
+          )}
+
           {purchaseInstances.length > 0 ? (
-            purchaseInstances
-              .filter((item) => item.status !== "Delivered")
-              .map((purchaseInstance, index) =>
-                purchaseInstance.purchasedItems.map((item) => (
-                  <option key={item.itemId} value={item.itemId}>
-                    {item.fileName}
-                  </option>
-                ))
-              )
+            purchaseInstances.map((purchaseInstance, outerIndex) => (
+             
+                purchaseInstance.purchasedItems
+                  .filter((item) => item.status == "Delivered")
+                  .map((item, index) => {
+                    return (
+                      <option key={item.itemId} value={item.itemId}>
+                        {item.fileName}
+                      </option>
+                    );
+                  })
+           
+            ))
           ) : (
             <></>
           )}
         </SelectProduct>
 
+            {selectedProduct !== ""?<>
         <StepContainer>
           <RegsubHeader>Describe the Issue:</RegsubHeader>
           <IssueDescription
@@ -207,8 +224,9 @@ const ProductConcernPrompt = ({
         </StepContainer>
         <ButtonContainer>
           <NextBtn onClick={handleSubmit}>Submit</NextBtn>
-          <NextBtnCancel onClick={onClose}>Cancel</NextBtnCancel>
+          {/* <NextBtnCancel onClick={onClose}>Cancel</NextBtnCancel> */}
         </ButtonContainer>
+        </>:<></>}
       </LoginFromcontainer>
     </PopupContainer>
   );

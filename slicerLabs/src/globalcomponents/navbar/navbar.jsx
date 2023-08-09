@@ -40,7 +40,12 @@ const NavLinksarray = [
   // { title: "Login", path: "/login" },
 ];
 
-const Navbar = ({ togglesidebar, userName }) => {
+const Navbar = ({
+  togglesidebar,
+  // userDetails,
+  // cartItems,
+  // isAuthenticated
+}) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -48,17 +53,34 @@ const Navbar = ({ togglesidebar, userName }) => {
   const [name, setName] = useState("");
   const { isAuthenticated } = useSelector((state) => state.authentication);
 
-  
-  const isAdmin = useSelector((state) => state.userDetails);
-  const cartItems = useSelector((state) => state.cartItems.cartItems);
-  const hasUndefinedProduct = cartItems.some(
+  const isAdmin = useSelector((state) => state.userDetails?.adminPrivileges);
+  const userName = useSelector((state) => state.userDetails?.userName);
+  const cartItems = useSelector((state) => state.cartItems?.cartItems);
+  const hasUndefinedProduct = cartItems?.some(
     (item) => !item || !item.options || !item.options.ProductId
   );
 
   useEffect(() => {
-    console.log(isAdmin)
-    setName(userName)
-  }, [dispatch]);
+    if (isLoading) {
+      // Set loading to true initially
+      setIsLoading(true);
+  
+      // const timeoutId = setTimeout(() => {
+      //   console.log(userName);
+      //   setName(userName);
+      //   if (isAdmin) {
+      //     console.log(userName);
+      //   }
+        
+      //   // Set loading to false after the timeout
+      //   setIsLoading(false);
+      // }, 5000);
+  
+      // Clean up the timeout if the component unmounts or isLoading changes
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isLoading, userName, isAdmin]);
+  
   const handleLogout = () => {
     localStorage.clear();
 
@@ -94,8 +116,8 @@ const Navbar = ({ togglesidebar, userName }) => {
                   </NavLinks>
                 </NavItem>
               ))}
-              {isAuthenticated ? (
-                isAdmin ? (
+              {!isLoading && isAuthenticated ? (
+                !isLoading && isAdmin ? (
                   <NavItem>
                     <DropdownContainer>
                       <NavLinks
@@ -123,7 +145,7 @@ const Navbar = ({ togglesidebar, userName }) => {
                       className={pathname === "/DashBoard" ? "active" : ""}
                       // isactive={pathname === "/login"}
                     >
-                      <p>{name ? name : "Profile"}</p>
+                      <p>{userName ? userName : "Profile"}</p>
                     </NavLinks>
                   </NavItem>
                 )
@@ -150,26 +172,26 @@ const Navbar = ({ togglesidebar, userName }) => {
               >
                 {pathname === "/Start3dPrinting"
                   ? "3D Printing"
-                  : cartItems.length > 0
+                  : cartItems?.length > 0
                   ? "Add More Items"
                   : "Start 3D Printing"}
               </NavLinks1>
             </ActionItems>
 
             <ActionItems>
-              {hasUndefinedProduct ? (
+              {hasUndefinedProduct && !isLoading ? (
                 <NavLinks
                   onClick={() =>
                     alert("Please fill in the material details first.")
                   }
                 >
                   <IMGTAG1 src={cart} alt="cart" />
-                  {cartItems.length > 0 && <span>{cartItems.length}</span>}
+                  {cartItems?.length > 0 && <span>{cartItems.length}</span>}
                 </NavLinks>
               ) : (
                 <NavLinks to="/cart">
                   <IMGTAG1 src={cart} alt="cart" />
-                  {cartItems.length > 0 && <span>{cartItems.length}</span>}
+                  {cartItems?.length > 0 && <span>{cartItems.length}</span>}
                 </NavLinks>
               )}
             </ActionItems>
