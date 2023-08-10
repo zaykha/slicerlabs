@@ -38,16 +38,17 @@ import { resetCartState } from "./ReduxStore/reducers/CartItemReducer";
 import { resetAddressDetails } from "./ReduxStore/reducers/MapServicesReducer";
 import { startAuthListener } from "./authListener";
 import TermsAndPolicies from "./Pages/Register/RegisterComponents/TermsAndPolicies";
+import BlogPage from "./AdminRelated/BlogPage/BlogPage";
 
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const dispatch = useDispatch();
-  
+
   const [isOpen, setIsOpen] = useState(false);
   const togglesidebar = () => {
-     setIsOpen(!isOpen);
-  }  
+    setIsOpen(!isOpen);
+  };
   const [isLoading, setIsLoading] = useState(true);
   const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
   const userPurchasedItems = JSON.parse(unparsedStoreditems);
@@ -100,12 +101,13 @@ function App() {
               "calculatePriceFunction",
               calculatePriceString
             );
+            // console.log("useeffect triggered");
             // Continue with your other logic
             const USERUID = user.uid;
             const userDetailsRef = doc(usersCollection, USERUID);
             const docSnap = await getDoc(userDetailsRef);
             if (docSnap.exists()) {
-              const userDetailsData = docSnap.data();
+              const userDetailsData = docSnap.data().userDetails;
               const userDetailsWithUid = {
                 ...userDetailsData,
                 // userUID: docSnap.id,
@@ -113,13 +115,13 @@ function App() {
               dispatch(setUserDetails(userDetailsData));
               localStorage.setItem(
                 "userDetails",
-                JSON.stringify(userDetailsWithUid)
+                JSON.stringify(userDetailsData)
               );
               console.log("Document data in APP.jsx:", userDetailsData);
               const userDetails = userDetailsWithUid.userDetails.userDetails;
-              const AdminCheck =
-                userDetailsWithUid.userDetails?.adminPrivileges;
+              const AdminCheck = userDetailsData?.adminPrivileges;
               setIsAdmin(AdminCheck);
+              console.log(AdminCheck);
               if (unparsedStoreditems && unparsedStoreditems.length > 0) {
                 const { error } = usePaymentSuccessHandler(
                   user.uid,
@@ -145,6 +147,7 @@ function App() {
           }
         } else {
           // User is logged out
+          setIsAdmin(false)
           dispatch(setAuthenticationStatus(false));
           dispatch(resetCartCount());
           dispatch(resetCartState());
@@ -196,9 +199,7 @@ function App() {
       element: (
         <>
           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-          <Navbar 
-          togglesidebar={togglesidebar} 
-          />
+          <Navbar togglesidebar={togglesidebar} />
           <HomePage />
           <Footer />
         </>
@@ -283,14 +284,14 @@ function App() {
     },
     {
       path: "/DashBoard",
-      element: isAdmin ? (
+      element: userDetails.adminPrivileges ? (
         <>
           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-          <Navbar 
-          togglesidebar={togglesidebar} 
-          userDetails={userDetails}
-          cartItems={cartItems}
-          isAuthenticated={isAuthenticated}
+          <Navbar
+            togglesidebar={togglesidebar}
+            userDetails={userDetails}
+            cartItems={cartItems}
+            isAuthenticated={isAuthenticated}
           />
           <TaskPage />
           <Footer />
@@ -298,11 +299,11 @@ function App() {
       ) : (
         <>
           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-          <Navbar 
-          togglesidebar={togglesidebar} 
-          userDetails={userDetails}
-          cartItems={cartItems}
-          isAuthenticated={isAuthenticated}
+          <Navbar
+            togglesidebar={togglesidebar}
+            userDetails={userDetails}
+            cartItems={cartItems}
+            isAuthenticated={isAuthenticated}
           />
           <DashBoard />
           <Footer />
@@ -310,16 +311,25 @@ function App() {
       ),
     },
     {
+      path: "/blog",
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <BlogPage />
+          <Footer />
+        </>
+      ),
+    },
+    {
       path: "/cart",
       element: (
-        (
-          <>
-            <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-            <Navbar togglesidebar={togglesidebar} />
-            <Cartpage />
-            <Footer />
-          </>
-        )
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <Cartpage />
+          <Footer />
+        </>
       ),
     },
     {
@@ -347,24 +357,14 @@ function App() {
   ]);
 
   return (
-    // <Provider store={store}>
-    //   {/* <CartCountContext.Provider value={{ cartCount, setCartCount }}> */}
-    //   {isLoading ? (
-    //       <div>Loading...</div>
-    //       ) : (
-    //         <>
-    //         <Navbar/>
-    //          <RouterProvider router={router} />
-    //          <Footer/>
-    //         </>
-
-    //   )}
-    // </Provider>
-    <>
-      <Provider store={store}>
-        <RouterProvider router={router}></RouterProvider>
-      </Provider>
-    </>
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
+    // <>
+    //   <Provider store={store}>
+    //     <RouterProvider router={router}></RouterProvider>
+    //   </Provider>
+    // </>
   );
 }
 

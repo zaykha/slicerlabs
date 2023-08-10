@@ -111,18 +111,22 @@ export const DashBoard = () => {
     }
     async function getProductIssueForUser(userId) {
       try {
-        const q = query(
-          ProductConcernCollection,
-          where("userUID", "==", userId)
-        );
-        const querySnapshot = await getDocs(q);
-        // console.log(querySnapshot)
+        // const q = query(
+        //   ProductConcernCollection,
+        //   where("userUID", "==", userId)
+        // );
+        // const querySnapshot = await getDocs(q);
+        const userConcernsRef = doc(ProductConcernCollection, userUIDInLocalStorage);
+        const userConcernsDoc = await getDoc(userConcernsRef);
+        const existingConcerns = userConcernsDoc.data()?.concerns || [];
+
+        console.log(existingConcerns)
         const ProductIssueData = [];
         // Loop through the snapshot and extract the data from each document
-        querySnapshot.forEach((doc) => {
+        existingConcerns.forEach((doc) => {
           // Extract the data from the document and add it to the array
-          const ProductIssueDatatoPush = doc.data();
-
+          const ProductIssueDatatoPush = doc;
+          console.log(ProductIssueData)
           ProductIssueData.push(ProductIssueDatatoPush);
         });
         console.log("Product Issue", ProductIssueData);
@@ -229,7 +233,9 @@ export const DashBoard = () => {
   };
 
   const onSubmitProductConcern = () => {
+    
     setIsProductConcernFormOpen(false);
+    
   };
 
   const handleLogout = () => {
@@ -542,6 +548,7 @@ export const DashBoard = () => {
           purchaseInstances={purchaseInstances}
           onSubmitProductConcern={onSubmitProductConcern}
           onClose={onSubmitProductConcern}
+          setFetchingData={setFetchingData}
         />
       )}
 

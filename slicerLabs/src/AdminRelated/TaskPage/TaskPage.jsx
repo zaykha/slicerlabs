@@ -63,6 +63,7 @@ const TaskPage = () => {
   const [statusUpdateInProgress, setStatusUpdateInProgress] = useState(false);
   const [productIssue, setProductIssue] = useState([]);
   const [openDropdownIndex, setOpenDropdownIndex] = useState(null);
+  const [openIssueDropdownIndex, setOpenIssueDropdownIndex] = useState(null);
   const [totalItemToDisplay, settotalItemToDisplay] = useState(0);
   const [TotalDeliveredItems, setTotalDeliveredItems] = useState(0);
   const [TotalIssueItems, setTotalIssueItems] = useState(0);
@@ -172,11 +173,15 @@ const TaskPage = () => {
       // console.log(querySnapshot)
       const ProductIssueData = [];
       // Loop through the snapshot and extract the data from each document
+      // const querySnapshotToLoop= querySnapshot.data().concerns;
       querySnapshot.forEach((doc) => {
         // Extract the data from the document and add it to the array
-        const ProductIssueDatatoPush = doc.data();
-        
-        ProductIssueData.push(ProductIssueDatatoPush);
+        const ProductIssueDatatoPushArray = doc.data().concerns;
+        ProductIssueDatatoPushArray.map((ProductIssueDatatoPush)=>{
+          console.log(ProductIssueDatatoPush)
+          ProductIssueData.push(ProductIssueDatatoPush);
+        })
+       
       });
       console.log("Product Issue", ProductIssueData);
       ProductIssueData.map((instance) => {
@@ -212,7 +217,9 @@ const TaskPage = () => {
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
-
+  const toggleIssueDropdown = (index) => {
+    setOpenIssueDropdownIndex((prevIndex) => (prevIndex === index ? null : index));
+  };
   const handleStatusChange = async (selectedOption, itemId) => {
     setStatusUpdateInProgress(true);
     // setFetchingData(true);
@@ -248,7 +255,7 @@ const TaskPage = () => {
       console.error("Error updating status:", error);
       setFetchingData(false)
     }
-    setOpenDropdownIndex(null);
+    setOpenIssueDropdownIndex(null);
     setStatusUpdateInProgress(false);
     // setFetchingData(false);
   };
@@ -270,8 +277,10 @@ const TaskPage = () => {
 
       for (const doc of querySnapshot.docs) {
         const ProductConcernData = doc.data();
-        const updatedItems = ProductConcernData.map((item) => {
-          if (item.itemId === itemId) {
+        console.log(ProductConcernData.concerns)
+        const concerns = ProductConcernData.concerns.map((item) => {
+          console.log(item.productId, itemId)
+          if (item.productId === itemId) {
             return {
               ...item,
               status: selectedOption,
@@ -279,16 +288,16 @@ const TaskPage = () => {
           }
           return item;
         });
-
+        console.log(concerns)
         // Update the Firestore document with the updated items
-        await updateDoc(doc.ref, { updatedItems });
+        await updateDoc(doc.ref, { concerns });
       }
       setStatusUpdateInProgress(false);
     } catch (error) {
       console.error("Error updating status:", error);
       setFetchingData(false)
     }
-    setOpenDropdownIndex(null);
+    setOpenIssueDropdownIndex(null);
     setStatusUpdateInProgress(false);
     // setFetchingData(false);
   };
@@ -573,12 +582,12 @@ const TaskPage = () => {
                         <InnerHeader>
                         <StatusDropdown
                           options={issueOptions}
-                          selectedOption={itemIssueStatuses[item.productId]}
+                          selectedOption={itemIssueStatuses[issue.productId]}
                           onSelect={(selectedOption) =>
-                            handleIssueStatusChange(selectedOption, item.productId)
+                            handleIssueStatusChange(selectedOption, issue.productId)
                           }
-                          isOpen={openDropdownIndex === item.productId}
-                          onClick={() => toggleDropdown(item.productId)}
+                          isOpen={openIssueDropdownIndex === issue.productId}
+                          onClick={() => toggleIssueDropdown(issue.productId)}
                           isLastItemTrue={
                             DelivereditemCountChecker === TotalIssueItems
                           }
@@ -648,7 +657,7 @@ const TaskPage = () => {
       </LoginFromcontainer>
     )} */}
 
-<NextBtn onClick={handleLogout}>logout</NextBtn>
+{/* <NextBtn onClick={handleLogout}>logout</NextBtn> */}
     </>
   );
 };

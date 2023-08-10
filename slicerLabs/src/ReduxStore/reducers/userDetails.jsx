@@ -12,21 +12,21 @@ const initialState = {
 const userDetailsReducer = (state = initialState, action) => {
   switch (action.type) {
     case "SET_USER_DETAILS":
+      console.log(action.payload)
       const updatedState = { ...state };
-      const payloadKeys = Object.keys(action.payload);
-      console.log(action.payload);
-      payloadKeys.forEach((key) => {
-        if (state.hasOwnProperty(key)) {
+      for (const key in action.payload) {
+        if (key === "userDetails") {
+          // If the key is userDetails, merge the nested object with the state's userDetails
+          updatedState.userDetails = {
+            ...updatedState.userDetails,
+            ...action.payload.userDetails,
+          };
+        } else {
           updatedState[key] = action.payload[key];
         }
-        // else {
-        //   // If key does not exist in current state, add it to the updatedState
-        //   updatedState[key] = action.payload[key];
-        // }
-      });
-
+      }
+      console.log(updatedState);
       return updatedState;
-
     case "UPDATE_EMAIL":
       console.log(action.payload);
       return {

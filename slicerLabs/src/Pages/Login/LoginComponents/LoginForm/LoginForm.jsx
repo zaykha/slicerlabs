@@ -35,12 +35,17 @@ import { doc, getDoc } from "firebase/firestore";
 import RotatingLoader from "../../../../globalcomponents/DropDown/RotatingLoader";
 import SpinningLoader from "../../../../globalcomponents/DropDown/SpinningLoader";
 import PasswordResetPrompt from "./PasswordReset";
-import { EyeIcon, InputContainer, Inputelem } from "../../../Register/RegisterComponents/Registerformelement";
+import {
+  EyeIcon,
+  InputContainer,
+  Inputelem,
+} from "../../../Register/RegisterComponents/Registerformelement";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 const LoginForm = () => {
   const [email, onChangeEmail] = React.useState("");
   const [emailError, setEmailError] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [password, onChangePassword] = React.useState("");
@@ -93,49 +98,81 @@ const LoginForm = () => {
     const emailValidationError = validateEmail(email);
     const passwordValidationError = validatePassword(password);
     setIsLoggingIn(true);
-    if (emailValidationError || passwordValidationError) {
-      alert(emailValidationError || passwordValidationError);
-    } else {
-      try {
-        const userCredentials = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-        const user = userCredentials.user;
-        const uid = user.uid;
-        const token = await user.getIdToken();
-        localStorage.setItem("idToken", token);
-        localStorage.setItem("uid", uid);
+    try {
+      
+      if (emailValidationError || passwordValidationError) {
+        alert(emailValidationError || passwordValidationError);
+      } else {
+        try {
+          const userCredentials = await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+          const user = userCredentials.user;
+          const uid = user.uid;
+          const idToken = await user.getIdToken();
+          localStorage.setItem("idToken", idToken);
+          localStorage.setItem("uid", uid);
+          const response = await fetch("http://localhost:3000/calculate-function", {
+            method: "GET",
+            headers: {
+              Authorization: idToken,
+            },
+          });
+    
+          if (!response.ok) {
+            // Handle the response error, if any
+            console.error("Error fetching calculatePrice function");
+            return;
+          }
+    
+          const data = await response.json();
+          // Assuming data contains all three functions: calculatePrice, calculateMassAndPrintTime, and calculatePostProcessingTime
+          const { calculatePrice } = data;
+    
+          // Serialize the functions to JSON strings
+          const calculatePriceString = JSON.stringify(calculatePrice);
+    
+          // Store the functions in local storage
+          localStorage.setItem("calculatePriceFunction", calculatePriceString);
+          const userDetailsRef = doc(usersCollection, uid);
+          const docSnap = await getDoc(userDetailsRef);
+          if (docSnap.exists()) {
+            dispatch(setUserDetails(docSnap.data().userDetails));
+            dispatch(setAuthenticationStatus(true));
+            localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
 
-        const userDetailsRef = doc(usersCollection, uid);
-        const docSnap = await getDoc(userDetailsRef);
-        if (docSnap.exists()) {
-          dispatch(setUserDetails(docSnap.data().userDetails));
-          dispatch(setAuthenticationStatus(true));
-          localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
-
-          console.log("Document data in Login:", docSnap.data().userDetails);
-        } else {
-          // docSnap.data() will be undefined in this case
-          console.log("No such document!");
+            console.log("Document data in Login:", docSnap.data().userDetails);
+            const AdminCheck = docSnap.data().userDetails.adminPrivileges;
+            setIsAdmin(AdminCheck);
+          } else {
+            // docSnap.data() will be undefined in this case
+            console.log("No such document!");
+          }
+          cartItems.length > 0
+            ? navigate("/cart")
+            : isAdmin
+            ? navigate("/Dashboard")
+            : navigate("/");
+          // Return a promise after dispatching user details and authentication status
+          // const navigationPromise = new Promise((resolve) => {
+          //   resolve();
+          // });
+          // // Use the returned promise to navigate after data is set
+          // navigationPromise.then(() => {
+          //   cartItems.length > 0 ? navigate("/cart") : navigate("/");
+          // });
+          setIsLoggingIn(false);
+        } catch (error) {
+          alert(error.message);
+          setIsLoggingIn(false);
         }
-        navigate("/cart");
-        // Return a promise after dispatching user details and authentication status
-        // const navigationPromise = new Promise((resolve) => {
-        //   resolve();
-        // });
-        // // Use the returned promise to navigate after data is set
-        // navigationPromise.then(() => {
-        //   cartItems.length > 0 ? navigate("/cart") : navigate("/");
-        // });
-        setIsLoggingIn(false);
-      } catch (error) {
-        alert(error.message);
-        setIsLoggingIn(false);
       }
+      setIsLoggingIn(false);
+    } catch (error) {
+      console.log(error);
     }
-    setIsLoggingIn(false);
   };
   const handleSSO = async (provider) => {
     try {

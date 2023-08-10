@@ -13,7 +13,18 @@ import {
   InnerLayersP,
   NextBtnCancel,
 } from "../../Pages/UserProfile/UserProfileElement";
-import { doc, setDoc } from "firebase/firestore";
+import {
+  FieldValue,
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { ProductConcernCollection } from "../../firebase";
 import { CancelIcon } from "../navbar/navbarelement";
 
@@ -127,11 +138,13 @@ const ProductConcernPrompt = ({
   purchaseInstances,
   onSubmitProductConcern,
   onClose,
+  setFetchingData
 }) => {
   const [selectedProduct, setSelectedProduct] = useState("");
   const [concernNote, setConcernNote] = useState("");
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetails = JSON.parse(userDetailsUnparsed).userDetails;
+  const userUIDInLocalStorage = localStorage.getItem("uid");
   const [formErrors, setFormErrors] = useState({
     selectProductError: "",
     concernNoteError: "",
@@ -151,6 +164,7 @@ const ProductConcernPrompt = ({
   };
 
   const handleSubmit = async () => {
+    setFetchingData(true);
     if (!selectedProduct || !concernNote) {
       setFormErrors((prevErrors) => ({
         ...prevErrors,
@@ -159,16 +173,63 @@ const ProductConcernPrompt = ({
       }));
       return;
     } else {
-      await setDoc(doc(ProductConcernCollection, userDetails.userUID), {
-        productId: selectedProduct,
-        userUID: userDetails.userUID,
-        status: "pending",
-        lastUpdate: formattedDate,
-        concernNote,
-      });
+      if (!ProductConcernCollection || !userUIDInLocalStorage) {
+        console.error("Invalid collection or user UID");
+        return;
+      }
+
+      try {
+        const userConcernsRef = doc(ProductConcernCollection, userUIDInLocalStorage);
+        const userConcernsDoc = await getDoc(userConcernsRef);
+      
+        if (!userConcernsDoc.exists()) {
+          // Document doesn't exist, create a new document
+          const newConcern = {
+            concerns: [
+              {
+                productId: selectedProduct,
+                status: "pending",
+                lastUpdate: formattedDate,
+                concernNote,
+              },
+            ],
+          };
+      
+          await setDoc(userConcernsRef, newConcern);
+        } else {
+          const existingConcerns = userConcernsDoc.data()?.concerns || [];
+      
+          const updatedConcerns = existingConcerns.map((existingConcern) =>
+            existingConcern.productId === selectedProduct
+              ? { ...existingConcern, concernNote }
+              : existingConcern
+          );
+      
+          if (!existingConcerns.find((concern) => concern.productId === selectedProduct)) {
+            // Add the new concern to the array
+            updatedConcerns.push({
+              productId: selectedProduct,
+              status: "pending",
+              lastUpdate: formattedDate,
+              concernNote,
+            });
+          }
+      
+          await setDoc(userConcernsRef, { concerns: updatedConcerns });
+        }
+      
+        // Validate and process the form data
+        onSubmitProductConcern(selectedProduct, concernNote);
+        setFetchingData(false)
+      } catch (error) {
+        setFetchingData(false)
+        console.error("Error submitting concern:", error);
+        // Handle the error, e.g., show an error message to the user
+      }
+      
+        
     }
-    // Validate and process the form data
-    onSubmitProductConcern(selectedProduct, concernNote);
+    setFetchingData(false)
   };
 
   return (
@@ -195,38 +256,40 @@ const ProductConcernPrompt = ({
           )}
 
           {purchaseInstances.length > 0 ? (
-            purchaseInstances.map((purchaseInstance, outerIndex) => (
-             
-                purchaseInstance.purchasedItems
-                  .filter((item) => item.status == "Delivered")
-                  .map((item, index) => {
-                    return (
-                      <option key={item.itemId} value={item.itemId}>
-                        {item.fileName}
-                      </option>
-                    );
-                  })
-           
-            ))
+            purchaseInstances.map((purchaseInstance, outerIndex) =>
+              purchaseInstance.purchasedItems
+                .filter((item) => item.status == "Delivered")
+                .map((item, index) => {
+                  return (
+                    <option key={item.itemId} value={item.itemId}>
+                      {item.fileName}
+                    </option>
+                  );
+                })
+            )
           ) : (
             <></>
           )}
         </SelectProduct>
 
-            {selectedProduct !== ""?<>
-        <StepContainer>
-          <RegsubHeader>Describe the Issue:</RegsubHeader>
-          <IssueDescription
-            value={concernNote}
-            onChange={handleNoteChange}
-            rows="4"
-          />
-        </StepContainer>
-        <ButtonContainer>
-          <NextBtn onClick={handleSubmit}>Submit</NextBtn>
-          {/* <NextBtnCancel onClick={onClose}>Cancel</NextBtnCancel> */}
-        </ButtonContainer>
-        </>:<></>}
+        {selectedProduct !== "" ? (
+          <>
+            <StepContainer>
+              <RegsubHeader>Describe the Issue:</RegsubHeader>
+              <IssueDescription
+                value={concernNote}
+                onChange={handleNoteChange}
+                rows="4"
+              />
+            </StepContainer>
+            <ButtonContainer>
+              <NextBtn onClick={handleSubmit}>Submit</NextBtn>
+              {/* <NextBtnCancel onClick={onClose}>Cancel</NextBtnCancel> */}
+            </ButtonContainer>
+          </>
+        ) : (
+          <></>
+        )}
       </LoginFromcontainer>
     </PopupContainer>
   );

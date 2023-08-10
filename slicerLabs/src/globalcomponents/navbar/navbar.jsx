@@ -49,36 +49,41 @@ const Navbar = ({
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const { isAuthenticated } = useSelector((state) => state.authentication);
-
-  const isAdmin = useSelector((state) => state.userDetails?.adminPrivileges);
-  const userName = useSelector((state) => state.userDetails?.userName);
+  const userDetailsUnparsed = localStorage.getItem("userDetails");
+  const userDetails = useSelector((state) => state.userDetails) || JSON.parse(userDetailsUnparsed); ;
+  const isAdmin = userDetails?.adminPrivileges;
+  const userName = userDetails?.userName;
   const cartItems = useSelector((state) => state.cartItems?.cartItems);
   const hasUndefinedProduct = cartItems?.some(
     (item) => !item || !item.options || !item.options.ProductId
   );
 
   useEffect(() => {
-    if (isLoading) {
-      // Set loading to true initially
-      setIsLoading(true);
-  
-      // const timeoutId = setTimeout(() => {
-      //   console.log(userName);
-      //   setName(userName);
-      //   if (isAdmin) {
-      //     console.log(userName);
-      //   }
+    setIsLoading(true);
+    console.log(isAdmin, userDetails);
+    // if (isLoading) {
+    //   // Set loading to true initially
+     
+      
+    //   const timeoutId = setTimeout(() => {
+    //     console.log(userName);
+    //     setName(userName);
+    //     if (isAdmin) {
+    //       console.log(userName);
+    //     }
         
-      //   // Set loading to false after the timeout
-      //   setIsLoading(false);
-      // }, 5000);
+    //     // Set loading to false after the timeout
+    //     setIsLoading(false);
+    //   }, 2000);
   
-      // Clean up the timeout if the component unmounts or isLoading changes
-      return () => clearTimeout(timeoutId);
-    }
+    //   // Clean up the timeout if the component unmounts or isLoading changes
+    //   return () => clearTimeout(timeoutId);
+    // }
+    setIsLoading(false);
+
   }, [isLoading, userName, isAdmin]);
   
   const handleLogout = () => {

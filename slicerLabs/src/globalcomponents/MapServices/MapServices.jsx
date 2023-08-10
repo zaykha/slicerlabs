@@ -27,7 +27,7 @@ const reverseGeocode = async (postalCode) => {
   }
 
   const data = await response.json();
-  console.log(data)
+  // console.log(data)
   
   if (!data.results || data.results.length === 0) {
     throw new Error("No address found with the provided postal code");
@@ -39,13 +39,13 @@ const reverseGeocode = async (postalCode) => {
 export const fetchAddressDetails = createAsyncThunk(
   "address/fetchAddressDetails",
   async (postalCode, { rejectWithValue }) => {
-    console.log(postalCode)
+    // console.log(postalCode)
     try {
       const results = await reverseGeocode(postalCode);
       return results; // Return the relevant data from the response
     } catch (error) {
       // The OneMap API does not use error.response.data, so we can just return the error message directly
-      console.log(error.message)
+      // console.log(error.message)
       return  rejectWithValue(error.message);
     }
   }
@@ -93,7 +93,7 @@ export const calculateDistanceWithOneMap = async (
       },
     });
     const data = await response.json();
-    console.log(data)
+    // console.log(data)
     // Check if the API call was successful and there is a valid route
     if (data.status === "OK" && data.route_geometry) {
       // Calculate the distance from the route information
