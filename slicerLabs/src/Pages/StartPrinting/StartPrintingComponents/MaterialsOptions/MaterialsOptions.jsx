@@ -21,6 +21,9 @@ import { useNavigate } from "react-router-dom";
 // import { useCartCount } from "../../../../App";
 import { useDispatch, useSelector } from "react-redux";
 import { addMaterialOptions } from "../../../../ReduxStore/reducers/CartItemReducer";
+import { doc, getDoc } from "firebase/firestore";
+import { ConfigCollection } from "../../../../firebase";
+import ErrorPrompt from "../../../../globalcomponents/prompt/ErrorPrompt";
 const defaultCalculatePriceFunction = (material, color, dimensions) => {
   // You can return a default value or an error message here if needed
   return 0; // For example, returning 0 as a default price
@@ -36,7 +39,7 @@ const MaterialsOptions = ({
   setIsAddedToCart,
   isFormFilled,
   setisFormFilled,
-  handleCheckOutInChild 
+  handleCheckOutInChild,
 }) => {
   const aboveDivRef = useRef(null);
   const belowDivRef = useRef(null);
@@ -55,6 +58,33 @@ const MaterialsOptions = ({
   const cart = useSelector((state) => state.cartItems);
   const [cartCount, setCartCount] = useState(cart.length > 0 ? cart.length : 0);
   const idToken = localStorage.getItem("idToken");
+  const userUIDInLocalStorage = localStorage.getItem("uid");
+  const [ErrorHandling, setErrorHandling] = useState({
+    state: false,
+    header: "",
+    message: "",
+  });
+  const [materialSettings, setMaterialSettings] = useState({
+    printTimePerUnitVolume: {
+      ABS: 0.05, // minutes/cm^3
+      PLA: 0.04, // minutes/cm^3
+      TPU: 0.06, // minutes/cm^3
+      NYLON: 0.07, // minutes/cm^3
+      PETG: 0.05, // minutes/cm^3
+      RESIN: 0.03, // minutes/cm^3
+    },
+    materialCosts: {
+      ABS: 0.05, // SGD per gram
+      PLA: 0.04, // SGD per gram
+      TPU: 0.06, // SGD per gram
+      NYLON: 0.07, // SGD per gram
+      PETG: 0.05, // SGD per gram
+      RESIN: 0.1, // SGD per gram
+    },
+    hourlyRate: 20,
+    laborCost: 25,
+    overheadCost: 5,
+  });
   useEffect(() => {
     // Perform actions or update the UI based on changes in the cart array
     // For example, you can update a notification count or trigger a checkout process
@@ -83,27 +113,35 @@ const MaterialsOptions = ({
     }
   };
   const calculatePriceString = localStorage.getItem("calculatePriceFunction");
+  const fetchConfigSettings = async () => {
+    try {
+      const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
+      const configDocSnapshot = await getDoc(configDocRef);
+
+      if (configDocSnapshot.exists()) {
+        const data = configDocSnapshot.data();
+        setMaterialSettings(data);
+      }
+      console.log(materialSettings);
+    } catch (error) {
+      console.error("Error fetching configuration settings:", error);
+    }
+  };
+  useEffect(() => {
+    fetchConfigSettings();
+  }, []);
 
   // Fetch the calculatePrice function from local storage
   useEffect(() => {
-    if(material && color && width && height && depth){
-      setisFormFilled(true)
+    if (material && color && width && height && depth) {
+      setisFormFilled(true);
     }
     if (calculatePriceString) {
-     const calculatePriceFunctionToStore = parseStoredFunction(
+      const calculatePriceFunctionToStore = parseStoredFunction(
         "calculatePrice",
         calculatePriceString
       );
-      // console.log(
-      //   "Parsed calculatePriceFunction:",
-      //   calculatePriceFunctionToStore
-      // );
 
-      // Now you have the parsed functions, you can use them as needed
-      // For example, you can store them in state or use them directly.
-      // setCalculatePriceFunction(
-      //   calculatePriceFunctionToStore
-      // );
       updatePrice(calculatePriceFunctionToStore);
     }
   }, [material, color, width, height, depth]);
@@ -186,28 +224,30 @@ const MaterialsOptions = ({
   // }
   const updatePrice = (anotherFunction) => {
     // console.log(anotherFunction);
-    if (
-      anotherFunction &&
-      material &&
-      color &&
-      width &&
-      height &&
-      depth
-    ) {
-      const newPrice = anotherFunction(material, color, {
-        width,
-        height,
-        depth,
-      });
+    if (anotherFunction && material && color && width && height && depth) {
+      const newPrice = anotherFunction(
+        material,
+        color,
+        {
+          width,
+          height,
+          depth,
+        },
+        materialSettings
+      );
       setPrice(newPrice);
     }
   };
 
- 
   const cartString = encodeURIComponent(JSON.stringify(cart.options));
   const handleAddToCart = () => {
     if (!material || !color || !width || !height || !depth || !quantity) {
-      alert("please fill in empty fields");
+      // alert("please fill in empty fields");
+      setErrorHandling({
+        state: true,
+        header: "An Error Occured",
+        message: "please fill in empty fields",
+      });
     } else {
       setMaterial("");
       setColor("");
@@ -245,9 +285,14 @@ const MaterialsOptions = ({
         Navigate(`/cart?cart=${cartString}`);
       } else {
         if (!material || !color || !width || !height || !depth) {
-          alert(
-            "please fill all in empty fields or empty the field to proceed"
-          );
+          // alert(
+          //   "please fill all in empty fields or empty the field to proceed"
+          // );
+          setErrorHandling({
+            state: true,
+            header: "An Error Occured",
+            message: "please fill all in empty fields or empty the field to proceed.",
+          });
         } else {
           const finalItem = {
             tempID, // generate a unique ID for the item
@@ -277,9 +322,19 @@ const MaterialsOptions = ({
         }
       }
     } else {
-      alert("please add to cart");
+      // alert("please add to cart");
+      setErrorHandling({
+        state: true,
+        header: "An Error Occured",
+        message: "please add to cart",
+      });
       if (!material || !color || !width || !height || !depth || !quantity) {
-        alert("please fill in empty fields");
+        // alert("please fill in empty fields");
+        setErrorHandling({
+          state: true,
+          header: "An Error Occured",
+          message: "please fill in empty fields",
+        });
       } else {
         const finalItem = {
           tempID, // generate a unique ID for the item
@@ -472,7 +527,7 @@ const MaterialsOptions = ({
         </LoginContainer>
       </LoginFromcontainer>
       <Tocartflexdiv ref={belowDivRef}>
-        {price ?  (
+        {price ? (
           <TocartCTABtn onClick={handleAddToCart}>ADD TO CART</TocartCTABtn>
         ) : (
           <></>
@@ -491,6 +546,13 @@ const MaterialsOptions = ({
           <></>
         )} */}
       </Tocartflexdiv>
+      {ErrorHandling.state && (
+        <ErrorPrompt
+          header={ErrorHandling.header}
+          message={ErrorHandling.message}
+          onClose={() => setErrorHandling({ ...ErrorHandling, state: false })}
+        />
+      )}
     </>
   );
 };

@@ -22,6 +22,9 @@ import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { Box3, DoubleSide, Mesh, MeshNormalMaterial, Vector3 } from "three";
 import * as blobUtil from "blob-util";
+import { doc, getDoc } from "firebase/firestore";
+import { ConfigCollection } from "../../../../firebase";
+import RotatingLoader from "../../../../globalcomponents/DropDown/RotatingLoader";
 
 const IndividualProduct = ({
   index,
@@ -38,14 +41,35 @@ const IndividualProduct = ({
 }) => {
   const [currentQuantity, setCurrentQuantity] = useState(quantity);
   const [IndividualTtlPrice, setIndividualTtlPrice] = useState(price);
-
+  const [isFetchingMSetting, setIsFetchingMSetting] = useState(false);
   const cartItemsDetails = useSelector((state) => state.cartItems.cartItems);
   const dispatch = useDispatch();
   // const [model, setModel] = useState(null);
   const [cameraPosition, setCameraPosition] = useState([
     -7.726866370752757, 7.241928986275022, -8.091348270643504,
   ]);
-
+  const userUIDInLocalStorage = localStorage.getItem("uid");
+  const [materialSettings, setMaterialSettings] = useState({
+    printTimePerUnitVolume: {
+      ABS: 0.05, // minutes/cm^3
+      PLA: 0.04, // minutes/cm^3
+      TPU: 0.06, // minutes/cm^3
+      NYLON: 0.07, // minutes/cm^3
+      PETG: 0.05, // minutes/cm^3
+      RESIN: 0.03, // minutes/cm^3
+    },
+    materialCosts: {
+      ABS: 0.05, // SGD per gram
+      PLA: 0.04, // SGD per gram
+      TPU: 0.06, // SGD per gram
+      NYLON: 0.07, // SGD per gram
+      PETG: 0.05, // SGD per gram
+      RESIN: 0.1, // SGD per gram
+    },
+    hourlyRate: 20,
+    laborCost: 25,
+    overheadCost: 5,
+  });
   const parseStoredFunction = (functionName, storedFunction) => {
     try {
       const Unstring = JSON.parse(storedFunction);
@@ -65,7 +89,26 @@ const IndividualProduct = ({
     }
   };
   const calculatePriceString = localStorage.getItem("calculatePriceFunction");
+  const fetchConfigSettings = async () => {
+    try {
+      const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
+      const configDocSnapshot = await getDoc(configDocRef);
 
+      if (configDocSnapshot.exists()) {
+        const data = configDocSnapshot.data();
+        setMaterialSettings(data);
+      }
+      console.log(materialSettings)
+    } catch (error) {
+      console.error("Error fetching configuration settings:", error);
+    }
+  };
+  useEffect(() => {
+    setIsFetchingMSetting(true);
+    fetchConfigSettings();
+    setIsFetchingMSetting(false);
+  }, [isFetchingMSetting])
+  
   // Fetch the calculatePrice function from local storage
   useEffect(() => {
 
@@ -86,6 +129,7 @@ const IndividualProduct = ({
       // );
       newPricetoUpdate(calculatePriceFunctionToStore);
     }
+    // fetchConfigSettings();
   }, [material, color, width, height, depth]);
 
   const newPricetoUpdate = (anotherFunction) => {
@@ -102,7 +146,9 @@ const IndividualProduct = ({
         width,
         height,
         depth,
-      });
+      },
+      materialSettings
+      );
       dispatch(updatePrice({ ProductId: tempID, newPrice }));
       // setPrice(newPrice);
     }
@@ -190,7 +236,9 @@ const IndividualProduct = ({
   const totalPrice = (price * quantity).toFixed(2);
   return (
     <div className="box">
-      <div className="ITEM-wrapper">
+      {isFetchingMSetting?
+        <RotatingLoader />
+      :<div className="ITEM-wrapper">
         <div className="ITEM">
           <div className="overlap">
             <div className="vertical-Division1">
@@ -372,7 +420,7 @@ const IndividualProduct = ({
           </div>
           <div className="text-wrapper-4"> ID : {tempID}</div>
         </div>
-      </div>
+      </div>}
     </div>
   );
 };

@@ -34,6 +34,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { MdCheckCircleOutline } from "react-icons/md";
 import { fetchAddressDetails } from "../../../globalcomponents/MapServices/MapServices";
 import { setAuthenticationStatus } from "../../../ReduxStore/actions/Authentication";
+import ErrorPrompt from "../../../globalcomponents/prompt/ErrorPrompt";
 // import {
 //   GoogleSignin,
 //   statusCodes,
@@ -73,7 +74,11 @@ const Registerform = () => {
     blkNumberError: "",
     flatNumberError: "",
   });
-
+  const [ErrorHandling, setErrorHandling] = useState({
+    state: false,
+    header: "",
+    message: "",
+  });
   useEffect(() => {
     if (formValues.postalCode.length === 6) {
       console.log(formValues.postalCode);
@@ -291,7 +296,12 @@ const Registerform = () => {
   };
   const handleSignUp = async () => {
     if (!agreedToTerms) {
-      alert("Please agree to the terms and policies.");
+      // alert("Please agree to the terms and policies.");
+      setErrorHandling({
+        state: true,
+        header: "An Error Occured",
+        message: "Please agree to the terms and policies.",
+      });
       return;
     }
     if (
@@ -661,6 +671,14 @@ const Registerform = () => {
           <LoginBTN onClick={handleSignUp}>Register</LoginBTN>
         </LoginContainer>
       </LoginFromcontainer>
+
+      {ErrorHandling.state && (
+        <ErrorPrompt
+          header={ErrorHandling.header}
+          message={ErrorHandling.message}
+          onClose={() => setErrorHandling({ ...ErrorHandling, state: false })}
+        />
+      )}
     </>
   );
 };

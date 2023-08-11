@@ -71,6 +71,7 @@ const StatusDropdown = ({
   isLastItemTrue,
   itemCount,
 }) => {
+  // console.log(selectedOption)
   return (
     <DropdownContainer>
       <DropdownButton onClick={onClick}>

@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+  unstable_HistoryRouter,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { FaBars } from "react-icons/fa";
 import {
   IMGTAG,
@@ -41,15 +45,10 @@ const NavLinksarray = [
   // { title: "Login", path: "/login" },
 ];
 
-const Navbar = ({
-  togglesidebar,
-  OKtoRoute
-  // userDetails,
-  // cartItems,
-  // isAuthenticated
-}) => {
+const NavbarForChecks = ({ togglesidebar, OKtoRoute }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  // const history = unstable_HistoryRouter();
   const location = useLocation();
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -71,16 +70,28 @@ const Navbar = ({
     header: "",
     message: "",
   });
+  const handleLinkClick = (link) => {
+    if (!OKtoRoute) {
+      setErrorHandling({
+        state: true,
+        header: "An Error Occured",
+        message: "Please Delete the current Item in the cart or Add to cart before routing to other page",
+      });
+      console.log("Not OK to route");
+    } else {
+      console.log("OK to route");
+    }
+  };
   useEffect(() => {
     setIsLoading(true);
-    console.log(isAdmin, userDetails);
+    console.log(OKtoRoute);
     setIsLoading(false);
   }, [isLoading, userName, isAdmin]);
   // useEffect(() => {
   //   location.state
 
   //   console.log(location.pathname)
-  
+
   // }, [location]);
   const handleLogout = () => {
     localStorage.clear();
@@ -107,9 +118,12 @@ const Navbar = ({
           <NavbarContainer>
             <NavMenu>
               {NavLinksarray.map((link) => (
-                <NavItem key={link.title}>
+                <NavItem
+                  key={link.title}
+                  onClick={() => handleLinkClick(link.path)}
+                >
                   <NavLinks
-                    to={link.path}
+                    to={OKtoRoute ? link.path : null}
                     className={pathname === link.path ? "active" : ""}
                     // isactive={pathname === link.path}
                   >
@@ -122,20 +136,21 @@ const Navbar = ({
                   <NavItem>
                     <DropdownContainer>
                       <NavLinks
-                        to="/dashboard"
+                        to={OKtoRoute ? "/dashboard" : null}
                         className={pathname === "/dashboard" ? "active" : ""}
+                        onClick={() => handleLinkClick()}
                       >
                         {"Admin"}
                       </NavLinks>
 
-                      <DropdownContent>
+                     {OKtoRoute? <DropdownContent>
                         <NavLinksAdmin to="/dashBoard">Task Page</NavLinksAdmin>
                         <NavLinksAdmin to="/config">Config Page</NavLinksAdmin>
                         <NavLinksAdmin to="/blog">Blog Page</NavLinksAdmin>
                         <NavLinksAdminLogout to="/" onClick={handleLogout}>
                           LogOut
                         </NavLinksAdminLogout>
-                      </DropdownContent>
+                      </DropdownContent>:<></>}
                     </DropdownContainer>
                   </NavItem>
                 ) : (
@@ -202,7 +217,14 @@ const Navbar = ({
           />
         )}
       </Nav>
+      {ErrorHandling.state && (
+        <ErrorPrompt
+          header={ErrorHandling.header}
+          message={ErrorHandling.message}
+          onClose={() => setErrorHandling({ ...ErrorHandling, state: false })}
+        />
+      )}
     </>
   );
 };
-export default Navbar;
+export default NavbarForChecks;

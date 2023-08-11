@@ -58,25 +58,8 @@ import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { MeshNormalMaterial, Box3, Vector3, Mesh, LoadingManager } from "three";
 import { getAuth } from "firebase/auth";
+import ErrorPrompt from "../../globalcomponents/prompt/ErrorPrompt";
 
-const getStripeKey = async () => {
-  try {
-    const response = await fetch("http://localhost:3000/get-stripe-key");
-    if (response.ok) {
-      const data = await response.json();
-      const stripe = new Stripe(data.publishableKey, {
-        apiVersion: "2022-11-15",
-      });
-      return stripe;
-    } else {
-      throw new Error("Failed to fetch Stripe API key from the server.");
-    }
-  } catch (error) {
-    console.error("Error fetching Stripe API key:", error);
-    alert("Error fetching Stripe API key. Please try again later.");
-    return null;
-  }
-};
 const ProgressBar = ({ step }) => {
   return (
     <ProgressBarContainer>
@@ -116,6 +99,11 @@ const Cartpage = () => {
   const [loadedObjects, setLoadedObjects] = useState([]);
   const [renderedObjects, setRenderedObjects] = useState([]);
   const [TTLPriceBeforeRouting, setTTLPriceBeforeRouting] = useState(0);
+  const [ErrorHandling, setErrorHandling] = useState({
+    state: false,
+    header: "",
+    message: "",
+  });
   // const postalCode = useSelector((state) => state.userDetails.postalCode);
   const AddressDetails = useSelector(
     (state) => state.LocationStorage.endCoordinates
@@ -132,7 +120,7 @@ const Cartpage = () => {
   // Convert the latitude and longitude values from strings to numbers
   const lat1 = parseFloat(startLat);
   const lon1 = parseFloat(startLon);
-  
+
   // useEffect(() => {
   //   // Function to fetch data from IndexedDB
   //   const fetchFilesFromIndexedDB = async () => {
@@ -171,7 +159,7 @@ const Cartpage = () => {
   //                       }
   //                     ]);
   //                   },
-      
+
   //                   // undefined,
   //                   function (xhr) {
   //                     console.log("loading");
@@ -200,7 +188,7 @@ const Cartpage = () => {
   //     .catch((error) => console.error("Error counting items:", error));
 
   //   };
-   
+
   //   setShouldFetchData(false);
   //   // }
   //   // Fetch files from IndexedDB when the component mounts or when coming from the Stripe page
@@ -208,7 +196,7 @@ const Cartpage = () => {
   //     fetchFilesFromIndexedDB();
   //     // After fetching data, set shouldFetchData to false to prevent re-fetching on re-renders
   //     fetchDataRef.current = false;
-      
+
   //   }
   //   countItemsInDB()
   //     .then((count) => console.log("indexedDb Count is ", count))
@@ -249,7 +237,29 @@ const Cartpage = () => {
     deleteFileFromDB(modelIdToDelete);
   };
 
- 
+  const getStripeKey = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/get-stripe-key");
+      if (response.ok) {
+        const data = await response.json();
+        const stripe = new Stripe(data.publishableKey, {
+          apiVersion: "2022-11-15",
+        });
+        return stripe;
+      } else {
+        throw new Error("Failed to fetch Stripe API key from the server.");
+      }
+    } catch (error) {
+      console.error("Error fetching Stripe API key:", error);
+      setErrorHandling({
+        state: true,
+        header: "An Error Occured",
+        message: "Error fetching Stripe API key. Please try again later.",
+      });
+      // alert("Error fetching Stripe API key. Please try again later.");
+      return null;
+    }
+  };
   const validatePricesWithMicroservice = async (items) => {
     console.log(items);
     try {
@@ -277,17 +287,16 @@ const Cartpage = () => {
   // const totalAmountInCents = Math.round(TTLPriceBeforeRouting * 100); // Convert dollars to cents
 
   const handleProceedToPayment = async () => {
-
     const auth = getAuth();
     const user = auth.currentUser;
-  
+
     // Check if the user is logged in
     if (!user) {
       // User is not logged in, prompt them to log in and redirect to the login page
       const confirmLogin = window.confirm(
         "Please log in or create an account to proceed to payment."
       );
-  
+
       if (confirmLogin) {
         navigate("/login"); // Redirect to the login page
       }
@@ -306,7 +315,7 @@ const Cartpage = () => {
     cartItemsDetails.forEach((item) => {
       const { material, color, dimensions, price, quantity } = item.options;
       const itemId = item.id;
-      const fileName = item.fileName
+      const fileName = item.fileName;
       itemsForValidation.push({
         itemId,
         fileName,
@@ -318,8 +327,14 @@ const Cartpage = () => {
         userUID,
       });
     });
-    localStorage.setItem("TTLprice",JSON.stringify({totalPrice:TTLPriceBeforeRouting.toFixed(2)}));
-    localStorage.setItem("TempItemsDetailsStorage",JSON.stringify(itemsForValidation));
+    localStorage.setItem(
+      "TTLprice",
+      JSON.stringify({ totalPrice: TTLPriceBeforeRouting.toFixed(2) })
+    );
+    localStorage.setItem(
+      "TempItemsDetailsStorage",
+      JSON.stringify(itemsForValidation)
+    );
     // // Check if there is any data in localStorage
     // if (storedItems) {
     //   // Use the retrieved data
@@ -367,39 +382,53 @@ const Cartpage = () => {
             "Error creating checkout session:",
             checkoutSessionResponse
           );
-          alert("Error creating checkout session. Please try again later.");
+          setErrorHandling({
+            state: true,
+            header: "Error",
+            message: "Error creating checkout session. Please try again later."
+          });
+          // alert("Error creating checkout session. Please try again later.");
         }
       } else {
         // If prices are not valid, show an error message to the user
-        alert("There was an issue with the prices. Please review your cart.");
+        setErrorHandling({
+          state: true,
+          header: "Error",
+          message: "There was an issue with the prices. Please review your cart."
+        });
+        // alert("There was an issue with the prices. Please review your cart.");
       }
     } catch (error) {
       // Handle any error that occurred during the validation or payment process
       console.error("Error processing payment:", error);
-      alert("Error processing payment. Please try again later.");
+      // alert("Error processing payment. Please try again later.");
+      setErrorHandling({
+        state: true,
+        header: "Error",
+        message: "Error processing payment. Please try again later."
+      });
     }
   };
 
   const handleDeleteAllRecords = () => {
     deleteAllRecordsFromDB();
-    localStorage.removeItem('TempItemsDetailsStorage')
+    localStorage.removeItem("TempItemsDetailsStorage");
   };
   return (
     <>
-     
       <CUheader>
         Shopping <SSpan>Cart</SSpan>
       </CUheader>
       <CUsubheader>Fast and Smooth Processing</CUsubheader>
 
       <Step1Container>
-        {cartItemsDetails.length === 0 ? <></> : <ProgressBar step={step} />}
+        {/* {cartItemsDetails.length === 0 ? <></> : <ProgressBar step={step} />} */}
         {cartItemsDetails.length === 0 ? (
           // renderedObjects.length > 0 && storedItems.length>0 ? (
           //   renderedObjects.map((objData) => {
           //     // Find the corresponding item in storedItems based on itemId
           //     const item = storedItems.find((storedItem) => storedItem.itemId === objData.id);
-          
+
           //     // Check if the item is found
           //     if (item) {
           //       return (
@@ -425,12 +454,11 @@ const Cartpage = () => {
           //     }
           //   })
           // ) : (
-            <NoitemCart>
-              <CUheader>No Items In Cart</CUheader>
-            </NoitemCart>
-          )
-         : (
-        cartItemsDetails.map((item, index) => (
+          <NoitemCart>
+            <CUheader>No Items In Cart</CUheader>
+          </NoitemCart>
+        ) : (
+          cartItemsDetails.map((item, index) => (
             <IndividualProduct
               key={index}
               index={index + 1}
@@ -446,7 +474,7 @@ const Cartpage = () => {
               onDelete={handleRemoveItem}
             />
           ))
-         )} 
+        )}
         {cartItemsDetails.length === 0 ? (
           <></>
         ) : (
@@ -492,10 +520,14 @@ const Cartpage = () => {
           </>
         )}
       </Step1Container>
-      
+      {ErrorHandling.state && (
+        <ErrorPrompt
+          header={ErrorHandling.header}
+          message={ErrorHandling.message}
+          onClose={() => setErrorHandling({ ...ErrorHandling, state: false })}
+        />
+      )}
       {/* <NextBtn onClick={handleDeleteAllRecords}>deleteAllFromIDB</NextBtn> */}
-
-     
     </>
   );
 };

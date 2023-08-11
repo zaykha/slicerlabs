@@ -29,4 +29,5 @@ export const usersCollection = collection(firestore, "users");
 export const PurchasedItemsCollection = collection(firestore, "PurchasedItems");
 export const ProductConcernCollection = collection(firestore, "ProductIssue");
 export const BlogCollection = collection(firestore, "Blogs");
+export const ConfigCollection = collection(firestore, "ConfigSettings");
 export const BlogStorage = getStorage(app);

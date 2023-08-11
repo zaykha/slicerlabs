@@ -39,11 +39,14 @@ import { resetAddressDetails } from "./ReduxStore/reducers/MapServicesReducer";
 import { startAuthListener } from "./authListener";
 import TermsAndPolicies from "./Pages/Register/RegisterComponents/TermsAndPolicies";
 import BlogPage from "./AdminRelated/BlogPage/BlogPage";
+import ConfigPage from "./AdminRelated/ConfigPage/ConfigPage";
+import NavbarForChecks from "./globalcomponents/navbar/navbarForChecks";
 
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const dispatch = useDispatch();
+  const [OKtoRoute, setOKtoRoute] = useState(true);
 
   const [isOpen, setIsOpen] = useState(false);
   const togglesidebar = () => {
@@ -118,7 +121,7 @@ function App() {
                 JSON.stringify(userDetailsData)
               );
               console.log("Document data in APP.jsx:", userDetailsData);
-              const userDetails = userDetailsWithUid.userDetails.userDetails;
+              const userDetails = userDetailsData;
               const AdminCheck = userDetailsData?.adminPrivileges;
               setIsAdmin(AdminCheck);
               console.log(AdminCheck);
@@ -276,8 +279,8 @@ function App() {
       element: (
         <>
           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-          <Navbar togglesidebar={togglesidebar} />
-          <StartPrinting />
+          <NavbarForChecks togglesidebar={togglesidebar} OKtoRoute={OKtoRoute} />
+          <StartPrinting setOKtoRoute={setOKtoRoute} />
           <Footer />
         </>
       ),
@@ -317,6 +320,17 @@ function App() {
           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
           <Navbar togglesidebar={togglesidebar} />
           <BlogPage />
+          <Footer />
+        </>
+      ),
+    },
+    {
+      path: "/Config",
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <ConfigPage />
           <Footer />
         </>
       ),

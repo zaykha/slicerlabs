@@ -41,6 +41,7 @@ import {
   Inputelem,
 } from "../../../Register/RegisterComponents/Registerformelement";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import ErrorPrompt from "../../../../globalcomponents/prompt/ErrorPrompt";
 
 const LoginForm = () => {
   const [email, onChangeEmail] = React.useState("");
@@ -54,6 +55,11 @@ const LoginForm = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   const [showPasswordResetPrompt, setShowPasswordResetPrompt] = useState(false);
+  const [ErrorHandling, setErrorHandling] = useState({
+    state: false,
+    header: "",
+    message: "",
+  });
   const validateEmail = (inputEmail) => {
     if (!inputEmail) {
       return "Email field is required.";
@@ -99,9 +105,13 @@ const LoginForm = () => {
     const passwordValidationError = validatePassword(password);
     setIsLoggingIn(true);
     try {
-      
       if (emailValidationError || passwordValidationError) {
-        alert(emailValidationError || passwordValidationError);
+        setErrorHandling({
+          state: true,
+          header: "An Error Occured",
+          message: emailValidationError || passwordValidationError,
+        });
+        // alert(emailValidationError || passwordValidationError);
       } else {
         try {
           const userCredentials = await signInWithEmailAndPassword(
@@ -114,26 +124,29 @@ const LoginForm = () => {
           const idToken = await user.getIdToken();
           localStorage.setItem("idToken", idToken);
           localStorage.setItem("uid", uid);
-          const response = await fetch("http://localhost:3000/calculate-function", {
-            method: "GET",
-            headers: {
-              Authorization: idToken,
-            },
-          });
-    
+          const response = await fetch(
+            "http://localhost:3000/calculate-function",
+            {
+              method: "GET",
+              headers: {
+                Authorization: idToken,
+              },
+            }
+          );
+
           if (!response.ok) {
             // Handle the response error, if any
             console.error("Error fetching calculatePrice function");
             return;
           }
-    
+
           const data = await response.json();
           // Assuming data contains all three functions: calculatePrice, calculateMassAndPrintTime, and calculatePostProcessingTime
           const { calculatePrice } = data;
-    
+
           // Serialize the functions to JSON strings
           const calculatePriceString = JSON.stringify(calculatePrice);
-    
+
           // Store the functions in local storage
           localStorage.setItem("calculatePriceFunction", calculatePriceString);
           const userDetailsRef = doc(usersCollection, uid);
@@ -165,7 +178,12 @@ const LoginForm = () => {
           // });
           setIsLoggingIn(false);
         } catch (error) {
-          alert(error.message);
+          // alert(error.message);
+          setErrorHandling({
+            state: true,
+            header: "An Error Occured",
+            message: error.message,
+          });
           setIsLoggingIn(false);
         }
       }
@@ -234,6 +252,13 @@ const LoginForm = () => {
   };
   return (
     <LoginFromcontainer>
+      {ErrorHandling.state && (
+        <ErrorPrompt
+          header={ErrorHandling.header}
+          message={ErrorHandling.message}
+          onClose={() => setErrorHandling({ ...ErrorHandling, state: false })}
+        />
+      )}
       <LoginContainer>
         <LoginHeader>Login</LoginHeader>
 

@@ -116,7 +116,7 @@ export const DashBoard = () => {
         //   where("userUID", "==", userId)
         // );
         // const querySnapshot = await getDocs(q);
-        const userConcernsRef = doc(ProductConcernCollection, userUIDInLocalStorage);
+        const userConcernsRef = doc(ProductConcernCollection, userId);
         const userConcernsDoc = await getDoc(userConcernsRef);
         const existingConcerns = userConcernsDoc.data()?.concerns || [];
 

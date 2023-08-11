@@ -48,6 +48,7 @@ export const InputelemSmall = styled.input`
   align-items: center;
   color: white;
   font-size: 1.1rem;
+  
 `;
 export const Regflexdiv = styled.div`
   display: flex;

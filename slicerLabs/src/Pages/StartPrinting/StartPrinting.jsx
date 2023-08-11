@@ -22,10 +22,12 @@ import {
   StyledAddButtonForStartPrinting,
 } from "../Cart/Cartpageelement";
 import { FaCheck, FaExclamationCircle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import ErrorPrompt from "../../globalcomponents/prompt/ErrorPrompt";
 
-const StartPrinting = () => {
+const StartPrinting = ({setOKtoRoute}) => {
   const cart = useSelector((state) => state.cartItems);
+  const Location = useLocation();
   const [isModelLoaded, setIsModelLoaded] = useState(false);
   const [isCheckedOut, setIsCheckedOut] = useState(false);
   const [isAddedToCart, setIsAddedToCart] = useState(cart.cartItems.length > 0);
@@ -34,6 +36,22 @@ const StartPrinting = () => {
   const [tempModelId, setTempModelId] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const navigate = useNavigate();
+  const [ErrorHandling, setErrorHandling] = useState({
+    state: false,
+    header: "",
+    message: "",
+  });
+  useEffect(() => {
+    if(!isCheckedOut && isModelLoaded && !isAddedToCart){
+      console.log("cannot route")
+      setOKtoRoute(false);
+    }else{
+      console.log("can Route")
+      setOKtoRoute(true);
+    }
+  }, [isCheckedOut, isModelLoaded, isAddedToCart])
+  
+  
   const handleBeforeUnload = (e) => {
     if (showPrompt) {
       e.preventDefault();
@@ -58,6 +76,7 @@ const StartPrinting = () => {
     console.log("Action triggered in the child, executing in the parent!");
   };
 
+
   const handleCheckOut = () => {
     if (cart.cartItems.length > 0) {
       if (!isModelLoaded) {
@@ -68,12 +87,22 @@ const StartPrinting = () => {
         }
       } else {
         if (!isFormFilled) {
-          alert(
-            "please fill all in empty fields or empty the field to proceed"
-          );
+          // alert(
+          //   "please fill all in empty fields or empty the field to proceed"
+          // );
+          setErrorHandling({
+            state: true,
+            header: "An Error Occured",
+            message: "please fill all in empty fields or empty the field to proceed.",
+          });
         } else {
           if (!isAddedToCart) {
-            alert("please add to cart first");
+            // alert("please add to cart first");
+            setErrorHandling({
+              state: true,
+              header: "An Error Occured",
+              message: "please add to cart first.",
+            });
           } else {
             navigate(`/cart?cart=${cart.cartItems.length}`);
           }
@@ -83,12 +112,17 @@ const StartPrinting = () => {
   };
 
   useEffect(() => {
+    if(location.pathname !== "/Start3dPrinting"){
+      setShowPrompt(true);
+    }
+
+    console.log(location.pathname)
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [showPrompt]);
+  }, [Location]);
   return (
     <>
       {showPrompt && (
@@ -107,7 +141,7 @@ const StartPrinting = () => {
           </PMAlertBox>
         </PMContainer>
       )}
-      
+
       <CUheader>
         UPLOAD <SSpan>FILE</SSpan>
       </CUheader>
@@ -156,9 +190,7 @@ const StartPrinting = () => {
               {(cart.cartItems.length === 0 &&
                 isModelLoaded &&
                 isAddedToCart) ||
-              (cart.cartItems.length > 0 &&
-                !isModelLoaded &&
-                isAddedToCart) ? (
+              (cart.cartItems.length > 0 && !isModelLoaded && isAddedToCart) ? (
                 <FaCheck style={{ marginTop: "10px" }} />
               ) : (
                 <FaExclamationCircle style={{ marginTop: "10px" }} />
@@ -175,7 +207,13 @@ const StartPrinting = () => {
       ) : (
         <></>
       )}
-   
+      {ErrorHandling.state && (
+        <ErrorPrompt
+          header={ErrorHandling.header}
+          message={ErrorHandling.message}
+          onClose={() => setErrorHandling({ ...ErrorHandling, state: false })}
+        />
+      )}
     </>
   );
 };

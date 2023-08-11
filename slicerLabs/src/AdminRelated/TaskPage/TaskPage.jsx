@@ -100,6 +100,7 @@ const TaskPage = () => {
   let itemCountChecker = 0;
   let DelivereditemCountChecker = 0;
   async function getPurchaseInstancesForUser(userId) {
+    // setFetchingData(true);
     try {
       const querySnapshot = await getDocs(PurchasedItemsCollection, userId);
       const purchaseInstancesData = [];
@@ -180,6 +181,10 @@ const TaskPage = () => {
         ProductIssueDatatoPushArray.map((ProductIssueDatatoPush)=>{
           console.log(ProductIssueDatatoPush)
           ProductIssueData.push(ProductIssueDatatoPush);
+          setItemIssueStatuses((prevStatuses) => ({
+            ...prevStatuses,
+            [ProductIssueDatatoPush.productId]: ProductIssueDatatoPush.status,
+          }));
         })
        
       });
@@ -199,15 +204,19 @@ const TaskPage = () => {
       console.error("Error retrieving Product Issue:", error);
       return []; // Return an empty array if an error occurs
     }
+    // setFetchingData(false)
   }
   useEffect(() => {   
     // Call the function on component mount
+    // setFetchingData(true);
     if (!FetchingData && !statusUpdateInProgress) {
-      // setFetchingData(true);
+      
       getPurchaseInstancesForUser(userUIDInLocalStorage);
-      // setFetchingData(false);
       getProductIssueForUser(userUIDInLocalStorage);
+     
+
     }
+    // setFetchingData(false);
   }, [FetchingData, statusUpdateInProgress]);
   // Function to handle status change
 
@@ -268,7 +277,7 @@ const TaskPage = () => {
         ...prevStatuses,
         [itemId]: selectedOption,
       }));
-      
+      console.log(itemIssueStatuses)
       // Get the reference to the document containing the purchasedItems array
       const querySnapshot = await getDocs(
         ProductConcernCollection,
