@@ -1,3 +1,13 @@
+@media screen and (max-width: 1200px) {
+
+.ITEM-wrapper .overlap .ITEM .box{
+  display:flex;
+  flex-wrap:wrap;
+  width:85%;
+}
+
+
+}
 .box {
   background-color: transparent;
   display: flex;
@@ -11,12 +21,14 @@
   /* height: 247px; */
   overflow-x: hidden;
   width: 1200px;
+  display:flex;
+  flex-wrap: wrap;
 }
 
 .box .ITEM {
   /* height: 247px; */
   position: relative;
-  width: 1210px;
+  width: 1200px;
 }
 .vertical-Division1 {
   width: 20%;
@@ -26,6 +38,7 @@
   align-items: flex-start;
   justify-content: center;
   padding: 10px;
+  flex-wrap: wrap;
 }
 
 .vertical-Division2 {

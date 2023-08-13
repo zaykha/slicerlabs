@@ -27,8 +27,7 @@ const usePaymentSuccessHandler = async (
     headers: {
       accept: "application/json",
       "content-type": "application/json",
-      "api-key":
-        "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",
+      "api-key": process.env.BREVO_API_KEY,
     },
     body: JSON.stringify({
       sender: { name: "SlicerLabs", email: "zaykha@gmail.com" },

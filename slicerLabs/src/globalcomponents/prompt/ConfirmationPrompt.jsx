@@ -32,7 +32,7 @@ const Button = styled.button`
   cursor: pointer;
 `;
 
-const ConfirmationPrompt = () => {
+const ConfirmationLogoutPrompt = () => {
   const [showPrompt, setShowPrompt] = useState(false);
 
   const handleUnload = (e) => {
@@ -80,4 +80,4 @@ const ConfirmationPrompt = () => {
   );
 }
 
-export default ConfirmationPrompt;
+export default ConfirmationLogoutPrompt;

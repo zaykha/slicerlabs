@@ -15,23 +15,6 @@ const PromptOverlay = styled.div`
   justify-content: center;
   z-index: 9999;
 `;
-
-const PromptContent = styled.div`
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  text-align: center;
-`;
-
-const CloseButton = styled.button`
-  background-color: lightblue;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
-  color: white;
-  cursor: pointer;
-`;
  const ContentContainer = styled.div`
     box-sizing: border-box;
 

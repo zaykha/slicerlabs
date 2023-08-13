@@ -59,6 +59,7 @@ import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { MeshNormalMaterial, Box3, Vector3, Mesh, LoadingManager } from "three";
 import { getAuth } from "firebase/auth";
 import ErrorPrompt from "../../globalcomponents/prompt/ErrorPrompt";
+import ConfirmationPrompt from "../../globalcomponents/prompt/ConfirmationPrompt";
 
 const ProgressBar = ({ step }) => {
   return (
@@ -96,10 +97,15 @@ const Cartpage = () => {
   const [endCoordinates, setEndCoordinates] = useState("");
   const cartItemsDetails = useSelector((state) => state.cartItems.cartItems);
   const userUID = useSelector((state) => state.userDetails.userUID);
-  const [loadedObjects, setLoadedObjects] = useState([]);
+  const [userConfirmationPrompt, setuserConfirmationPrompt] = useState(false);
   const [renderedObjects, setRenderedObjects] = useState([]);
   const [TTLPriceBeforeRouting, setTTLPriceBeforeRouting] = useState(0);
   const [ErrorHandling, setErrorHandling] = useState({
+    state: false,
+    header: "",
+    message: "",
+  });
+  const [confirmationHandling, setConfirmationHandling] = useState({
     state: false,
     header: "",
     message: "",
@@ -285,7 +291,10 @@ const Cartpage = () => {
   };
   // const stripe = loadStripe('pk_test_51NXRyMLJRenTchxdZh6X0oIQths7aa6kIDlyPzR0tAtoRaFXu3pCEv8T65UpKuWFWu9N1oyUwjQAzH4g9vqTLBn000DhgRovlf');
   // const totalAmountInCents = Math.round(TTLPriceBeforeRouting * 100); // Convert dollars to cents
-
+  const handleConfirmation = () => {
+    // Perform the delete action here
+    setShowPrompt(false);
+  };
   const handleProceedToPayment = async () => {
     const auth = getAuth();
     const user = auth.currentUser;
@@ -293,13 +302,19 @@ const Cartpage = () => {
     // Check if the user is logged in
     if (!user) {
       // User is not logged in, prompt them to log in and redirect to the login page
-      const confirmLogin = window.confirm(
-        "Please log in or create an account to proceed to payment."
-      );
+      // const confirmLogin = window.confirm(
+      //   "Please log in or create an account to proceed to payment."
+      // );
 
-      if (confirmLogin) {
-        navigate("/login"); // Redirect to the login page
-      }
+      setConfirmationHandling({
+        state: true,
+        header: "Confirmation Needed",
+        message: "Please log in or create an account to proceed to payment.",
+      });
+
+      // if (confirmLogin) {
+      //   navigate("/login"); // Redirect to the login page
+      // }
       return; // Stop the function if the user is not logged in
     }
 
@@ -335,6 +350,9 @@ const Cartpage = () => {
       "TempItemsDetailsStorage",
       JSON.stringify(itemsForValidation)
     );
+    useEffect(() => {
+    console.log(userConfirmationPrompt);
+  }, [userConfirmationPrompt]);
     // // Check if there is any data in localStorage
     // if (storedItems) {
     //   // Use the retrieved data
@@ -385,7 +403,7 @@ const Cartpage = () => {
           setErrorHandling({
             state: true,
             header: "Error",
-            message: "Error creating checkout session. Please try again later."
+            message: "Error creating checkout session. Please try again later.",
           });
           // alert("Error creating checkout session. Please try again later.");
         }
@@ -394,7 +412,8 @@ const Cartpage = () => {
         setErrorHandling({
           state: true,
           header: "Error",
-          message: "There was an issue with the prices. Please review your cart."
+          message:
+            "There was an issue with the prices. Please review your cart.",
         });
         // alert("There was an issue with the prices. Please review your cart.");
       }
@@ -405,7 +424,7 @@ const Cartpage = () => {
       setErrorHandling({
         state: true,
         header: "Error",
-        message: "Error processing payment. Please try again later."
+        message: "Error processing payment. Please try again later.",
       });
     }
   };
@@ -472,6 +491,7 @@ const Cartpage = () => {
               quantity={item.options.quantity}
               price={item.options.price}
               onDelete={handleRemoveItem}
+              setuserConfirmationPrompt={setuserConfirmationPrompt}
             />
           ))
         )}
@@ -528,6 +548,21 @@ const Cartpage = () => {
         />
       )}
       {/* <NextBtn onClick={handleDeleteAllRecords}>deleteAllFromIDB</NextBtn> */}
+      {confirmationHandling.state && (
+        <ConfirmationPrompt
+          header={confirmationHandling.header}
+          message={confirmationHandling.message}
+          onClose={() =>
+            setConfirmationHandling({ ...confirmationHandling, state: false })
+          }
+          onConfirm={() =>{
+            setConfirmationHandling({ ...confirmationHandling, state: false })
+            navigate("/login")
+          }
+            
+          }
+        />
+      )}
     </>
   );
 };

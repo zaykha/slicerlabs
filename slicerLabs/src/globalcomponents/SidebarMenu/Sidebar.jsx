@@ -147,6 +147,35 @@ const Sidebar = ({ togglesidebar, isOpen }) => {
               {link.title}
             </SidebarLink>
           ))}
+          </SidebarMenu>
+          <ActionItemsSideBar>
+            <SidebarLink
+              to="/Start3dPrinting"
+              className={pathname === "/Start3dPrinting" ? "active" : ""}
+              // isActive={pathname === "/Start3dPrinting"}
+            >
+              {pathname === "/Start3dPrinting"
+                ? "3D Printing"
+                : cartItems?.length > 0
+                ? "Add More Items"
+                : "Start 3D Printing"}
+            </SidebarLink>
+          </ActionItemsSideBar>
+
+          <ActionItemsSideBar>
+            {hasUndefinedProduct && !isLoading ? (
+              <SidebarLink onClick={() => setErrorPromptShow(true)}>
+                Cart
+                {cartItems?.length > 0 && <span>{cartItems.length}</span>}
+              </SidebarLink>
+            ) : (
+              <SidebarLink to="/cart">
+                Cart
+                {cartItems?.length > 0 && <span>{cartItems.length}</span>}
+              </SidebarLink>
+            )}
+          </ActionItemsSideBar>
+          <SidebarMenu>
           {!isLoading && isAuthenticated ? (
             !isLoading && isAdmin ? (
               <>
@@ -201,36 +230,11 @@ const Sidebar = ({ togglesidebar, isOpen }) => {
               </SidebarLink>
             </NavItem>
           )}
+          </SidebarMenu>
           {/* <Commerce> */}
-          <ActionItemsSideBar>
-            <SidebarLink
-              to="/Start3dPrinting"
-              className={pathname === "/Start3dPrinting" ? "active" : ""}
-              // isActive={pathname === "/Start3dPrinting"}
-            >
-              {pathname === "/Start3dPrinting"
-                ? "3D Printing"
-                : cartItems?.length > 0
-                ? "Add More Items"
-                : "Start 3D Printing"}
-            </SidebarLink>
-          </ActionItemsSideBar>
-
-          <ActionItemsSideBar>
-            {hasUndefinedProduct && !isLoading ? (
-              <SidebarLink onClick={() => setErrorPromptShow(true)}>
-                Cart
-                {cartItems?.length > 0 && <span>{cartItems.length}</span>}
-              </SidebarLink>
-            ) : (
-              <SidebarLink to="/cart">
-                Cart
-                {cartItems?.length > 0 && <span>{cartItems.length}</span>}
-              </SidebarLink>
-            )}
-          </ActionItemsSideBar>
+         
           {/* </Commerce> */}
-        </SidebarMenu>
+        
       </SidebarWrapper>
     </SidebarContainer>
   );

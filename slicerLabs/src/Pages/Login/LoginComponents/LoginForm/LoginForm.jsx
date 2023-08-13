@@ -132,7 +132,15 @@ const LoginForm = () => {
                 Authorization: idToken,
               },
             }
-          );
+          ).catch(error=>{
+            setErrorHandling({
+              state: true,
+              header: "An Error Occured",
+              message: "Fetch error:", error,
+            });
+            // console.log("Fetch error:", error);
+            throw error;
+          })
 
           if (!response.ok) {
             // Handle the response error, if any
