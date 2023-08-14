@@ -12,6 +12,7 @@ import {
 import { LoginFromcontainer } from "../../Pages/Login/LoginComponents/LoginForm/LoginFormelements";
 import { InputelemSmall } from "../../Pages/Register/RegisterComponents/Registerformelement";
 import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
+import PriceCalculatorExplanation from "./PriceCalculatorExplanation";
 
 const ConfigPageContainer = styled.div`
   /* Your styling here */
@@ -155,8 +156,10 @@ const ConfigPage = () => {
   return (
     <Step1Container>
       <Container>
+     
         <UPHeaderFullline1>Admin Config Page</UPHeaderFullline1>
         <LoginFromcontainer>
+        <PriceCalculatorExplanation />
           {isFetching?
             <RotatingLoader/>
           :
@@ -451,7 +454,7 @@ const ConfigPage = () => {
           {/* ... */}
         </LoginFromcontainer>
 
-
+       
       </Container>
     </Step1Container>
   );

@@ -16,7 +16,7 @@ const ToServices = () => {
                     including SLA, SLS, FDM, and MJF. 
                     Experience top-quality prints at ultra-competitive rates
                     and lightning-fast lead times.</Infop>
-                <CTABtn>View Our Techs</CTABtn>
+                <CTABtn to={"/Learn"}>View Our Techs</CTABtn>
             
        
         </RightContentservice>

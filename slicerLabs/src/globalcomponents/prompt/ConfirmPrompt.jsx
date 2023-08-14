@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { UPHeaderFullline1 } from '../../Pages/UserProfile/UserProfileElement';
+import { LoginFromcontainer } from '../../Pages/Login/LoginComponents/LoginForm/LoginFormelements';
 
 const PromptOverlay = styled.div`
   position: fixed;
@@ -51,19 +52,60 @@ const CancelButton = styled.button`
   padding: 5px 10px;
   cursor: pointer;
 `;
-
+const Button = styled.button`
+  background-color: lightblue;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  cursor: pointer;
+`;
+const AddButton = styled(Button)`
+  background-color: #388fc9;
+  width: 80%;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 10px auto;
+  &:hover {
+    background-color: #2c73a3;
+  }
+`;
+const ConfigSubHeader = styled.div`
+  width: 100%;
+  text-align: center;
+  font-size: 1.1rem;
+  margin: 20px auto;
+  color: white;
+`;
+const AddButtonDelete = styled(Button)`
+  background-color: #e83e00;
+  width: 200px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 10px 20px;
+  &:hover {
+    background-color: #a82e02;
+  }
+`;
 const ConfirmationPrompt = ({ header, message, onConfirm, onCancel }) => {
-    console.log(header, message);
+    // console.log(header, message);
   return (
     <PromptOverlay>
-      <ContentContainer>
+      <LoginFromcontainer>
       <UPHeaderFullline1>{header}</UPHeaderFullline1>
-        <Message>{message}</Message>
+        <ConfigSubHeader>{message}</ConfigSubHeader>
         <ButtonContainer>
-          <ConfirmButton onClick={onConfirm}>Confirm</ConfirmButton>
-          <CancelButton onClick={onCancel}>Cancel</CancelButton>
+          <AddButton onClick={onConfirm}>Confirm</AddButton>
+          <AddButtonDelete onClick={onCancel}>Cancel</AddButtonDelete>
         </ButtonContainer>
-      </ContentContainer>
+      </LoginFromcontainer>
     </PromptOverlay>
   );
 };

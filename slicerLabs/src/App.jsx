@@ -77,7 +77,8 @@ function App() {
           // and store it in local storage.
           try {
             const response = await fetch(
-              "http://localhost:3000/calculate-function",
+              // "http://localhost:3000/calculate-function",
+              "https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function",
               {
                 method: "GET",
                 headers: {

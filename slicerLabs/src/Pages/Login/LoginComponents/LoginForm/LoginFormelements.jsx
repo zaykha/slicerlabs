@@ -102,6 +102,9 @@ export const LoginFlexdiv = styled.div`
     align-items:center;
     margin-bottom: 20px;
     justify-content: space-between;
+    @media screen and (max-width: 1200px) {
+        flex-direction: column;
+      }
 `;
 export const RememberMe = styled.input`
     width: 20px;

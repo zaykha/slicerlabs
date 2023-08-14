@@ -33,7 +33,7 @@ const ServicesStats = () => {
                 Competitive Price
             </Scardp>
 
-            <CTABtn>Learn More</CTABtn>
+            <CTABtn to={"/Learn"}>Learn More</CTABtn>
         </Stats1container>
     </>
   )

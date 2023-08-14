@@ -18,7 +18,7 @@ const Services = () => {
         </Sheader1>
       <ServicesHero/>
       <ServicesStats/>
-      <PApplications/>
+      {/* <PApplications/> */}
       <SMaterials/>
       <OurWorks/>
  

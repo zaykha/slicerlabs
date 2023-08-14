@@ -105,11 +105,25 @@ const AddButton = styled(Button)`
     background-color: #2c73a3;
   }
 `;
+const AddButtonDelete = styled(Button)`
+  background-color: #e83e00;
+  width: 200px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 5px 10px 5px 12px;
+  &:hover {
+    background-color: #a82e02;
+  }
+`;
 const LoginFromcontainer2 = styled.div`
   box-sizing: border-box;
 
   width: 773px;
-  padding: 40px 0;
+  padding: 40px 15px;
   margin: 40px auto;
   background: linear-gradient(
     180deg,
@@ -123,8 +137,9 @@ const LoginFromcontainer2 = styled.div`
 
   border-radius: 10px;
 
-  @media screen and (max-width: 800px) {
+  @media screen and (max-width: 1200px) {
     width: 95%;
+ 
   }
 `;
 const AddPostButton = styled(Button)`
@@ -287,6 +302,7 @@ const BlogPage = () => {
 
         {blogPosts.length > 0 ? (
           <LoginFromcontainer2>
+             <ItemHeaderprofile>Current Live Blog</ItemHeaderprofile>
             {blogPosts.map((post) => (
               <BlogPost key={post.id}>
                 <LoginFlexdiv>
@@ -300,9 +316,9 @@ const BlogPage = () => {
                     <AddButton onClick={() => handleEditClick(post)}>
                       Edit
                     </AddButton>
-                    <AddButton onClick={() => handleDeletePost(post.id)}>
+                    <AddButtonDelete onClick={() => handleDeletePost(post.id)}>
                       Delete
-                    </AddButton>
+                    </AddButtonDelete>
                   </div>
                 </LoginFlexdiv>
               </BlogPost>

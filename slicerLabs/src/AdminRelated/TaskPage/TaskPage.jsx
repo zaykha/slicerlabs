@@ -13,6 +13,7 @@ import {
   EditIcon,
   InnerHeader,
   InnerHeader1,
+  InnerHeaderClickable,
   InnerHeaderLeft,
   InnerHeaderP,
   InnerHeaderWrapper,
@@ -56,6 +57,8 @@ import { resetCartCount } from "../../ReduxStore/actions/cartCountActions";
 import { resetCartState } from "../../ReduxStore/reducers/CartItemReducer";
 import { resetAddressDetails } from "../../ReduxStore/reducers/MapServicesReducer";
 import { resetUserDetails } from "../../ReduxStore/actions/userDetails";
+import ConfirmationPrompt from "../../globalcomponents/prompt/ConfirmPrompt";
+import { getDownloadURL, getStorage, ref } from "firebase/storage";
 
 const TaskPage = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,6 +82,9 @@ const TaskPage = () => {
   const [formattedAddresses, setFormattedAddresses] = useState([]);
   const [itemStatuses, setItemStatuses] = useState({});
   const [itemIssueStatuses, setItemIssueStatuses] = useState({});
+  const [isDownloadPopupOpen, setIsDownloadPopupOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFileUser, setSelectedFileUser] = useState(null);
   const statusOptions = [
     "Pre-Printing Procedures",
     "Printing",
@@ -94,8 +100,13 @@ const TaskPage = () => {
     "Solution Proposed",
     "Customer Feedback",
     "Resolved",
-    "Closed"
+    "Closed",
   ];
+  const [confirmationHandling, setConfirmationHandling] = useState({
+    state: false,
+    header: "",
+    message: "",
+  });
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   let itemCountChecker = 0;
   let DelivereditemCountChecker = 0;
@@ -107,7 +118,7 @@ const TaskPage = () => {
       const addresses = [];
       let purchaseTotalItems = 0;
       let purchaseTotalDeliveredItems = 0;
-      
+
       // Loop through the snapshot and extract the data from each document
       for (const doc of querySnapshot.docs) {
         const purchaseInstanceData = doc.data();
@@ -164,11 +175,11 @@ const TaskPage = () => {
       setPurchaseInstances([]); // Set an empty array if an error occurs
     }
   }
- 
+
   async function getProductIssueForUser(userId) {
     try {
-      let purchasedIssueItems =0;
-     
+      let purchasedIssueItems = 0;
+
       const querySnapshot = await getDocs(ProductConcernCollection, userId);
       // const querySnapshot = await getDocs(q);
       // console.log(querySnapshot)
@@ -178,25 +189,22 @@ const TaskPage = () => {
       querySnapshot.forEach((doc) => {
         // Extract the data from the document and add it to the array
         const ProductIssueDatatoPushArray = doc.data().concerns;
-        ProductIssueDatatoPushArray.map((ProductIssueDatatoPush)=>{
-          console.log(ProductIssueDatatoPush)
+        ProductIssueDatatoPushArray.map((ProductIssueDatatoPush) => {
+          console.log(ProductIssueDatatoPush);
           ProductIssueData.push(ProductIssueDatatoPush);
           setItemIssueStatuses((prevStatuses) => ({
             ...prevStatuses,
             [ProductIssueDatatoPush.productId]: ProductIssueDatatoPush.status,
           }));
-        })
-       
+        });
       });
       console.log("Product Issue", ProductIssueData);
       ProductIssueData.map((instance) => {
-       
-          if (instance.status) {
-            purchasedIssueItems++;
-          } else {
-            return console.log("no issue attached");
-          }
-        
+        if (instance.status) {
+          purchasedIssueItems++;
+        } else {
+          return console.log("no issue attached");
+        }
       });
       setTotalIssueItems(purchasedIssueItems);
       setProductIssue(ProductIssueData);
@@ -206,15 +214,12 @@ const TaskPage = () => {
     }
     // setFetchingData(false)
   }
-  useEffect(() => {   
+  useEffect(() => {
     // Call the function on component mount
     // setFetchingData(true);
     if (!FetchingData && !statusUpdateInProgress) {
-      
       getPurchaseInstancesForUser(userUIDInLocalStorage);
       getProductIssueForUser(userUIDInLocalStorage);
-     
-
     }
     // setFetchingData(false);
   }, [FetchingData, statusUpdateInProgress]);
@@ -227,7 +232,9 @@ const TaskPage = () => {
     setIsOpen(!isOpen);
   };
   const toggleIssueDropdown = (index) => {
-    setOpenIssueDropdownIndex((prevIndex) => (prevIndex === index ? null : index));
+    setOpenIssueDropdownIndex((prevIndex) =>
+      prevIndex === index ? null : index
+    );
   };
   const handleStatusChange = async (selectedOption, itemId) => {
     setStatusUpdateInProgress(true);
@@ -237,7 +244,7 @@ const TaskPage = () => {
         ...prevStatuses,
         [itemId]: selectedOption,
       }));
-      
+
       // Get the reference to the document containing the purchasedItems array
       const querySnapshot = await getDocs(
         PurchasedItemsCollection,
@@ -262,7 +269,7 @@ const TaskPage = () => {
       setStatusUpdateInProgress(false);
     } catch (error) {
       console.error("Error updating status:", error);
-      setFetchingData(false)
+      setFetchingData(false);
     }
     setOpenIssueDropdownIndex(null);
     setStatusUpdateInProgress(false);
@@ -277,7 +284,7 @@ const TaskPage = () => {
         ...prevStatuses,
         [itemId]: selectedOption,
       }));
-      console.log(itemIssueStatuses)
+      console.log(itemIssueStatuses);
       // Get the reference to the document containing the purchasedItems array
       const querySnapshot = await getDocs(
         ProductConcernCollection,
@@ -286,9 +293,9 @@ const TaskPage = () => {
 
       for (const doc of querySnapshot.docs) {
         const ProductConcernData = doc.data();
-        console.log(ProductConcernData.concerns)
+        console.log(ProductConcernData.concerns);
         const concerns = ProductConcernData.concerns.map((item) => {
-          console.log(item.productId, itemId)
+          console.log(item.productId, itemId);
           if (item.productId === itemId) {
             return {
               ...item,
@@ -297,14 +304,14 @@ const TaskPage = () => {
           }
           return item;
         });
-        console.log(concerns)
+        console.log(concerns);
         // Update the Firestore document with the updated items
         await updateDoc(doc.ref, { concerns });
       }
       setStatusUpdateInProgress(false);
     } catch (error) {
       console.error("Error updating status:", error);
-      setFetchingData(false)
+      setFetchingData(false);
     }
     setOpenIssueDropdownIndex(null);
     setStatusUpdateInProgress(false);
@@ -384,12 +391,46 @@ const TaskPage = () => {
 
     // Unsubscribe from the onAuthStateChanged listener
   };
+  const storage = getStorage();
+  const handleDownload = async (item, purchaseInstance) => {
+    try {
+      const fileName= `${selectedFileUser}&${selectedFile}`
+      // console.log(fileName)
+      // Get the reference to the file in Firebase Storage
+      const fileRef = ref(storage, `Purchased3DFiles/${fileName}`);
 
+      // Get the download URL for the file
+      const downloadURL = await getDownloadURL(fileRef);
+
+      // Create a link and trigger a download
+      const link = document.createElement("a");
+      link.href = downloadURL;
+      link.download = fileName;
+      link.target = "_blank";
+      link.click();
+      setConfirmationHandling({
+        state: false,
+        header: "",
+        message: "",
+      });
+    } catch (error) {
+      console.error("Error downloading the file:", error);
+    }
+  };
+  const handleFileClick = (item, purchaseInstance) => {
+    setSelectedFile(item.fileName);
+    setSelectedFileUser(purchaseInstance.userUID);
+    // console.log(item, purchaseInstance)
+    setIsDownloadPopupOpen(true);
+    setConfirmationHandling({
+      state: true,
+      header: "Confirmation Needed",
+      message: "Do you want to download the 3D file for this Task?",
+    });
+  };
   // Your rendering logic here
   return (
     <>
-      
-
       <UPHeaderFullline1>Admin Task Page</UPHeaderFullline1>
 
       <LoginFromcontainer>
@@ -413,6 +454,105 @@ const TaskPage = () => {
                     .map((item, index) => {
                       itemCountChecker++;
 
+                      return (
+                        <InnerHeaderWrapper key={item.itemId}>
+                          <InnerHeader>
+                            <InnerLayersP>User: </InnerLayersP>
+                            <InnerLayerP>
+                              {purchaseInstance.userName}
+                            </InnerLayerP>
+                            <InnerLayersP>
+                              Contact: {purchaseInstance.userPhone}
+                            </InnerLayersP>
+                            <InnerLayersP>
+                              {item.fileName}
+                              {/* .substring(6) */}
+                            </InnerLayersP>
+                          </InnerHeader>
+                          <InnerHeaderClickable
+                            onClick={() => handleFileClick(item,purchaseInstance)}
+                          >
+                            <InnerLayerP>
+                              FDM Printing({item.color})
+                            </InnerLayerP>
+                            <InnerLayersP>with</InnerLayersP>
+                            <InnerLayerP>
+                              {item.material} {item.dimensions.depth} x{" "}
+                              {item.dimensions.width} x {item.dimensions.height}
+                            </InnerLayerP>
+                            <InnerLayersP>Quantity of </InnerLayersP>
+                            <InnerLayerP>{item.quantity}</InnerLayerP>
+                          </InnerHeaderClickable>
+                          <InnerHeaderP>
+                            {formattedAddresses[outerIndex]}
+                          </InnerHeaderP>
+                          <InnerHeader>
+                            <StatusDropdown
+                              options={statusOptions}
+                              selectedOption={itemStatuses[item.itemId]}
+                              onSelect={(selectedOption) =>
+                                handleStatusChange(selectedOption, item.itemId)
+                              }
+                              isOpen={openDropdownIndex === item.itemId}
+                              onClick={() => toggleDropdown(item.itemId)}
+                              isLastItemTrue={
+                                itemCountChecker === totalItemToDisplay
+                              }
+                              itemCount={totalItemToDisplay}
+                            />
+                          </InnerHeader>
+                          <InnerHeaderLeft>
+                            SGD {item.price.toFixed(2)}
+                            <InnerLayersP>Purchased Date:</InnerLayersP>
+                            <InnerLayerP>
+                              {purchaseInstance.purchasedAt}
+                            </InnerLayerP>
+                          </InnerHeaderLeft>
+                          {confirmationHandling.state && (
+                            <ConfirmationPrompt
+                              header={confirmationHandling.header}
+                              message={confirmationHandling.message}
+                              onCancel={() =>
+                                setConfirmationHandling({
+                                  ...confirmationHandling,
+                                  state: false,
+                                })
+                              }
+                              onConfirm={()=>handleDownload(item,purchaseInstance)}
+                            />
+                          )}
+                        </InnerHeaderWrapper>
+                      );
+                    })}
+                </div>
+              ))
+            ) : (
+              <></>
+            )}
+          </>
+        )}
+      </LoginFromcontainer>
+
+      <LoginFromcontainer>
+        <ItemHeaderprofile>Completed Tasks</ItemHeaderprofile>
+        {FetchingData ? (
+          <SpinningLoader />
+        ) : (
+          <>
+            <InnerHeaderWrapper>
+              <InnerHeader1></InnerHeader1>
+              <DisplayHeader>Product Details</DisplayHeader>
+              <DisplayHeader>Address</DisplayHeader>
+              <DisplayHeader>Status</DisplayHeader>
+              <DisplayHeader>Price Paid</DisplayHeader>
+            </InnerHeaderWrapper>
+            {purchaseInstances.length > 0 ? (
+              purchaseInstances.map((purchaseInstance, outerIndex) => (
+                <div key={outerIndex}>
+                  {purchaseInstance.purchasedItems
+                    .filter((item) => item.status == "Delivered")
+                    .map((item, index) => {
+                      DelivereditemCountChecker++;
                       return (
                         <InnerHeaderWrapper key={item.itemId}>
                           <InnerHeader>
@@ -452,9 +592,10 @@ const TaskPage = () => {
                               isOpen={openDropdownIndex === item.itemId}
                               onClick={() => toggleDropdown(item.itemId)}
                               isLastItemTrue={
-                                itemCountChecker === totalItemToDisplay
+                                DelivereditemCountChecker ===
+                                TotalDeliveredItems
                               }
-                              itemCount={totalItemToDisplay}
+                              itemCount={TotalDeliveredItems}
                             />
                           </InnerHeader>
                           <InnerHeaderLeft>
@@ -477,89 +618,10 @@ const TaskPage = () => {
       </LoginFromcontainer>
 
       <LoginFromcontainer>
-        <ItemHeaderprofile>Completed Tasks</ItemHeaderprofile>
-        {FetchingData ? (
-          <SpinningLoader />
-        ) : (
-          <>
-        <InnerHeaderWrapper>
-          <InnerHeader1></InnerHeader1>
-          <DisplayHeader>Product Details</DisplayHeader>
-          <DisplayHeader>Address</DisplayHeader>
-          <DisplayHeader>Status</DisplayHeader>
-          <DisplayHeader>Price Paid</DisplayHeader>
-        </InnerHeaderWrapper>
-        {purchaseInstances.length > 0 ? (
-          purchaseInstances.map((purchaseInstance, outerIndex) => (
-            <div key={outerIndex}>
-              {purchaseInstance.purchasedItems
-                .filter((item) => item.status == "Delivered")
-                .map((item, index) => {
-                  DelivereditemCountChecker++;
-                  return (
-                    <InnerHeaderWrapper key={item.itemId}>
-                      <InnerHeader>
-                        <InnerLayersP>User: </InnerLayersP>
-                        <InnerLayerP>{purchaseInstance.userName}</InnerLayerP>
-                        <InnerLayersP>
-                          Contact: {purchaseInstance.userPhone}
-                        </InnerLayersP>
-                        <InnerLayersP>
-                          {item.fileName.substring(6)}
-                        </InnerLayersP>
-                      </InnerHeader>
-                      <InnerHeader>
-                        <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
-                        <InnerLayersP>with</InnerLayersP>
-                        <InnerLayerP>
-                          {item.material} {item.dimensions.depth} x{" "}
-                          {item.dimensions.width} x {item.dimensions.height}
-                        </InnerLayerP>
-                        <InnerLayersP>Quantity of </InnerLayersP>
-                        <InnerLayerP>{item.quantity}</InnerLayerP>
-                      </InnerHeader>
-                      <InnerHeaderP>
-                        {formattedAddresses[outerIndex]}
-                      </InnerHeaderP>
-                      <InnerHeader>
-                        <StatusDropdown
-                          options={statusOptions}
-                          selectedOption={itemStatuses[item.itemId]}
-                          onSelect={(selectedOption) =>
-                            handleStatusChange(selectedOption, item.itemId)
-                          }
-                          isOpen={openDropdownIndex === item.itemId}
-                          onClick={() => toggleDropdown(item.itemId)}
-                          isLastItemTrue={
-                            DelivereditemCountChecker === TotalDeliveredItems
-                          }
-                          itemCount={TotalDeliveredItems}
-                        />
-                      </InnerHeader>
-                      <InnerHeaderLeft>
-                        SGD {item.price.toFixed(2)}
-                        <InnerLayersP>Purchased Date:</InnerLayersP>
-                        <InnerLayerP>
-                          {purchaseInstance.purchasedAt}
-                        </InnerLayerP>
-                      </InnerHeaderLeft>
-                    </InnerHeaderWrapper>
-                  );
-                })}
-            </div>
-          ))
-        ) : (
-          <></>
-        )}
-         </>
-        )}
-      </LoginFromcontainer>
-
-      <LoginFromcontainer>
         <ItemHeaderprofile>Issue Status</ItemHeaderprofile>
         <InnerHeaderWrapper>
           <DisplayHeader></DisplayHeader>
-          <DisplayHeader>Product Details</DisplayHeader>         
+          <DisplayHeader>Product Details</DisplayHeader>
           <DisplayHeader>Status</DisplayHeader>
           <DisplayHeader>Last updated</DisplayHeader>
           <DisplayHeader>Note</DisplayHeader>
@@ -571,46 +633,56 @@ const TaskPage = () => {
             .map((purchaseInstance, index) => (
               <div key={index}>
                 {purchaseInstance.purchasedItems.map((item) =>
-                productIssue.map((issue)=>{
-                  if(issue.productId === item.itemId){
-                    return(
-                      <InnerHeaderWrapper key={item.itemId}>
-                        <InnerHeader>
-                          <InnerLayerP> {item.fileName}</InnerLayerP>
-                        </InnerHeader>
-                        <InnerHeader>
-                          <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
-                          <InnerLayersP>with</InnerLayersP>
-                          <InnerLayerP>
-                            {item.material} {item.dimensions.depth} x{" "}
-                            {item.dimensions.width} x {item.dimensions.height}
-                          </InnerLayerP>
-                          <InnerLayersP>Quantity of </InnerLayersP>
-                          <InnerLayerP>{item.quantity}</InnerLayerP>
-                        </InnerHeader>
-                        <InnerHeader>
-                        <StatusDropdown
-                          options={issueOptions}
-                          selectedOption={itemIssueStatuses[issue.productId]}
-                          onSelect={(selectedOption) =>
-                            handleIssueStatusChange(selectedOption, issue.productId)
-                          }
-                          isOpen={openIssueDropdownIndex === issue.productId}
-                          onClick={() => toggleIssueDropdown(issue.productId)}
-                          isLastItemTrue={
-                            DelivereditemCountChecker === TotalIssueItems
-                          }
-                          itemCount={TotalIssueItems}
-                        />
-                      </InnerHeader>
-                        <InnerHeader>{issue.lastUpdate || ""}</InnerHeader>
-                        <InnerHeader>{issue.concernNote}</InnerHeader>
-                      
-                      </InnerHeaderWrapper>
-                    )
-                  }
-                })
-                  )}
+                  productIssue.map((issue) => {
+                    if (issue.productId === item.itemId) {
+                      return (
+                        <InnerHeaderWrapper key={item.itemId}>
+                          <InnerHeader>
+                            <InnerLayerP> {item.fileName}</InnerLayerP>
+                          </InnerHeader>
+                          <InnerHeader>
+                            <InnerLayerP>
+                              FDM Printing({item.color})
+                            </InnerLayerP>
+                            <InnerLayersP>with</InnerLayersP>
+                            <InnerLayerP>
+                              {item.material} {item.dimensions.depth} x{" "}
+                              {item.dimensions.width} x {item.dimensions.height}
+                            </InnerLayerP>
+                            <InnerLayersP>Quantity of </InnerLayersP>
+                            <InnerLayerP>{item.quantity}</InnerLayerP>
+                          </InnerHeader>
+                          <InnerHeader>
+                            <StatusDropdown
+                              options={issueOptions}
+                              selectedOption={
+                                itemIssueStatuses[issue.productId]
+                              }
+                              onSelect={(selectedOption) =>
+                                handleIssueStatusChange(
+                                  selectedOption,
+                                  issue.productId
+                                )
+                              }
+                              isOpen={
+                                openIssueDropdownIndex === issue.productId
+                              }
+                              onClick={() =>
+                                toggleIssueDropdown(issue.productId)
+                              }
+                              isLastItemTrue={
+                                DelivereditemCountChecker === TotalIssueItems
+                              }
+                              itemCount={TotalIssueItems}
+                            />
+                          </InnerHeader>
+                          <InnerHeader>{issue.lastUpdate || ""}</InnerHeader>
+                          <InnerHeader>{issue.concernNote}</InnerHeader>
+                        </InnerHeaderWrapper>
+                      );
+                    }
+                  })
+                )}
               </div>
             ))
         ) : (
@@ -666,7 +738,7 @@ const TaskPage = () => {
       </LoginFromcontainer>
     )} */}
 
-{/* <NextBtn onClick={handleLogout}>logout</NextBtn> */}
+      {/* <NextBtn onClick={handleLogout}>logout</NextBtn> */}
     </>
   );
 };

@@ -12,7 +12,7 @@ export const Hero = () => {
             with just a few clicks!
         </Herop>
 
-        <CTABtn>Start 3D Printing</CTABtn>
+        <CTABtn to={"/Start3dPrinting"}>Start 3D Printing</CTABtn>
     </HeroContainer>
   )
 }

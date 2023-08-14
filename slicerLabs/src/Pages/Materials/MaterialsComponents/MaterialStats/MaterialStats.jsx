@@ -45,7 +45,7 @@ const MaterialStats = () => {
             <Scardp>We provide fuss-free service 
                 using hobbyist FDM and SLA technologies with  competitive price</Scardp>
 
-        <CTABtn>Learn More</CTABtn>
+        <CTABtn to={"/Learn"}>Learn More</CTABtn>
     </MScontainter>
   )
 }

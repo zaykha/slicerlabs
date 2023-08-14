@@ -43,14 +43,14 @@ const ItemWrapper = styled.div`
 
 const Item = styled.div`
   position: relative;
-  width: 1210px;
+  width: 1200px;
 `;
 
 const VerticalDivision = styled.div`
-  width: ${({ width }) => width || 'auto'};
+  width: ${({ width }) => width || "auto"};
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   padding: 10px;
 `;
@@ -70,10 +70,10 @@ const Overlap = styled.div`
 `;
 
 const TextWrapper = styled.div`
-  color: ${({ color }) => color || '#ffffff'};
-  font-family: ${({ font }) => font || 'Inter-Bold, Helvetica'};
-  font-size: ${({ fontSize }) => fontSize || '16px'};
-  font-weight: ${({ fontWeight }) => fontWeight || '700'};
+  color: ${({ color }) => color || "#ffffff"};
+  font-family: ${({ font }) => font || "Inter-Bold, Helvetica"};
+  font-size: ${({ fontSize }) => fontSize || "16px"};
+  font-weight: ${({ fontWeight }) => fontWeight || "700"};
   letter-spacing: 0;
   line-height: normal;
   position: relative;
@@ -81,18 +81,18 @@ const TextWrapper = styled.div`
 `;
 
 const Group = styled.div`
-  height: ${({ height }) => height || 'auto'};
-  position: ${({ position }) => position || 'static'};
-  width: ${({ width }) => width || 'auto'};
+  height: ${({ height }) => height || "auto"};
+  position: ${({ position }) => position || "static"};
+  width: ${({ width }) => width || "auto"};
 `;
 
 const Rectangle = styled.div`
-  background-color: ${({ bgColor }) => bgColor || '#e9e9e930'};
-  border: 1px solid ${({ borderColor }) => borderColor || '#c1c1c1'};
+  background-color: ${({ bgColor }) => bgColor || "#e9e9e930"};
+  border: 1px solid ${({ borderColor }) => borderColor || "#c1c1c1"};
   border-radius: 10px;
-  height: ${({ height }) => height || 'auto'};
+  height: ${({ height }) => height || "auto"};
   position: relative;
-  width: ${({ width }) => width || 'auto'};
+  width: ${({ width }) => width || "auto"};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -105,16 +105,24 @@ const Input = styled.input`
   type: number;
   placeholder: ${({ placeholder }) => placeholder};
   value: ${({ value }) => value};
-  width: ${({ width }) => width || '28%'};
-  background: ${({ background }) => background || 'rgba(87, 87, 87, 0.43)'};
-  border: ${({ border }) => border || '1px solid #D5D5D5'};
+  width: ${({ width }) => width || "28%"};
+  background: ${({ background }) => background || "rgba(87, 87, 87, 0.43)"};
+  border: ${({ border }) => border || "1px solid #D5D5D5"};
   border-radius: 10px;
-  color: ${({ color }) => color || 'white'};
-  margin: ${({ margin }) => margin || '0px auto 15px'};
+  color: ${({ color }) => color || "white"};
+  margin: ${({ margin }) => margin || "0px auto 15px"};
   padding: 8px;
   text-align: center;
-  height: ${({ height }) => height || '40px'};
-  font-size: ${({ fontSize }) => fontSize || '1.1rem'};
+  height: ${({ height }) => height || "40px"};
+  font-size: ${({ fontSize }) => fontSize || "1.1rem"};
+`;
+
+const Flexdiv = styled.div`
+  display: flex;
+  height: 30px;
+  justify-content: center;
+  align-items: flex-start;
+  color: white;
 `;
 const IndividualProduct = ({
   index,
@@ -128,7 +136,7 @@ const IndividualProduct = ({
   quantity,
   price,
   onDelete,
-  setuserConfirmationPrompt
+  setuserConfirmationPrompt,
 }) => {
   const [currentQuantity, setCurrentQuantity] = useState(quantity);
   const [IndividualTtlPrice, setIndividualTtlPrice] = useState(price);
@@ -161,7 +169,7 @@ const IndividualProduct = ({
     laborCost: 25,
     overheadCost: 5,
   });
- 
+
   const parseStoredFunction = (functionName, storedFunction) => {
     try {
       const Unstring = JSON.parse(storedFunction);
@@ -237,6 +245,14 @@ const IndividualProduct = ({
         },
         materialSettings
       );
+      console.log(material,
+        color,
+        {
+          width,
+          height,
+          depth,
+        },
+        materialSettings)
       dispatch(updatePrice({ ProductId: tempID, newPrice }));
       // setPrice(newPrice);
     }
@@ -329,198 +345,196 @@ const IndividualProduct = ({
   const totalPrice = (price * quantity).toFixed(2);
   return (
     <div className="box">
-      {isFetchingMSetting?
+      {isFetchingMSetting ? (
         <RotatingLoader />
-      :<div className="ITEM-wrapper">
-        <div className="ITEM">
+      ) : (
+        // <div className="ITEM-wrapper">
+          // {/* <div className="ITEM"> */}
           <div className="overlap">
             <div className="vertical-Division1">
               <div className="ezgif-wrapper">
-                  <Canvas>
-                    <Grid cellSize={3} infiniteGrid={true} />
-                    <OrbitControls />
-                    <ambientLight />
-                    <pointLight position={[10, 10, 10]} />
-                    <ModelSizeChecker model={model} />
-                    {/* {model && (
+                <Canvas>
+                  <Grid cellSize={3} infiniteGrid={true} />
+                  <OrbitControls />
+                  <ambientLight />
+                  <pointLight position={[10, 10, 10]} />
+                  <ModelSizeChecker model={model} />
+                  {/* {model && (
                     <primitive
                       object={model}
                       position={[0, 0, 0]}
                       scale={[0.1, 0.1, 0.1]}
                     />
                   )} */}
-                    <CameraControls cameraPosition={cameraPosition} />
-                  </Canvas>
+                  <CameraControls cameraPosition={cameraPosition} />
+                </Canvas>
               </div>
             </div>
 
-              <div className="vertical-Division1">
-                <h1 className="text-wrapper">ITEM {index}</h1>
+            <div className="vertical-Division1">
+              <h1 className="text-wrapper">ITEM {index}</h1>
 
-                <div className="group-2">
-                  <div className="overlap-group-wrapper">
-                    <div
-                      className="overlap-group-3"
-                      onClick={() => increaseQuantityAction(tempID)}
-                    >
-                      <div className="rectangle-2">
-                        <div className="text-wrapper-7">+</div>
-                      </div>
+              <div className="group-2">
+                <div className="overlap-group-wrapper">
+                  <div
+                    className="overlap-group-3"
+                    onClick={() => increaseQuantityAction(tempID)}
+                  >
+                    <div className="rectangle-2">
+                      <div className="text-wrapper-7">+</div>
                     </div>
-                    <div className="text-wrapper-6">{quantity}</div>
+                  </div>
+                  <div className="text-wrapper-6">{quantity}</div>
 
-                    <div
-                      className="overlap-2"
-                      onClick={() => decreaseQuantityAction(tempID)}
-                    >
-                      <div className="rectangle-3">
-                        <div className="text-wrapper-8">-</div>
-                      </div>
+                  <div
+                    className="overlap-2"
+                    onClick={() => decreaseQuantityAction(tempID)}
+                  >
+                    <div className="rectangle-3">
+                      <div className="text-wrapper-8">-</div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="vertical-Division2">
-                <Mdropdownlabel htmlFor="material">Materials</Mdropdownlabel>
-                <MOdropdown value={material} onChange={handleMaterialChange}>
-                  <Moption value="">Please Select a Material</Moption>
-                  <Moption value="ABS">
-                    Acrylonitrile Butadiene Styrene (ABS)
-                  </Moption>
-                  <Moption value="PLA">Polylactic Acid (PLA)</Moption>
-                  <Moption value="TPU">
-                    Thermoplastic Polyurethane (TPU)
-                  </Moption>
-                  <Moption value="Nylon">Nylon</Moption>
-                  <Moption value="PETG">
-                    Polyethylene Terephthalate Glycol (PETG)
-                  </Moption>
-                  <Moption value="Resin">Resins</Moption>
-                </MOdropdown>
+            <div className="vertical-Division2">
+              <Mdropdownlabel htmlFor="material">Materials</Mdropdownlabel>
+              <MOdropdown value={material} onChange={handleMaterialChange}>
+                <Moption value="">Please Select a Material</Moption>
+                <Moption value="ABS">
+                  Acrylonitrile Butadiene Styrene (ABS)
+                </Moption>
+                <Moption value="PLA">Polylactic Acid (PLA)</Moption>
+                <Moption value="TPU">Thermoplastic Polyurethane (TPU)</Moption>
+                <Moption value="Nylon">Nylon</Moption>
+                <Moption value="PETG">
+                  Polyethylene Terephthalate Glycol (PETG)
+                </Moption>
+                <Moption value="Resin">Resins</Moption>
+              </MOdropdown>
 
-                <Mdropdownlabel htmlFor="color">
-                  Finshing & Color
-                </Mdropdownlabel>
-                <MOdropdown value={color} onChange={handleColorChange}>
-                  <Moption value="">Please Select a Color</Moption>
-                  <Moption value="white">White</Moption>
-                  <Moption value="black">Black</Moption>
-                  <Moption value="transparent">Transparent</Moption>
-                </MOdropdown>
+              <Mdropdownlabel htmlFor="color">Finshing & Color</Mdropdownlabel>
+              <MOdropdown value={color} onChange={handleColorChange}>
+                <Moption value="">Please Select a Color</Moption>
+                <Moption value="white">White</Moption>
+                <Moption value="black">Black</Moption>
+                <Moption value="transparent">Transparent</Moption>
+              </MOdropdown>
 
-                <Mdropdownlabel htmlFor="width">
-                  Dimension ( Width x Height x Depth )
-                </Mdropdownlabel>
+              <Mdropdownlabel htmlFor="width">
+                Dimension ( Width x Height x Depth )
+              </Mdropdownlabel>
 
-                <div
-                  style={{
-                    display: "flex",
+              <div
+                style={{
+                  display: "flex",
+                }}
+              >
+                <input
+                  type="number"
+                  placeholder="Width"
+                  value={width}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value >= 10) {
+                      dispatch(
+                        updateDimensions({
+                          ProductId: tempID,
+                          width: value,
+                          height,
+                          depth,
+                        })
+                      );
+                    }
                   }}
-                >
-                  <input
-                    type="number"
-                    placeholder="Width"
-                    value={width}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value >= 10) {
-                        dispatch(
-                          updateDimensions({
-                            ProductId: tempID,
-                            width: value,
-                            height,
-                            depth,
-                          })
-                        );
-                      }
-                    }}
-                    style={{
-                      width: "28%",
-                      background: "rgba(87, 87, 87, 0.43)",
-                      border: "1px solid #D5D5D5",
-                      borderRadius: "10px",
-                      color: "white",
-                      margin: "0px auto 15px",
-                      padding: "8px",
-                      textAlign: "center",
-                      height: "40px",
-                      fontSize: "1.1rem",
-                    }}
-                  />
+                  style={{
+                    width: "28%",
+                    background: "rgba(87, 87, 87, 0.43)",
+                    border: "1px solid #D5D5D5",
+                    borderRadius: "10px",
+                    color: "white",
+                    margin: "0px auto 15px",
+                    padding: "8px",
+                    textAlign: "center",
+                    height: "40px",
+                    fontSize: "1.1rem",
+                  }}
+                />
 
-                  <input
-                    type="number"
-                    placeholder="Height"
-                    value={height}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value >= 10) {
-                        handleDimensionsChange(width, value, depth);
-                      }
-                    }}
-                    style={{
-                      width: "28%",
-                      background: "rgba(87, 87, 87, 0.43)",
-                      border: "1px solid #D5D5D5",
-                      borderRadius: "10px",
-                      color: "white",
-                      margin: "0px auto 15px",
-                      padding: "8px",
-                      textAlign: "center",
-                      height: "40px",
-                      fontSize: "1.1rem",
-                    }}
-                  />
+                <input
+                  type="number"
+                  placeholder="Height"
+                  value={height}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value >= 10) {
+                      handleDimensionsChange(width, value, depth);
+                    }
+                  }}
+                  style={{
+                    width: "28%",
+                    background: "rgba(87, 87, 87, 0.43)",
+                    border: "1px solid #D5D5D5",
+                    borderRadius: "10px",
+                    color: "white",
+                    margin: "0px auto 15px",
+                    padding: "8px",
+                    textAlign: "center",
+                    height: "40px",
+                    fontSize: "1.1rem",
+                  }}
+                />
 
-                  <input
-                    type="number"
-                    placeholder="Depth"
-                    value={depth}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value >= 10) {
-                        handleDimensionsChange(width, height, value);
-                      }
-                    }}
-                    style={{
-                      width: "28%",
-                      background: "rgba(87, 87, 87, 0.43)",
-                      border: "1px solid #D5D5D5",
-                      borderRadius: "10px",
-                      color: "white",
-                      margin: "0px auto 15px",
-                      padding: "8px",
-                      textAlign: "center",
-                      height: "40px",
-                      fontSize: "1.1rem",
-                    }}
-                  />
+                <input
+                  type="number"
+                  placeholder="Depth"
+                  value={depth}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value >= 10) {
+                      handleDimensionsChange(width, height, value);
+                    }
+                  }}
+                  style={{
+                    width: "28%",
+                    background: "rgba(87, 87, 87, 0.43)",
+                    border: "1px solid #D5D5D5",
+                    borderRadius: "10px",
+                    color: "white",
+                    margin: "0px auto 15px",
+                    padding: "8px",
+                    textAlign: "center",
+                    height: "40px",
+                    fontSize: "1.1rem",
+                  }}
+                />
+              </div>
+            </div>
+            {isFetchingMSetting ? (
+              <RotatingLoader />
+            ) : (
+              <div className="vertical-Division3">
+                <div className="div">Total :</div>
+                <div className="overlap-group">
+                  <div className="text-wrapper-3">SGD</div>
+                  <div className="text-wrapper-2">{totalPrice}</div>
                 </div>
               </div>
-              {isFetchingMSetting ? (
-                <RotatingLoader />
-              ) : (
-                <div className="vertical-Division3">
-                  <div className="div">Total :</div>
-                  <div className="overlap-group">
-                    <div className="text-wrapper-3">SGD</div>
-                    <div className="text-wrapper-2">{totalPrice}</div>
-                  </div>
-                </div>
-              )}
-
-              <div className="group" onClick={handleDelete}>
-                <div className="overlap-group-2">
-                  <div className="rectangle">
-                    <div className="text-wrapper-5">x</div>
-                  </div>
-                </div>
-              </div>
-          </div>
+            )}
             <div className="text-wrapper-4"> ID : {tempID}</div>
-        </div>
-      </div>}
+            <div className="group" onClick={handleDelete}>
+              <div className="overlap-group-2">
+                <div className="rectangle">
+                  <div className="text-wrapper-5">x</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        //   {/* </div> */}
+        // {/* </div> */}
+      )}
     </div>
   );
 };

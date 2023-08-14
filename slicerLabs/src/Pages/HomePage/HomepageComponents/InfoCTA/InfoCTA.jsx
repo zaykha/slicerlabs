@@ -17,7 +17,7 @@ const InfoCTA = () => {
                 <Infop>Frustrated with slow vendor replies? With us, getting a quote 
                     and placing an order for 3D printed parts takes just 5 seconds.
                     You'll save an average of half the lead time compared to other vendors.</Infop>
-                <CTABtn>Get Your Quotes</CTABtn>
+                <CTABtn to={"/Start3dPrinting"}>Get Your Quotes</CTABtn>
         </RightContent>
     </InfoCTAContainer>
   )

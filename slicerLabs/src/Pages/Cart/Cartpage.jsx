@@ -60,6 +60,8 @@ import { MeshNormalMaterial, Box3, Vector3, Mesh, LoadingManager } from "three";
 import { getAuth } from "firebase/auth";
 import ErrorPrompt from "../../globalcomponents/prompt/ErrorPrompt";
 import ConfirmationPrompt from "../../globalcomponents/prompt/ConfirmationPrompt";
+import { ConfigCollection } from "../../firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const ProgressBar = ({ step }) => {
   return (
@@ -91,6 +93,7 @@ const Cartpage = () => {
   const togglesidebar = () => {
     setIsOpen(!isOpen);
   };
+  const userUIDInLocalStorage = localStorage.getItem("uid");
   const [shouldFetchData, setShouldFetchData] = useState(true);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -109,6 +112,28 @@ const Cartpage = () => {
     state: false,
     header: "",
     message: "",
+  });
+  const [isFetchingMSetting, setIsFetchingMSetting] = useState(false);
+  const [materialSettings, setMaterialSettings] = useState({
+    printTimePerUnitVolume: {
+      ABS: 0.05, // minutes/cm^3
+      PLA: 0.04, // minutes/cm^3
+      TPU: 0.06, // minutes/cm^3
+      NYLON: 0.07, // minutes/cm^3
+      PETG: 0.05, // minutes/cm^3
+      RESIN: 0.03, // minutes/cm^3
+    },
+    materialCosts: {
+      ABS: 0.05, // SGD per gram
+      PLA: 0.04, // SGD per gram
+      TPU: 0.06, // SGD per gram
+      NYLON: 0.07, // SGD per gram
+      PETG: 0.05, // SGD per gram
+      RESIN: 0.1, // SGD per gram
+    },
+    hourlyRate: 20,
+    laborCost: 25,
+    overheadCost: 5,
   });
   // const postalCode = useSelector((state) => state.userDetails.postalCode);
   const AddressDetails = useSelector(
@@ -232,7 +257,25 @@ const Cartpage = () => {
       console.log("endCoordinates not ready");
     }
   }, [endCoordinates]);
+  const fetchConfigSettings = async () => {
+    setIsFetchingMSetting(true);
+    try {
+      const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
+      const configDocSnapshot = await getDoc(configDocRef);
 
+      if (configDocSnapshot.exists()) {
+        const data = configDocSnapshot.data();
+        setMaterialSettings(data);
+      }
+      console.log(materialSettings);
+    } catch (error) {
+      console.error("Error fetching configuration settings:", error);
+    }
+    setIsFetchingMSetting(false);
+  };
+  useEffect(() => {
+    fetchConfigSettings();
+  }, []);
   useEffect(() => {
     if (AddressDetails) {
       setEndCoordinates(AddressDetails);
@@ -283,7 +326,7 @@ const Cartpage = () => {
       }
 
       const data = await response.json();
-      console.log("accepted");
+      console.log(data);
       return data;
     } catch (error) {
       throw new Error("Error validating prices with microservice.");
@@ -340,8 +383,10 @@ const Cartpage = () => {
         quantity, // Adjust the expected price based on quantity
         price,
         userUID,
+        materialSettings
       });
     });
+    console.log("itemsForValidation", itemsForValidation)
     localStorage.setItem(
       "TTLprice",
       JSON.stringify({ totalPrice: TTLPriceBeforeRouting.toFixed(2) })
@@ -350,9 +395,9 @@ const Cartpage = () => {
       "TempItemsDetailsStorage",
       JSON.stringify(itemsForValidation)
     );
-    useEffect(() => {
-    console.log(userConfirmationPrompt);
-  }, [userConfirmationPrompt]);
+  //   useEffect(() => {
+  //   console.log(userConfirmationPrompt);
+  // }, [userConfirmationPrompt]);
     // // Check if there is any data in localStorage
     // if (storedItems) {
     //   // Use the retrieved data
@@ -383,6 +428,7 @@ const Cartpage = () => {
 
         if (checkoutSessionResponse.ok) {
           const checkoutSessionData = await checkoutSessionResponse.json();
+
           // Redirect the user to the Stripe Checkout page
           window.location.href = checkoutSessionData.url;
           //  stripe.redirectToCheckout({

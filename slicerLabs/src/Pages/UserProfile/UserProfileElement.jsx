@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { RiArrowDropDownLine } from 'react-icons/ri'; 
+import { RiArrowDropDownLine } from "react-icons/ri";
 export const SubHeader = styled.div`
   display: flex;
   flex-direction: row;
@@ -10,8 +10,14 @@ export const SubHeader = styled.div`
 export const InnerHeaderWrapper = styled.div`
   display: flex;
   flex-direction: row;
-  align-items:center;
+  align-items: center;
   margin-top: 20px;
+
+  @media screen and (max-width: 1200px) {
+    flex-direction: column;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(225, 225, 225, 0.5);
+  }
 `;
 export const InnerHeaderWrapperbtm = styled.div`
   display: flex;
@@ -48,6 +54,9 @@ export const DisplayHeader = styled.div`
   // white-space: wrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  @media screen and (max-width: 1200px) {
+    display: none;
+  }
 `;
 export const InnerHeader = styled.div`
   // display:flex;
@@ -62,6 +71,34 @@ export const InnerHeader = styled.div`
   // white-space: wrap;
   // overflow: hidden;
   text-overflow: ellipsis;
+  @media screen and (max-width: 1200px) {
+    width: 100%;
+    // display:flex;
+    // flex-direction:row;
+  }
+`;
+export const InnerHeaderClickable = styled.div`
+  // display:flex;
+  // flex-direction:row;
+  width: 20%;
+  text-align: center;
+  border: 1px solid #275e78;
+  border-radius: 10%;
+  color: #e6e6e6;
+  margin-right: 5px;
+  padding: 10px;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  &:hover {
+    color: #fff;
+    background: #006b9e;
+    border: 1px solid white;
+  }
+  @media screen and (max-width: 1200px) {
+    width: 100%;
+    // display:flex;
+    // flex-direction:row;
+  }
 `;
 export const InnerHeaderP = styled.div`
   // display:flex;
@@ -78,6 +115,9 @@ export const InnerHeaderP = styled.div`
   // white-space: wrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  @media screen and (max-width: 1200px) {
+    width: 100%;
+  }
 `;
 export const InnerHeaderLeft = styled.div`
   // display:flex;
@@ -92,6 +132,9 @@ export const InnerHeaderLeft = styled.div`
   // white-space: wrap;
   // overflow: hidden;
   text-overflow: ellipsis;
+  @media screen and (max-width: 1200px) {
+    width: 100%;
+  }
 `;
 export const InnerHeader1 = styled.div`
   display: flex;
@@ -111,6 +154,9 @@ export const InnerLayerP = styled.div`
   font-weight: 400;
   letter-spacing: 0;
   line-height: normal;
+  @media screen and (max-width: 1200px) {
+    width: 100%;
+  }
 `;
 
 export const InnerLayersP = styled.div`
@@ -120,6 +166,9 @@ export const InnerLayersP = styled.div`
   font-weight: 400;
   letter-spacing: 0;
   line-height: normal;
+  @media screen and (max-width: 1200px) {
+    font-size: 12px;
+  }
 `;
 export const InnerHeaderpersonalize = styled.div`
   // display:flex;
@@ -237,7 +286,7 @@ export const DropdownList = styled.ul`
   margin: 0;
   width: 100%; /* Make the dropdown list width full */
   transform: translateY(100%); /* Move the dropdown below the button */
-  display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
+  display: ${({ isOpen }) => (isOpen ? "block" : "none")};
   z-index: 4; /* Ensure the dropdown is above other content */
 `;
 
