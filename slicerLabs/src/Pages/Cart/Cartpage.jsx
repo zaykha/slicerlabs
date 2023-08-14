@@ -288,7 +288,7 @@ const Cartpage = () => {
 
   const getStripeKey = async () => {
     try {
-      const response = await fetch("http://localhost:3000/get-stripe-key");
+      const response = await fetch("https://cerulean-hermit-crab-robe.cyclic.cloud/get-stripe-key");
       if (response.ok) {
         const data = await response.json();
         const stripe = new Stripe(data.publishableKey, {
@@ -312,7 +312,7 @@ const Cartpage = () => {
   const validatePricesWithMicroservice = async (items) => {
     console.log(items);
     try {
-      const response = await fetch("http://localhost:3000/validate-price", {
+      const response = await fetch("https://cerulean-hermit-crab-robe.cyclic.cloud/validate-price", {
         method: "POST",
         headers: {
           Authorization: storedIdToken,
@@ -415,7 +415,7 @@ const Cartpage = () => {
       if (response.valid) {
         // If prices are valid, proceed to Stripe.js for payment
         const checkoutSessionResponse = await fetch(
-          "http://localhost:3000/create-checkout-session",
+          "https://cerulean-hermit-crab-robe.cyclic.cloud/create-checkout-session",
           {
             method: "POST",
             headers: {

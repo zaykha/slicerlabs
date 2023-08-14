@@ -273,7 +273,7 @@ const Registerform = () => {
     const email = encodeURIComponent(formValues.email);
     try {
       const response = await fetch(
-        `http://localhost:3000/validate-email?email=${email}`
+        `https://cerulean-hermit-crab-robe.cyclic.cloud/validate-email?email=${email}`
       );
       const data = await response.json();
       console.log(data);
