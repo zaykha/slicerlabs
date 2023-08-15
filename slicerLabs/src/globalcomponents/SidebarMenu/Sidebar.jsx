@@ -147,9 +147,8 @@ const Sidebar = ({ togglesidebar, isOpen }) => {
               {link.title}
             </SidebarLink>
           ))}
-          </SidebarMenu>
-          <ActionItemsSideBar>
-            <SidebarLink
+{/* <ActionItemsSideBar> */}
+<SidebarLink
               to="/Start3dPrinting"
               className={pathname === "/Start3dPrinting" ? "active" : ""}
               // isActive={pathname === "/Start3dPrinting"}
@@ -160,9 +159,9 @@ const Sidebar = ({ togglesidebar, isOpen }) => {
                 ? "Add More Items"
                 : "Start 3D Printing"}
             </SidebarLink>
-          </ActionItemsSideBar>
+          {/* </ActionItemsSideBar> */}
 
-          <ActionItemsSideBar>
+          {/* <ActionItemsSideBar> */}
             {hasUndefinedProduct && !isLoading ? (
               <SidebarLink onClick={() => setErrorPromptShow(true)}>
                 Cart
@@ -174,7 +173,7 @@ const Sidebar = ({ togglesidebar, isOpen }) => {
                 {cartItems?.length > 0 && <span>{cartItems.length}</span>}
               </SidebarLink>
             )}
-          </ActionItemsSideBar>
+          {/* </ActionItemsSideBar> */}
           <SidebarMenu>
           {!isLoading && isAuthenticated ? (
             !isLoading && isAdmin ? (
@@ -207,7 +206,7 @@ const Sidebar = ({ togglesidebar, isOpen }) => {
                   
               </>
             ) : (
-              <NavItem>
+              // <NavItem>
                 <SidebarLink
                   key={"userDetails"}
                   to={"/DashBoard"}
@@ -216,7 +215,7 @@ const Sidebar = ({ togglesidebar, isOpen }) => {
                 >
                   <p>{userName ? userName : "Profile"}</p>
                 </SidebarLink>
-              </NavItem>
+              // </NavItem>
             )
           ) : (
             <NavItem>
@@ -235,6 +234,8 @@ const Sidebar = ({ togglesidebar, isOpen }) => {
          
           {/* </Commerce> */}
         
+          </SidebarMenu>
+          
       </SidebarWrapper>
     </SidebarContainer>
   );
