@@ -151,7 +151,7 @@ const EditLoginDetailForm = ({ onClose }) => {
                   getDoc(userDetailsRef)
                     .then((docSnap) => {
                       if (docSnap.exists()) {
-                        const existingUserDetails = docSnap.data().userDetails;
+                        const existingUserDetails = docSnap.data();
                         const updatedUserDetails = { ...existingUserDetails };
                         // Loop through the keys of the existingUserDetails object
                         Object.keys(existingUserDetails).forEach((key) => {
