@@ -1,9 +1,18 @@
-import React, { useEffect, useState, useContext, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useContext,
+  useRef,
+  Fragment,
+} from "react";
 // import { Route, Routes } from 'react-router-dom';
 import { Provider } from "react-redux";
 import store from "./ReduxStore/store";
 import {
-  BrowserRouter,
+  BrowserRouter as Router,
+  Route,
+  Outlet,
+  Routes,
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
@@ -41,6 +50,9 @@ import TermsAndPolicies from "./Pages/Register/RegisterComponents/TermsAndPolici
 import BlogPage from "./AdminRelated/BlogPage/BlogPage";
 import ConfigPage from "./AdminRelated/ConfigPage/ConfigPage";
 import NavbarForChecks from "./globalcomponents/navbar/navbarForChecks";
+import RotatingLoader from "./globalcomponents/DropDown/RotatingLoader";
+import { UPHeaderFullline1 } from "./Pages/UserProfile/UserProfileElement";
+import SplashScreen from "./globalcomponents/DropDown/SplashScreen";
 
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
@@ -146,12 +158,14 @@ function App() {
               console.log("No such document!");
             }
             dispatch(setAuthenticationStatus(true));
+            setIsLoading(false);
           } catch (error) {
             console.error("Error fetching calculatePrice function:", error);
+            setIsLoading(false);
           }
         } else {
           // User is logged out
-          setIsAdmin(false)
+          setIsAdmin(false);
           dispatch(setAuthenticationStatus(false));
           dispatch(resetCartCount());
           dispatch(resetCartState());
@@ -280,7 +294,10 @@ function App() {
       element: (
         <>
           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-          <NavbarForChecks togglesidebar={togglesidebar} OKtoRoute={OKtoRoute} />
+          <NavbarForChecks
+            togglesidebar={togglesidebar}
+            OKtoRoute={OKtoRoute}
+          />
           <StartPrinting setOKtoRoute={setOKtoRoute} />
           <Footer />
         </>
@@ -316,24 +333,28 @@ function App() {
     },
     {
       path: "/blog",
-      element: (
+      element: userDetails.adminPrivileges ? (
         <>
           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
           <Navbar togglesidebar={togglesidebar} />
           <BlogPage />
           <Footer />
         </>
+      ) : (
+        <UPHeaderFullline1>Only Admins Allowed</UPHeaderFullline1>
       ),
     },
     {
       path: "/Config",
-      element: (
+      element: userDetails.adminPrivileges ? (
         <>
           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
           <Navbar togglesidebar={togglesidebar} />
           <ConfigPage />
           <Footer />
         </>
+      ) : (
+        <UPHeaderFullline1>Only Admins Allowed</UPHeaderFullline1>
       ),
     },
     {
@@ -370,7 +391,9 @@ function App() {
       ),
     },
   ]);
-
+  if (isLoading) {
+    return <SplashScreen />;
+  }
   return (
     <Provider store={store}>
       <RouterProvider router={router} />
@@ -382,5 +405,236 @@ function App() {
     // </>
   );
 }
+
+//   return (
+//     <Provider store={store}>
+//       <Router>
+//         {isLoading ? (
+//           <RotatingLoader />
+//         ) : (
+//           <MainRoutes
+//             isOpen={isOpen}
+//             setIsOpen={setIsOpen}
+//             userDetails={userDetails}
+//             cartItems={cartItems}
+//             isAuthenticated={isAuthenticated}
+//             OKtoRoute={OKtoRoute}
+//             setOKtoRoute={setOKtoRoute}
+//             togglesidebar={togglesidebar}
+//           />
+//         )}
+//       </Router>
+//     </Provider>
+//   );
+// }
+
+// function MainRoutes({
+//   isOpen,
+//   setIsOpen,
+//   userDetails,
+//   cartItems,
+//   isAuthenticated,
+//   OKtoRoute,
+//   setOKtoRoute,
+//   togglesidebar,
+// }) {
+//   const routes = [
+//     {
+//       path: "/",
+//       element: (
+//         <div>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <HomePage />
+//           <Footer />
+//         </div>
+//       ),
+//     },
+//     {
+//       path: "/services",
+//       element: (
+//         <div>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <Services />
+//           <Footer />
+//         </div>
+//       ),
+//     },
+//     {
+//       path: "/Materials",
+//       element: (
+//         <div>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <Materials />
+//           <Footer />
+//         </div>
+//       ),
+//     },
+//     {
+//       path: "/Learn",
+//       element: (
+//         <div>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <Learn />
+//           <Footer />
+//         </div>
+//       ),
+//     },
+//     {
+//       path: "/ContactUs",
+//       element: (
+//         <Fragment>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <ContactUs />
+//           <Footer />
+//         </Fragment>
+//       ),
+//     },
+//     {
+//       path: "/Login",
+//       element: (
+//         <Fragment>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <Login />
+//           <Footer />
+//         </Fragment>
+//       ),
+//     },
+//     {
+//       path: "/registerPage",
+//       element: (
+//         <Fragment>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <RegisterPage />
+//           <Footer />
+//         </Fragment>
+//       ),
+//     },
+//     {
+//       path: "/Start3dPrinting",
+//       element: (
+//         <Fragment>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <NavbarForChecks
+//             togglesidebar={togglesidebar}
+//             OKtoRoute={OKtoRoute}
+//           />
+//           <StartPrinting setOKtoRoute={setOKtoRoute} />
+//           <Footer />
+//         </Fragment>
+//       ),
+//     },
+//     {
+//       path: "/blog",
+//       element: (
+//         <Fragment>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <BlogPage />
+//           <Footer />
+//         </Fragment>
+//       ),
+//     },
+//     {
+//       path: "/Config",
+//       element: (
+//         <Fragment>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <ConfigPage />
+//           <Footer />
+//         </Fragment>
+//       ),
+//     },
+//     {
+//       path: "/cart",
+//       element: (
+//         <Fragment>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <Cartpage />
+//           <Footer />
+//         </Fragment>
+//       ),
+//     },
+//     {
+//       path: "/success",
+//       element: (
+//         <Fragment>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <PaymentSuccess />
+//           <Footer />
+//         </Fragment>
+//       ),
+//     },
+//     {
+//       path: "/terms&policies",
+//       element: (
+//         <Fragment>
+//           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//           <Navbar togglesidebar={togglesidebar} />
+//           <TermsAndPolicies />
+//           <Footer />
+//         </Fragment>
+//       ),
+//     },
+//   ];
+//   return (
+//     <Routes>
+//       {routes.map((route, index) => (
+//         <Route
+//           key={index}
+//           path={route.path}
+//           element={
+//             route.path === "/DashBoard" ? (
+//               userDetails.adminPrivileges ? (
+//                 <Fragment>
+//                 <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//                 <Navbar
+//                   togglesidebar={togglesidebar}
+//                   userDetails={userDetails}
+//                   cartItems={cartItems}
+//                   isAuthenticated={isAuthenticated}
+//                 />
+//                 <TaskPage />
+//                 <Footer />
+//               </Fragment>
+//               ) : (
+//                 <Fragment>
+//                 <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+//                 <Navbar
+//                   togglesidebar={togglesidebar}
+//                   userDetails={userDetails}
+//                   cartItems={cartItems}
+//                   isAuthenticated={isAuthenticated}
+//                 />
+//                 <DashBoard />
+//                 <Footer />
+//               </Fragment>
+//               )
+//             ) : (
+//               <route.element
+//                 isOpen={isOpen}
+//                 setIsOpen={setIsOpen}
+//                 userDetails={userDetails}
+//                 cartItems={cartItems}
+//                 isAuthenticated={isAuthenticated}
+//                 OKtoRoute={OKtoRoute}
+//                 setOKtoRoute={setOKtoRoute}
+//               />
+//             )
+//           }
+//         />
+//       ))}
+//     </Routes>
+//   );
+// }
 
 export default App;

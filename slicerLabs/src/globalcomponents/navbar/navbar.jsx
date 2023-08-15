@@ -117,7 +117,8 @@ const Navbar = ({
                   </NavLinks>
                 </NavItem>
               ))}
-              {!isLoading && isAuthenticated ? (
+              {!isLoading?
+              !isLoading && isAuthenticated ? (
                 !isLoading && isAdmin ? (
                   <NavItem>
                     <DropdownContainer>
@@ -161,7 +162,7 @@ const Navbar = ({
                     Login
                   </NavLinks>
                 </NavItem>
-              )}
+              ):<></>}
             </NavMenu>
           </NavbarContainer>
           <Commerce>

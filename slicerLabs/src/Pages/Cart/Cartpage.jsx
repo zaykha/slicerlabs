@@ -62,6 +62,7 @@ import ErrorPrompt from "../../globalcomponents/prompt/ErrorPrompt";
 import ConfirmationPrompt from "../../globalcomponents/prompt/ConfirmationPrompt";
 import { ConfigCollection } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
 
 const ProgressBar = ({ step }) => {
   return (
@@ -95,6 +96,7 @@ const Cartpage = () => {
   };
   const userUIDInLocalStorage = localStorage.getItem("uid");
   const [shouldFetchData, setShouldFetchData] = useState(true);
+  const [isProceedingToPayment, setIsProceedingToPayment] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [endCoordinates, setEndCoordinates] = useState("");
@@ -339,6 +341,7 @@ const Cartpage = () => {
     setShowPrompt(false);
   };
   const handleProceedToPayment = async () => {
+    setIsProceedingToPayment(true);
     const auth = getAuth();
     const user = auth.currentUser;
 
@@ -463,6 +466,7 @@ const Cartpage = () => {
         });
         // alert("There was an issue with the prices. Please review your cart.");
       }
+      setIsProceedingToPayment(false);
     } catch (error) {
       // Handle any error that occurred during the validation or payment process
       console.error("Error processing payment:", error);
@@ -472,7 +476,9 @@ const Cartpage = () => {
         header: "Error",
         message: "Error processing payment. Please try again later.",
       });
+      setIsProceedingToPayment(false);
     }
+    setIsProceedingToPayment(false);
   };
 
   const handleDeleteAllRecords = () => {
@@ -579,9 +585,11 @@ const Cartpage = () => {
                 </Grandtotaldisplay>
               </PaymentRinner>
 
-              <NextBtn onClick={handleProceedToPayment}>
+             {isProceedingToPayment?
+             <RotatingLoader/>
+              :<NextBtn onClick={handleProceedToPayment}>
                 Proceed to Payment
-              </NextBtn>
+              </NextBtn>}
             </PaymentroutingContainer>
           </>
         )}

@@ -125,6 +125,7 @@ const LoginForm = () => {
           localStorage.setItem("idToken", idToken);
           localStorage.setItem("uid", uid);
           const response = await fetch(
+            // "http://localhost:3000/calculate-function",
             "https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function",
             {
               method: "GET",
@@ -298,8 +299,8 @@ const LoginForm = () => {
         </InputContainer>
         {passwordError && <div style={{ color: "red" }}>{passwordError}</div>}
         <LoginFlexdiv>
-          <RememberMe type="checkbox" />
-          <RememberMelabel>Remember me</RememberMelabel>
+          {/* <RememberMe type="checkbox" /> */}
+          <RememberMelabel></RememberMelabel>
 
           {isLoggingIn ? (
             <SpinningLoader />
