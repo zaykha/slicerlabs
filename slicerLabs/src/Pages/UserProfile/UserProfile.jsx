@@ -499,14 +499,14 @@ export const DashBoard = () => {
           <InnerHeaderWrapper>
             <DisplayHeader>Name</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.userDetails?.userName ?? "Default Username"}
+              {userDetails?.userName ?? "Default Username"}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
           <InnerHeaderWrapper>
             <DisplayHeader>Shipping Address</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.userDetails?.displayFullAddress ??
+              {userDetails?.displayFullAddress ??
                 "Default address"}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
@@ -514,7 +514,7 @@ export const DashBoard = () => {
           <InnerHeaderWrapper>
             <DisplayHeader>Contact</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.userDetails?.phone ?? "Default phone"}
+              {userDetails?.phone ?? "Default phone"}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
         </LoginFromcontainer>
@@ -526,7 +526,7 @@ export const DashBoard = () => {
         <InnerHeaderWrapper>
           <DisplayHeader>Email</DisplayHeader>
           <InnerHeaderpersonalize>
-            {userDetails?.userDetails?.email ?? "Default Email"}
+            {userDetails?.email ?? "Default Email"}
           </InnerHeaderpersonalize>
           <EditIconLoginDetails1 onClick={handleEditLoginDetailsClick}>
             Change Login Email
