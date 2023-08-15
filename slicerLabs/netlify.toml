@@ -1,7 +1,0 @@
-[[redirects]]
-from = "https://slicerlabs.netlify.app/success"
-to = "/success"
-
-[[redirects]]
-from = "/cart"
-to = "https://slicerlabs.netlify.app/cart"
