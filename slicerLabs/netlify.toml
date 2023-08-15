@@ -1,6 +1,6 @@
 [[redirects]]
-from = "/success"
-to = "https://slicerlabs.netlify.app/success"
+from = "https://slicerlabs.netlify.app/success"
+to = "/success"
 
 [[redirects]]
 from = "/cart"
