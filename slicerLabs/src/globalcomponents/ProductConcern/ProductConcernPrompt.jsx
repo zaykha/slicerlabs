@@ -143,7 +143,7 @@ const ProductConcernPrompt = ({
   const [selectedProduct, setSelectedProduct] = useState("");
   const [concernNote, setConcernNote] = useState("");
   const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetails = JSON.parse(userDetailsUnparsed).userDetails;
+  const userDetails = JSON.parse(userDetailsUnparsed);
   const userUIDInLocalStorage = localStorage.getItem("uid");
   const [formErrors, setFormErrors] = useState({
     selectProductError: "",

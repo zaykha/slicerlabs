@@ -36,7 +36,7 @@ const EditLoginDetailForm = ({ onClose }) => {
   const dispatch = useDispatch();
   const auth = getAuth();
   const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetails = JSON.parse(userDetailsUnparsed).userDetails;
+  const userDetails = JSON.parse(userDetailsUnparsed);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [formValues, setFormValues] = useState({
     userName: userDetails.userName || "",

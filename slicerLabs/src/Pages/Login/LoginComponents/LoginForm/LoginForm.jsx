@@ -161,12 +161,12 @@ const LoginForm = () => {
           const userDetailsRef = doc(usersCollection, uid);
           const docSnap = await getDoc(userDetailsRef);
           if (docSnap.exists()) {
-            dispatch(setUserDetails(docSnap.data().userDetails));
+            dispatch(setUserDetails(docSnap.data()));
             dispatch(setAuthenticationStatus(true));
             localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
 
-            console.log("Document data in Login:", docSnap.data().userDetails);
-            const AdminCheck = docSnap.data().userDetails.adminPrivileges;
+            console.log("Document data in Login:", docSnap.data());
+            const AdminCheck = docSnap.data().adminPrivileges;
             setIsAdmin(AdminCheck);
           } else {
             // docSnap.data() will be undefined in this case
@@ -229,11 +229,11 @@ const LoginForm = () => {
           const userDetailsRef = doc(usersCollection, uid);
           const docSnap = getDoc(userDetailsRef);
           if (docSnap.exists()) {
-            dispatch(setUserDetails(docSnap.data().userDetails));
+            dispatch(setUserDetails(docSnap.data()));
             dispatch(setAuthenticationStatus(true));
             localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
 
-            console.log("Document data in SSO:", docSnap.data().userDetails);
+            console.log("Document data in SSO:", docSnap.data());
 
             // Navigate to the desired page after successful sign-in
             navigate("/cart");

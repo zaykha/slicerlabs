@@ -37,7 +37,7 @@ const PaymentSuccess = () => {
   const userUIDInLocalStorage = localStorage.getItem("uid");
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetailsParsed = JSON.parse(userDetailsUnparsed);
-  const userDetails = userDetailsParsed.userDetails;
+  const userDetails = userDetailsParsed;
   const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
   const userPurchasedItems = JSON.parse(unparsedStoreditems);
   // Function to format date and time to the desired format

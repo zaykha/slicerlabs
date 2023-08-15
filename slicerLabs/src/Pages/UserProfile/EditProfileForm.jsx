@@ -33,7 +33,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
   const dispatch = useDispatch();
  
   const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetails = JSON.parse(userDetailsUnparsed).userDetails;
+  const userDetails = JSON.parse(userDetailsUnparsed);
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [isValidatingEmail, setIsValidatingEmail] = useState(false);
   const [fetchingAddress, setFetchingAddress] = useState(false);

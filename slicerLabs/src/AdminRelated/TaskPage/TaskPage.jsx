@@ -75,7 +75,7 @@ const TaskPage = () => {
   const [Loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const userDetails = useSelector((state) => state?.userDetails);
-  const [localUser, setLocalUser] = useState(userDetails.userDetails);
+  const [localUser, setLocalUser] = useState(userDetails);
   const userUIDInLocalStorage = localStorage.getItem("uid");
   const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
