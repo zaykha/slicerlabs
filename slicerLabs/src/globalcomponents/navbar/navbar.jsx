@@ -58,8 +58,8 @@ const Navbar = ({
   const { isAuthenticated } = useSelector((state) => state.authentication);
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetails =
-    useSelector((state) => state.userDetails) ||
-    JSON.parse(userDetailsUnparsed);
+    // useSelector((state) => state.userDetails) ||
+    JSON.parse(userDetailsUnparsed)?.userDetails;
   const isAdmin = userDetails?.adminPrivileges;
   const userName = userDetails?.userName;
   const cartItems = useSelector((state) => state.cartItems?.cartItems);
@@ -75,7 +75,7 @@ const Navbar = ({
     setIsLoading(true);
     console.log(isAdmin, userDetails);
     setIsLoading(false);
-  }, [isLoading, userName, isAdmin]);
+  }, [isLoading, userName, isAdmin, dispatch]);
   // useEffect(() => {
   //   location.state
 

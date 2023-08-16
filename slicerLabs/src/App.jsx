@@ -28,7 +28,7 @@ import Materials from "./Pages/Materials/Materials";
 import RegisterPage from "./Pages/Register/RegisterPage";
 import Services from "./Pages/Services/Services";
 import StartPrinting from "./Pages/StartPrinting/StartPrinting";
-import { db, usersCollection } from "./firebase";
+import { DevServer, ServerConfig, db, usersCollection } from "./firebase";
 import { useDispatch } from "react-redux";
 import {
   resetUserDetails,
@@ -90,7 +90,8 @@ function App() {
           try {
             const response = await fetch(
               // "http://localhost:3000/calculate-function",
-              "https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function",
+              // "https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function",
+                `${ServerConfig}/calculate-function`,
               {
                 method: "GET",
                 headers: {

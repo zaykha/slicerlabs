@@ -55,10 +55,10 @@ import EditLoginDetailForm from "./EditLoginDetailForm";
 import EditPasswordForm from "./EditPasswordForm";
 import ProductConcernPrompt from "../../globalcomponents/ProductConcern/ProductConcernPrompt";
 import SpinningLoader from "../../globalcomponents/DropDown/SpinningLoader";
+import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
 
 export const DashBoard = () => {
-
-  const [FetchingData, setFetchingData] = useState(false);
+  const [FetchingData, setFetchingData] = useState(true);
   // Initialize an array to store the retrieved documents
   const [purchaseInstances, setPurchaseInstances] = useState([]);
   const [productIssue, setProductIssue] = useState([]);
@@ -75,6 +75,8 @@ export const DashBoard = () => {
   // const userDetails = useSelector((state) => state?.userDetails);
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetails = JSON.parse(userDetailsUnparsed);
+  // const userDetails = useSelector((state) => state.userDetails);
+
   const [localUser, setLocalUser] = useState(userDetails);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   const userUIDInLocalStorage = localStorage.getItem("uid");
@@ -120,13 +122,13 @@ export const DashBoard = () => {
         const userConcernsDoc = await getDoc(userConcernsRef);
         const existingConcerns = userConcernsDoc.data()?.concerns || [];
 
-        console.log(existingConcerns)
+        console.log(existingConcerns);
         const ProductIssueData = [];
         // Loop through the snapshot and extract the data from each document
         existingConcerns.forEach((doc) => {
           // Extract the data from the document and add it to the array
           const ProductIssueDatatoPush = doc;
-          console.log(ProductIssueData)
+          console.log(ProductIssueData);
           ProductIssueData.push(ProductIssueDatatoPush);
         });
         console.log("Product Issue", ProductIssueData);
@@ -233,9 +235,7 @@ export const DashBoard = () => {
   };
 
   const onSubmitProductConcern = () => {
-    
     setIsProductConcernFormOpen(false);
-    
   };
 
   const handleLogout = () => {
@@ -315,10 +315,13 @@ export const DashBoard = () => {
 
   return (
     <>
-
-      <UPHeaderFullline1>
-        Welcome {userDetails?.userName ?? ""}
-      </UPHeaderFullline1>
+      {FetchingData ? (
+        <RotatingLoader />
+      ) : (
+        <UPHeaderFullline1>
+          Welcome {userDetails.userName}
+        </UPHeaderFullline1>
+      )}
 
       <LoginFromcontainer>
         <ItemHeaderprofile>In Production</ItemHeaderprofile>
@@ -340,31 +343,30 @@ export const DashBoard = () => {
             <div key={outerIndex}>
               {purchaseInstance.purchasedItems
                 .filter((item) => item.status !== "Delivered")
-                .map((item, index) => {             
-
+                .map((item, index) => {
                   return (
                     <InnerHeaderWrapper key={item.itemId}>
-                    <InnerHeader>
-                      <InnerLayerP> {item.fileName}</InnerLayerP>
-                    </InnerHeader>
-                    <InnerHeader>
-                      <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
-                      <InnerLayersP>with</InnerLayersP>
-                      <InnerLayerP>
-                        {item.material} {item.dimensions.depth} x{" "}
-                        {item.dimensions.width} x {item.dimensions.height}
-                      </InnerLayerP>
-                      <InnerLayersP>Quantity of </InnerLayersP>
-                      <InnerLayerP>{item.quantity}</InnerLayerP>
-                    </InnerHeader>
-                    <InnerHeader>
-                      {purchaseInstance.approxDeliDate || "TBD"}
-                    </InnerHeader>
-                    <InnerHeader>{item.status}</InnerHeader>
-                    <InnerHeaderLeft>
-                      SGD {item.price.toFixed(2)}
-                    </InnerHeaderLeft>
-                  </InnerHeaderWrapper>
+                      <InnerHeader>
+                        <InnerLayerP> {item.fileName}</InnerLayerP>
+                      </InnerHeader>
+                      <InnerHeader>
+                        <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
+                        <InnerLayersP>with</InnerLayersP>
+                        <InnerLayerP>
+                          {item.material} {item.dimensions.depth} x{" "}
+                          {item.dimensions.width} x {item.dimensions.height}
+                        </InnerLayerP>
+                        <InnerLayersP>Quantity of </InnerLayersP>
+                        <InnerLayerP>{item.quantity}</InnerLayerP>
+                      </InnerHeader>
+                      <InnerHeader>
+                        {purchaseInstance.approxDeliDate || "TBD"}
+                      </InnerHeader>
+                      <InnerHeader>{item.status}</InnerHeader>
+                      <InnerHeaderLeft>
+                        SGD {item.price.toFixed(2)}
+                      </InnerHeaderLeft>
+                    </InnerHeaderWrapper>
                   );
                 })}
             </div>
@@ -436,60 +438,66 @@ export const DashBoard = () => {
           <SpinningLoader />
         ) : (
           <>
-        <InnerHeaderWrapper>
-          <DisplayHeader></DisplayHeader>
-          <DisplayHeader>Product Details</DisplayHeader>
-          <DisplayHeader>Status</DisplayHeader>
-          <DisplayHeader>Last updated</DisplayHeader>
-          <DisplayHeader>Note</DisplayHeader>
-        </InnerHeaderWrapper>
+            <InnerHeaderWrapper>
+              <DisplayHeader></DisplayHeader>
+              <DisplayHeader>Product Details</DisplayHeader>
+              <DisplayHeader>Status</DisplayHeader>
+              <DisplayHeader>Last updated</DisplayHeader>
+              <DisplayHeader>Note</DisplayHeader>
+            </InnerHeaderWrapper>
 
-        {purchaseInstances.length > 0 ? (
-          purchaseInstances
-            .filter((item) => item.status !== "Delivered")
-            .map((purchaseInstance, index) => (
-              <div key={index}>
-                {purchaseInstance.purchasedItems.map((item) =>
-                  productIssue.map((issue) => {
-                    if (issue.productId === item.itemId) {
-                      return (
-                        <InnerHeaderWrapper key={item.itemId}>
-                          <InnerHeader>
-                            <InnerLayerP> {item.fileName}</InnerLayerP>
-                          </InnerHeader>
-                          <InnerHeader>
-                            <InnerLayerP>
-                              FDM Printing({item.color})
-                            </InnerLayerP>
-                            <InnerLayersP>with</InnerLayersP>
-                            <InnerLayerP>
-                              {item.material} {item.dimensions.depth} x{" "}
-                              {item.dimensions.width} x {item.dimensions.height}
-                            </InnerLayerP>
-                            <InnerLayersP>Quantity of </InnerLayersP>
-                            <InnerLayerP>{item.quantity}</InnerLayerP>
-                          </InnerHeader>
-                          <InnerHeader>{issue.status || "pending"}</InnerHeader>
-                          <InnerHeader>{issue.lastUpdate || ""}</InnerHeader>
-                          <InnerHeader>{issue.concernNote}</InnerHeader>
-                        </InnerHeaderWrapper>
-                      );
-                    }
-                  })
-                )}
-              </div>
-            ))
-        ) : (
-          <></>
+            {purchaseInstances.length > 0 ? (
+              purchaseInstances
+                .filter((item) => item.status !== "Delivered")
+                .map((purchaseInstance, index) => (
+                  <div key={index}>
+                    {purchaseInstance.purchasedItems.map((item) =>
+                      productIssue.map((issue) => {
+                        if (issue.productId === item.itemId) {
+                          return (
+                            <InnerHeaderWrapper key={item.itemId}>
+                              <InnerHeader>
+                                <InnerLayerP> {item.fileName}</InnerLayerP>
+                              </InnerHeader>
+                              <InnerHeader>
+                                <InnerLayerP>
+                                  FDM Printing({item.color})
+                                </InnerLayerP>
+                                <InnerLayersP>with</InnerLayersP>
+                                <InnerLayerP>
+                                  {item.material} {item.dimensions.depth} x{" "}
+                                  {item.dimensions.width} x{" "}
+                                  {item.dimensions.height}
+                                </InnerLayerP>
+                                <InnerLayersP>Quantity of </InnerLayersP>
+                                <InnerLayerP>{item.quantity}</InnerLayerP>
+                              </InnerHeader>
+                              <InnerHeader>
+                                {issue.status || "pending"}
+                              </InnerHeader>
+                              <InnerHeader>
+                                {issue.lastUpdate || ""}
+                              </InnerHeader>
+                              <InnerHeader>{issue.concernNote}</InnerHeader>
+                            </InnerHeaderWrapper>
+                          );
+                        }
+                      })
+                    )}
+                  </div>
+                ))
+            ) : (
+              <></>
+            )}
+            <StyledAddButton onClick={handleProductConcernClick}>
+              <span style={plusSignStyle}>+</span>
+            </StyledAddButton>
+          </>
         )}
-        <StyledAddButton onClick={handleProductConcernClick}>
-          <span style={plusSignStyle}>+</span>
-        </StyledAddButton>
-        </>)}
       </LoginFromcontainer>
 
-      {Loading ? (
-        <LoginFromcontainer>Loading</LoginFromcontainer>
+      {Loading && FetchingData ? (
+        <RotatingLoader/>
       ) : (
         <LoginFromcontainer>
           <ItemHeaderprofile>Personalization</ItemHeaderprofile>
@@ -499,22 +507,21 @@ export const DashBoard = () => {
           <InnerHeaderWrapper>
             <DisplayHeader>Name</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.userName ?? "Default Username"}
+              {userDetails.userName|| "Default Username"}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
           <InnerHeaderWrapper>
             <DisplayHeader>Shipping Address</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.displayFullAddress ??
-                "Default address"}
+              {userDetails.displayFullAddress || "Default address"}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
           <InnerHeaderWrapper>
             <DisplayHeader>Contact</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.phone ?? "Default phone"}
+              {userDetails.phone || "Default phone"}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
         </LoginFromcontainer>
@@ -576,7 +583,6 @@ export const DashBoard = () => {
           onClose={EditPasswordFormClose} // Function to close the form
         />
       )}
-      
     </>
   );
 };
