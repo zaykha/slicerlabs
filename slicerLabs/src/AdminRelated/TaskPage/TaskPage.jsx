@@ -691,6 +691,7 @@ const TaskPage = () => {
         {/* <StyledAddButton to="/">
           <span style={plusSignStyle}>+</span>
         </StyledAddButton> */}
+        <button onClick={handleLogout}>Logout</button>
       </LoginFromcontainer>
 
       {/* {Loading ? (
