@@ -7,14 +7,21 @@ export const ToServicesContainer = styled.div`
     // padding: 1px;
 `;
 export const RightContentservice = styled.div`
-    width:30%;
+    width:45%;
+    padding: 30px;
     margin: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
+    text-align: center;
+    // background-color:black;
     @media screen and (max-width: 1200px){
         width: 80%;
     }
+`;
+export const Infopservices = styled.div`
+    color: white;
+    margin: 20px auto 20px auto;
+    text-align:tight;
 `;

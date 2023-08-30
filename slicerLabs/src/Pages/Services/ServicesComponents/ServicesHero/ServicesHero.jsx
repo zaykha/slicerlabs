@@ -11,7 +11,7 @@ import {
     RightContentservice,
     ToServicesContainer 
 } from '../../../HomePage/HomepageComponents/ToServices/ToServiceselement'
-import Makerbot from '../../../../assets/makerbot.png';
+import Makerbot from '../../../../assets/1235.png';
 
 
 const ServicesHero = () => {

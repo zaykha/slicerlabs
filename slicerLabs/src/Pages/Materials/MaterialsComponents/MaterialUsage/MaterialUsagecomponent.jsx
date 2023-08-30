@@ -9,9 +9,11 @@ export const MUContainer = styled.div`
 export const MUContainer1 = styled.div`
     width: 100%;
     margin: 0 0;
+    padding: 20px;
     
 `;
 export const MUBox = styled.div`
+// padding: 20px;
     width: 1000px;
     display: flex;
     flex-wrap: wrap;

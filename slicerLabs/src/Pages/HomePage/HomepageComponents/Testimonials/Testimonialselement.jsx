@@ -1,11 +1,11 @@
 import styled from "styled-components";
 
 export const Testcontainer = styled.div`
-    width: 300px;
-    height: 500px;
+    width: 80%;
+    // height: 500px;
     padding: 10px;
     display: flex;
-    flex-direction: column;
+    // flex-direction: column;
     align-items: center;
     justify-content: flex-start;
     margin: auto;
@@ -13,8 +13,9 @@ export const Testcontainer = styled.div`
 
 export const Avatar = styled.img`
     width: 280px;
-    height: 257px;
-    margin: 20px auto;
+    height: 100px;
+    object-fit: fill;
+    margin: 20px 10px;
 `;
 export const Avatarname = styled.div`
     color: #48B2E5;

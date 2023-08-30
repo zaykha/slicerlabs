@@ -12,7 +12,7 @@ export const CUFContainer = styled.div`
     }
 `;
 export const CUFstats = styled.div`
-    width: 65%;
+    width: 55%;
     display:flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -49,6 +49,7 @@ export const CUFstatscontent = styled.div`
     color:white;
 `;
 export const CUFCTAcard = styled.div`
+    width: 600px;
     color:white;
     flex-direction: column;
     justify-content: flex-start;
@@ -86,12 +87,13 @@ export const CUFCTABTN= styled.div`
     }
 `;
 export const CUFForm = styled.div`
-    width: 35%;
+    width: 40%;
     display:flex;
     flex-direction: column;
     justify-content: flex-start;
     padding: 50px;
     background:white;
+    margin-left:20px;
     @media screen and (max-width: 780px){
         width:100%;
 }

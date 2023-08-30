@@ -16,13 +16,14 @@ export const InfoCTAContainer = styled.div`
 export const Infop = styled.div`
     color: white;
     margin: 20px auto 20px auto;
+    // text-align:left;
 `;
 
 export const LeftContent = styled.div`
     width: 600px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: right;
     justify-content: center;
     flex-wrap: wrap;
     @media screen and (max-width: 1200px){
@@ -33,15 +34,21 @@ export const InfoIMG = styled.img`
     width: 600px;
     height: 400px;
     margin: auto;
+     object-fit: contain;
     @media screen and (max-width: 1200px){
         width: 100%;
         margin: 0;
         height: auto;
     }
 `;
+export const Sheader = styled.div`
+    text-align: center;
+    color: grey;
+`;
 export const RightContent = styled.div`
     width: 500px;
     margin: 10px auto;
+    padding: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
