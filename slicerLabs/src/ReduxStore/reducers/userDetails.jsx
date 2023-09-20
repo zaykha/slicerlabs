@@ -12,7 +12,7 @@ const initialState = {
 const userDetailsReducer = (state = initialState, action) => {
   switch (action.type) {
     case "SET_USER_DETAILS":
-      console.log(action.payload)
+      // console.log(action.payload)
       const updatedState = { ...state };
       for (const key in action.payload) {
         if (key === "userDetails") {
@@ -25,7 +25,7 @@ const userDetailsReducer = (state = initialState, action) => {
           updatedState[key] = action.payload[key];
         }
       }
-      console.log(updatedState);
+      // console.log(updatedState);
       return updatedState;
     case "UPDATE_EMAIL":
       console.log(action.payload);

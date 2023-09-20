@@ -46,19 +46,22 @@ const MaterialsOptions = ({
   const leftDivRef = useRef(null);
   const rightDivRef = useRef(null);
   const [material, setMaterial] = useState("");
+  const cart = useSelector((state) => state.cartItems);
+  const dimensions = cart.cartItems[0].dimensions;
   const [color, setColor] = useState("");
-  const [width, setWidth] = useState(10);
-  const [height, setHeight] = useState(10);
-  const [depth, setDepth] = useState(10);
+  const [width, setWidth] = useState(Math.round(dimensions?.width));
+  const [height, setHeight] = useState(Math.round(dimensions?.height));
+  const [depth, setDepth] = useState(Math.round(dimensions?.depth));
   const [quantity, setQuantity] = useState(1);
   const Navigate = useNavigate();
   const dispatch = useDispatch();
   const [price, setPrice] = useState(0);
   const ProductId = useSelector((state) => state.cartItems.tempModelId);
-  const cart = useSelector((state) => state.cartItems);
+
   const [cartCount, setCartCount] = useState(cart.length > 0 ? cart.length : 0);
   const idToken = localStorage.getItem("idToken");
   const userUIDInLocalStorage = localStorage.getItem("uid");
+
   const [ErrorHandling, setErrorHandling] = useState({
     state: false,
     header: "",
@@ -66,12 +69,12 @@ const MaterialsOptions = ({
   });
   const [materialSettings, setMaterialSettings] = useState({
     printTimePerUnitVolume: {
-      ABS: 0.05, // minutes/cm^3
-      PLA: 0.04, // minutes/cm^3
-      TPU: 0.06, // minutes/cm^3
-      NYLON: 0.07, // minutes/cm^3
-      PETG: 0.05, // minutes/cm^3
-      RESIN: 0.03, // minutes/cm^3
+      ABS: 0.00104, // g/mm^3 (converted from g/cm^3)
+      PLA: 0.00125, // g/mm^3 (converted from g/cm^3)
+      TPU: 0.00121, // g/mm^3 (converted from g/cm^3)
+      NYLON: 0.00114, // g/mm^3 (converted from g/cm^3)
+      PETG: 0.00127, // g/mm^3 (converted from g/cm^3)
+      RESIN: 0.00105, // g/mm^3 (converted from g/cm^3)
     },
     materialCosts: {
       ABS: 0.05, // SGD per gram
@@ -129,6 +132,7 @@ const MaterialsOptions = ({
   };
   useEffect(() => {
     fetchConfigSettings();
+    console.log(cart.cartItems[0].dimensions);
   }, []);
 
   // Fetch the calculatePrice function from local storage
@@ -291,7 +295,8 @@ const MaterialsOptions = ({
           setErrorHandling({
             state: true,
             header: "An Error Occured",
-            message: "please fill all in empty fields or empty the field to proceed.",
+            message:
+              "please fill all in empty fields or empty the field to proceed.",
           });
         } else {
           const finalItem = {
@@ -417,7 +422,7 @@ const MaterialsOptions = ({
           </MOdropdown>
 
           <Mdropdownlabel htmlFor="width">
-            Dimension ( Width x Height x Depth )
+            Dimension ( Width x Height x Depth ) in mm
           </Mdropdownlabel>
 
           <div
@@ -428,17 +433,19 @@ const MaterialsOptions = ({
             <input
               type="number"
               placeholder="Width"
-              value={width}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value >= 10) {
-                  setWidth(value);
-                }
-              }}
+              value={Math.round(dimensions?.width)}
+              readOnly // Make the input field uneditable
+              step="1" // Allow only whole numbers
+              // onChange={(e) => {
+              //   const value = e.target.value;
+              //   if (value >= 10) {
+              //     setWidth(value);
+              //   }
+              // }}
               style={{
                 width: "28%",
-                background: "rgba(87, 87, 87, 0.43)",
-                border: "1px solid #D5D5D5",
+                background: "rgba(38, 38, 38, 0.43)",
+                border: "1px solid #4a4a4a",
                 borderRadius: "10px",
                 color: "white",
                 margin: "0px auto 15px",
@@ -446,23 +453,26 @@ const MaterialsOptions = ({
                 textAlign: "center",
                 height: "40px",
                 fontSize: "1.1rem",
+                pointerEvents: "none", // Make it unclickable
               }}
             />
 
             <input
               type="number"
               placeholder="Height"
-              value={height}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value >= 10) {
-                  setHeight(value);
-                }
-              }}
+              value={Math.round(dimensions?.height)}
+              readOnly // Make the input field uneditable
+              step="1" // Allow only whole numbers
+              // onChange={(e) => {
+              //   const value = e.target.value;
+              //   if (value >= 10) {
+              //     setHeight(value);
+              //   }
+              // }}
               style={{
                 width: "28%",
-                background: "rgba(87, 87, 87, 0.43)",
-                border: "1px solid #D5D5D5",
+                background: "rgba(38, 38, 38, 0.43)",
+                border: "1px solid #4a4a4a",
                 borderRadius: "10px",
                 color: "white",
                 margin: "0px auto 15px",
@@ -470,23 +480,26 @@ const MaterialsOptions = ({
                 textAlign: "center",
                 height: "40px",
                 fontSize: "1.1rem",
+                pointerEvents: "none", // Make it unclickable
               }}
             />
 
             <input
               type="number"
               placeholder="Depth"
-              value={depth}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value >= 10) {
-                  setDepth(value);
-                }
-              }}
+              value={Math.round(dimensions?.depth)}
+              readOnly // Make the input field uneditable
+              step="1" // Allow only whole numbers
+              // onChange={(e) => {
+              //   const value = e.target.value;
+              //   if (value >= 10) {
+              //     setDepth(value);
+              //   }
+              // }}
               style={{
                 width: "28%",
-                background: "rgba(87, 87, 87, 0.43)",
-                border: "1px solid #D5D5D5",
+                background: "rgba(38, 38, 38, 0.43)",
+                border: "1px solid #4a4a4a",
                 borderRadius: "10px",
                 color: "white",
                 margin: "0px auto 15px",
@@ -494,6 +507,7 @@ const MaterialsOptions = ({
                 textAlign: "center",
                 height: "40px",
                 fontSize: "1.1rem",
+                pointerEvents: "none", // Make it unclickable
               }}
             />
           </div>

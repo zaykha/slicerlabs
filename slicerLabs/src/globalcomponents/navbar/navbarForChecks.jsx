@@ -86,7 +86,7 @@ const NavbarForChecks = ({ togglesidebar, OKtoRoute }) => {
   };
   useEffect(() => {
     setIsLoading(true);
-    console.log(OKtoRoute);
+    // console.log(OKtoRoute);
     setIsLoading(false);
   }, [isLoading, userName, isAdmin]);
   // useEffect(() => {

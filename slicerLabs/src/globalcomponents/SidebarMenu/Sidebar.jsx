@@ -110,7 +110,7 @@ const Sidebar = ({ togglesidebar, isOpen }) => {
   });
   useEffect(() => {
     setIsLoading(true);
-    console.log(isAdmin, userDetails);
+    // console.log(isAdmin, userDetails);
     setIsLoading(false);
   }, [isLoading, userName, isAdmin]);
   // useEffect(() => {
