@@ -125,7 +125,8 @@ const LoginForm = () => {
           localStorage.setItem("idToken", idToken);
           localStorage.setItem("uid", uid);
           const response = await fetch(
-            "http://localhost:3000/calculate-function",
+            // "http://localhost:3000/calculate-function",
+            `https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function`,
             {
               method: "GET",
               headers: {
@@ -235,7 +236,11 @@ const LoginForm = () => {
             console.log("Document data in SSO:", docSnap.data().userDetails);
 
             // Navigate to the desired page after successful sign-in
-            navigate("/cart");
+            cartItems.length > 0
+            ? navigate("/cart")
+            : isAdmin
+            ? navigate("/Dashboard")
+            : navigate("/");
           } else {
             // docSnap.data() will be undefined in this case
             console.log("No such document!");

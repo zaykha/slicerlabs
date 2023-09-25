@@ -75,7 +75,7 @@ export const DashBoard = () => {
   // const userDetails = useSelector((state) => state?.userDetails);
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetails = JSON.parse(userDetailsUnparsed);
-  const [localUser, setLocalUser] = useState(userDetails.userDetails);
+  const [localUser, setLocalUser] = useState(userDetails);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   const userUIDInLocalStorage = localStorage.getItem("uid");
   // const postalCode = userDetails?.userDetails.postalCode
@@ -317,7 +317,7 @@ export const DashBoard = () => {
     <>
 
       <UPHeaderFullline1>
-        Welcome {userDetails?.userDetails?.userName ?? ""}
+        Welcome {userDetails?.userName ?? ""}
       </UPHeaderFullline1>
 
       <LoginFromcontainer>
@@ -499,22 +499,21 @@ export const DashBoard = () => {
           <InnerHeaderWrapper>
             <DisplayHeader>Name</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.userDetails?.userName ?? "Default Username"}
+              {userDetails?.userName || userDetails?.userDetails.userName }
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
           <InnerHeaderWrapper>
             <DisplayHeader>Shipping Address</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.userDetails?.displayFullAddress ??
-                "Default address"}
+              {userDetails?.displayFullAddress || userDetails?.userDetails.displayFullAddress}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
           <InnerHeaderWrapper>
             <DisplayHeader>Contact</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.userDetails?.phone ?? "Default phone"}
+              {userDetails?.phone || userDetails?.userDetails.phone}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
         </LoginFromcontainer>
@@ -526,7 +525,7 @@ export const DashBoard = () => {
         <InnerHeaderWrapper>
           <DisplayHeader>Email</DisplayHeader>
           <InnerHeaderpersonalize>
-            {userDetails?.userDetails?.email ?? "Default Email"}
+            {userDetails?.email || userDetails?.userDetails.email}
           </InnerHeaderpersonalize>
           <EditIconLoginDetails1 onClick={handleEditLoginDetailsClick}>
             Change Login Email
@@ -554,7 +553,7 @@ export const DashBoard = () => {
 
       {isEditFormOpen && (
         <EditProfileForm
-          user={userDetails.userDetails}
+          user={userDetails}
           onClose={EditFormClose} // Function to close the form
           onSave={(updatedUser) => {
             // Handle saving the updated user data here

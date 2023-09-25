@@ -273,7 +273,8 @@ const Registerform = () => {
     const email = encodeURIComponent(formValues.email);
     try {
       const response = await fetch(
-        `http://localhost:3000/validate-email?email=${email}`
+        // `http://localhost:3000/validate-email?email=${email}`,
+        `https://cerulean-hermit-crab-robe.cyclic.cloud/validate-email?email=${email}`,
       );
       const data = await response.json();
       console.log(data);
@@ -384,9 +385,10 @@ const Registerform = () => {
         resolve();
       });
       // Use the returned promise to navigate after data is set
-      navigationPromise.then(() => {
-        cartItems.length > 0 ? navigate("/cart") : navigate("/");
-      });
+      // navigationPromise.then(() => {
+      //   cartItems.length > 0 ? navigate("/cart") : navigate("/");
+      // });
+      cartItems.length > 0 ? navigate("/cart") : navigate("/");
     } catch (error) {
       console.log(error.message);
     }
