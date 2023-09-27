@@ -154,6 +154,9 @@ export const InnerLayerP = styled.div`
   font-weight: 400;
   letter-spacing: 0;
   line-height: normal;
+   /* Allow word wrapping */
+  overflow-wrap: break-word;
+  word-wrap: break-word;
   @media screen and (max-width: 1200px) {
     width: 100%;
   }

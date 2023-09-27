@@ -153,38 +153,38 @@ export const DashBoard = () => {
   }, [FetchingData]);
 
   const EditFormClose = async () => {
-    setLoading(true);
+    // setLoading(true);
     setIsEditFormOpen(false);
-    try {
-      // Continue with your other logic
-      const USERUID = userUIDInLocalStorage;
-      const userDetailsRef = doc(usersCollection, USERUID);
+    // try {
+    //   // Continue with your other logic
+    //   const USERUID = userUIDInLocalStorage;
+    //   const userDetailsRef = doc(usersCollection, USERUID);
 
-      getDoc(userDetailsRef)
-        .then((docSnap) => {
-          if (docSnap.exists()) {
-            const userDetailsData = docSnap.data();
-            setLocalUser(userDetailsData);
-            dispatch(setUserDetails(userDetailsData));
-            localStorage.setItem(
-              "userDetails",
-              JSON.stringify(userDetailsData)
-            );
-            console.log("Document data in UserProfile:", userDetailsData);
-            setLoading(false);
-          } else {
-            console.log("No such document!");
-            setLoading(false);
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching user details:", error);
-          setLoading(false);
-        });
-    } catch {
-      console.error("Error gettingdocs:", error);
-      setLoading(false);
-    }
+    //   getDoc(userDetailsRef)
+    //     .then((docSnap) => {
+    //       if (docSnap.exists()) {
+    //         const userDetailsData = docSnap.data();
+    //         setLocalUser(userDetailsData);
+    //         dispatch(setUserDetails(userDetailsData));
+    //         localStorage.setItem(
+    //           "userDetails",
+    //           JSON.stringify(userDetailsData)
+    //         );
+    //         console.log("Document data in UserProfile:", userDetailsData);
+    //         setLoading(false);
+    //       } else {
+    //         console.log("No such document!");
+    //         setLoading(false);
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       console.error("Error fetching user details:", error);
+    //       setLoading(false);
+    //     });
+    // } catch {
+    //   console.error("Error gettingdocs:", error);
+    //   setLoading(false);
+    // }
   };
 
   const handleEditClick = () => {
@@ -317,7 +317,7 @@ export const DashBoard = () => {
     <>
 
       <UPHeaderFullline1>
-        Welcome {userDetails?.userName ?? ""}
+        Welcome {userDetails?.userDetails?.userName ?? ""}
       </UPHeaderFullline1>
 
       <LoginFromcontainer>
@@ -499,21 +499,21 @@ export const DashBoard = () => {
           <InnerHeaderWrapper>
             <DisplayHeader>Name</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.userName || userDetails?.userDetails.userName }
+              {userDetails?.userName || userDetails?.userDetails?.userName }
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
           <InnerHeaderWrapper>
             <DisplayHeader>Shipping Address</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.displayFullAddress || userDetails?.userDetails.displayFullAddress}
+              {userDetails?.displayFullAddress || userDetails?.userDetails?.displayFullAddress}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
           <InnerHeaderWrapper>
             <DisplayHeader>Contact</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.phone || userDetails?.userDetails.phone}
+              {userDetails?.phone || userDetails?.userDetails?.phone}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
         </LoginFromcontainer>
@@ -525,7 +525,7 @@ export const DashBoard = () => {
         <InnerHeaderWrapper>
           <DisplayHeader>Email</DisplayHeader>
           <InnerHeaderpersonalize>
-            {userDetails?.email || userDetails?.userDetails.email}
+            {userDetails?.email || userDetails?.userDetails?.email}
           </InnerHeaderpersonalize>
           <EditIconLoginDetails1 onClick={handleEditLoginDetailsClick}>
             Change Login Email

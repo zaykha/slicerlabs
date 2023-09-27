@@ -166,7 +166,7 @@ const LoginForm = () => {
             localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
 
             console.log("Document data in Login:", docSnap.data().userDetails);
-            const AdminCheck = docSnap.data().userDetails.adminPrivileges;
+            const AdminCheck = docSnap.data().userDetails?.adminPrivileges;
             setIsAdmin(AdminCheck);
           } else {
             // docSnap.data() will be undefined in this case
@@ -303,8 +303,8 @@ const LoginForm = () => {
         </InputContainer>
         {passwordError && <div style={{ color: "red" }}>{passwordError}</div>}
         <LoginFlexdiv>
-          <RememberMe type="checkbox" />
-          <RememberMelabel>Remember me</RememberMelabel>
+          {/* <RememberMe type="checkbox" /> */}
+          <RememberMelabel>Single Sign-On Enabled: Sign in once to access all services.</RememberMelabel>
 
           {isLoggingIn ? (
             <SpinningLoader />

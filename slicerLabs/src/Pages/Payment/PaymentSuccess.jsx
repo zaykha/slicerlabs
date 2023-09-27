@@ -25,7 +25,6 @@ import {
   Tocartflexdiv,
 } from "../StartPrinting/StartPrintingComponents/MaterialsOptions/MaterialsOptionselements";
 const PaymentSuccess = () => {
-  
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const aboveDivRef = useRef(null);
@@ -36,8 +35,7 @@ const PaymentSuccess = () => {
   const userUID = new URLSearchParams(location.search).get("user_id");
   const userUIDInLocalStorage = localStorage.getItem("uid");
   const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetailsParsed = JSON.parse(userDetailsUnparsed);
-  const userDetails = userDetailsParsed.userDetails;
+  const userDetails = JSON.parse(userDetailsUnparsed);
   const unparsedStoreditems = localStorage.getItem("TempItemsDetailsStorage");
   const userPurchasedItems = JSON.parse(unparsedStoreditems);
   // Function to format date and time to the desired format
@@ -171,12 +169,12 @@ const PaymentSuccess = () => {
   //   }
   // };
   useEffect(() => {
-  //  console.log('logged')
+    //  console.log('logged')
     // if (!userUID) {
     //   // Handle case where userId is missing (e.g., if the user directly navigates to /success)
     //   console.error("Invalid payment response from Stripe.");
     // }else{
-      
+
     // }
     // handlePaymentSuccess();
     const updatePosition = () => {
@@ -188,20 +186,21 @@ const PaymentSuccess = () => {
     };
     handleResize(); // Set initial positions on page load
     window.addEventListener("resize", handleResize);
-    
+
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-    
+
     // need to clean localstorage and IDB
   }, []);
   useEffect(() => {
-    if(userUID){
+    if (userUID) {
       setsuccessPaymentState(true);
-    }else{
-      console.log("userUID params is not in")
+      console.log(userDetails)
+    } else {
+      console.log("userUID params is not in");
     }
-    
+
     // Add any logic that needs to be executed when successPaymentState changes
   }, []);
   const handleRoute = (route) => {
@@ -211,51 +210,48 @@ const PaymentSuccess = () => {
 
   return (
     <>
-     
       {successPaymentState ? (
         <>
-        <ContainerforResponse ref={aboveDivRef}>
-          <PaymentResponsecontainer>
-            <DropzoneContainer>
-              <UPHeaderFullline>Payment Successful</UPHeaderFullline>
-              <UPFullline>
-                A confirmation email has been sent to {userDetails.email}.
-              </UPFullline>
-              <UPFullline>
-                Feel Free to Contact Us at support@silcerlabs.com
-              </UPFullline>
-            </DropzoneContainer>
-          </PaymentResponsecontainer>
-        </ContainerforResponse>
+          <ContainerforResponse ref={aboveDivRef}>
+            <PaymentResponsecontainer>
+              <DropzoneContainer>
+                <UPHeaderFullline>Payment Successful</UPHeaderFullline>
+                <UPFullline>
+                  A confirmation email has been sent to{" "}
+                  {userDetails?.email || userDetails?.userDetails?.email}.
+                </UPFullline>
+                <UPFullline>
+                  Feel Free to Contact Us at support@silcerlabs.com
+                </UPFullline>
+              </DropzoneContainer>
+            </PaymentResponsecontainer>
+          </ContainerforResponse>
           <Tocartflexdiv ref={belowDivRef}>
-          <TocartCTABtn onClick={() => handleRoute("Start3dPrinting")}>
-            Print More
-          </TocartCTABtn>
-          <TocartCTABtn onClick={() => handleRoute("DashBoard")}>
-            Track Product
-          </TocartCTABtn>
-        </Tocartflexdiv>
+            <TocartCTABtn onClick={() => handleRoute("Start3dPrinting")}>
+              Print More
+            </TocartCTABtn>
+            <TocartCTABtn onClick={() => handleRoute("DashBoard")}>
+              Track Product
+            </TocartCTABtn>
+          </Tocartflexdiv>
         </>
       ) : (
         <>
-        <ContainerforResponse ref={aboveDivRef}>
-          <PaymentResponsecontainer>
-            <DropzoneContainer>
-              <UPHeaderFullline>Payment Unsuccessful</UPHeaderFullline>
-              <UPFullline>Please Contact us at +65 8475 1547</UPFullline>
-              <UPFullline>Or</UPFullline>
-              <UPFullline>Email to us at support@silcerlabs.com</UPFullline>
-            </DropzoneContainer>
-          </PaymentResponsecontainer>
-        </ContainerforResponse>
-         <Tocartflexdiv ref={belowDivRef}>
-
-         </Tocartflexdiv>
-         </>
+          <ContainerforResponse ref={aboveDivRef}>
+            <PaymentResponsecontainer>
+              <DropzoneContainer>
+                <UPHeaderFullline>Payment Unsuccessful</UPHeaderFullline>
+                <UPFullline>Please Contact us at +65 8475 1547</UPFullline>
+                <UPFullline>Or</UPFullline>
+                <UPFullline>Email to us at support@silcerlabs.com</UPFullline>
+              </DropzoneContainer>
+            </PaymentResponsecontainer>
+          </ContainerforResponse>
+          <Tocartflexdiv ref={belowDivRef}></Tocartflexdiv>
+        </>
       )}
-    
+
       {/* Additional content for the success page */}
-     
     </>
   );
 };

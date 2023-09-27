@@ -32,12 +32,14 @@ import {
 } from "../navbar/navbarelement";
 import styled from "styled-components";
 const SideLinksarray = [
-  { title: "Home", path: "/" },
-  { title: "Services", path: "/services" },
-  { title: "Materials", path: "/materials" },
-  { title: "Learn", path: "/learn" },
+  // { title: "Home", path: "/" },
+  // { title: "Services", path: "/services" },
+  // { title: "Materials", path: "/materials" },
+  // { title: "Learn", path: "/learn" },
+  { title: "Resources", path: "/services" },
+  // { title: "FAQ", path: "/faq" },
   { title: "Contact", path: "/ContactUs" },
-  //   { title: "Login", path: "/login" },
+  // { title: "Login", path: "/login" },
 ];
 const ActionItemsSideBar = styled.div`
   display: flex;

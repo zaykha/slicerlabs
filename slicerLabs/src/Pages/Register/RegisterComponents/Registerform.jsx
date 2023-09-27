@@ -35,6 +35,7 @@ import { MdCheckCircleOutline } from "react-icons/md";
 import { fetchAddressDetails } from "../../../globalcomponents/MapServices/MapServices";
 import { setAuthenticationStatus } from "../../../ReduxStore/actions/Authentication";
 import ErrorPrompt from "../../../globalcomponents/prompt/ErrorPrompt";
+import SpinningLoader from "../../../globalcomponents/DropDown/SpinningLoader";
 // import {
 //   GoogleSignin,
 //   statusCodes,
@@ -46,6 +47,8 @@ const Registerform = () => {
   const timeoutIdRef = useRef(null);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isEmailValidating, setIsEmailValidating] = useState(false);
   const [IsFetchingAddressLoading, setIsFetchingAddressLoading] =
     useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -81,7 +84,7 @@ const Registerform = () => {
   });
   useEffect(() => {
     if (formValues.postalCode.length === 6) {
-      console.log(formValues.postalCode);
+      // console.log(formValues.postalCode);
       if (timeoutIdRef.current) {
         // Clear previous timeout if there was any
         clearTimeout(timeoutIdRef.current);
@@ -269,11 +272,12 @@ const Registerform = () => {
     }));
   };
   const handleValidateEmail = async () => {
+    setIsEmailValidating(true);
     const token = "80fbc8ce7e0f482d9f5f36e50cb11389";
     const email = encodeURIComponent(formValues.email);
     try {
       const response = await fetch(
-        `http://localhost:3000/validate-email?email=${email}`,
+        `http://localhost:3000/validate-email?email=${email}`
         // `https://cerulean-hermit-crab-robe.cyclic.cloud/validate-email?email=${email}`,
       );
       const data = await response.json();
@@ -294,8 +298,10 @@ const Registerform = () => {
         emailError: "Error validating email. Please try again.",
       }));
     }
+    setIsEmailValidating(false);
   };
   const handleSignUp = async () => {
+    setIsRegistering(true);
     if (!agreedToTerms) {
       // alert("Please agree to the terms and policies.");
       setErrorHandling({
@@ -395,6 +401,7 @@ const Registerform = () => {
     // } finally {
     //   setLoading(false);
     // }
+    setIsRegistering(false);
   };
 
   return (
@@ -545,14 +552,19 @@ const Registerform = () => {
           </InputContainer>
 
           {formValues.email !== "" &&
-          formErrors.emailError == "" &&
+          formErrors.emailError === "" &&
           !isEmailValid ? (
-            <ValidateEmailButton onClick={handleValidateEmail}>
-              Validate Email
-            </ValidateEmailButton>
+            isEmailValidating ? (
+              <SpinningLoader />
+            ) : (
+              <ValidateEmailButton onClick={handleValidateEmail}>
+                Validate Email
+              </ValidateEmailButton>
+            )
           ) : (
             <></>
           )}
+
           {formErrors.emailError && (
             <div style={{ color: "red", fontSize: "12px" }}>
               {formErrors.emailError}
@@ -645,7 +657,7 @@ const Registerform = () => {
             {formValues.displayFullAddress !== "" ? (
               <Addressdiv>{formValues.displayFullAddress}</Addressdiv>
             ) : IsFetchingAddressLoading ? (
-              <>Loading</>
+              <SpinningLoader />
             ) : (
               <Addressdiv>Please Type in a valid postal Code</Addressdiv>
             )}
@@ -670,7 +682,15 @@ const Registerform = () => {
               provided by Slicerlabs
             </RememberMelabel>
           </LoginFlexdiv>
-          <LoginBTN onClick={handleSignUp}>Register</LoginBTN>
+          <LoginFlexdiv>
+            <LoginBTN onClick={() => navigate("/Login")}>Back</LoginBTN>
+
+            {isRegistering ? (
+              <SpinningLoader />
+            ) : (
+              <LoginBTN onClick={handleSignUp}>Register</LoginBTN>
+            )}
+          </LoginFlexdiv>
         </LoginContainer>
       </LoginFromcontainer>
 

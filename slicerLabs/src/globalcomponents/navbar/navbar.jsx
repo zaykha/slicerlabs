@@ -38,7 +38,7 @@ const NavLinksarray = [
   // { title: "Materials", path: "/materials" },
   // { title: "Learn", path: "/learn" },
   { title: "Resources", path: "/services" },
-  { title: "FAQ", path: "/faq" },
+  // { title: "FAQ", path: "/faq" },
   { title: "Contact", path: "/ContactUs" },
   // { title: "Login", path: "/login" },
 ];

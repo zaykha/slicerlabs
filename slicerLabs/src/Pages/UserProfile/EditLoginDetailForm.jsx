@@ -36,7 +36,7 @@ const EditLoginDetailForm = ({ onClose }) => {
   const dispatch = useDispatch();
   const auth = getAuth();
   const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetails = JSON.parse(userDetailsUnparsed).userDetails;
+  const userDetails = JSON.parse(userDetailsUnparsed);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [formValues, setFormValues] = useState({
     userName: userDetails.userName || "",
@@ -90,7 +90,7 @@ const EditLoginDetailForm = ({ onClose }) => {
       setIsEmailValid(false);
     }
 
-    console.log(formattedValue);
+    // console.log(formattedValue);
     setFormValues((prevValues) => ({
       ...prevValues,
       [name]: formattedValue,
@@ -137,10 +137,12 @@ const EditLoginDetailForm = ({ onClose }) => {
     setLoadingForUpdatingEmail(true);
     if (formValues.email !== "" && formValues.email !== userDetails.email) {
       const credential = EmailAuthProvider.credential(
-        formValues.email,
+        userDetails.email,
         formValues.password
       );
-      console.log(credential);
+      // const credential = promptForCredentials();
+
+      // console.log(credential);
       try {
         await reauthenticateWithCredential(auth.currentUser, credential)
           .then(() => {
