@@ -38,6 +38,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
   const [isValidatingEmail, setIsValidatingEmail] = useState(false);
   const [fetchingAddress, setFetchingAddress] = useState(false);
   const auth = getAuth();
+  const userUIDInLocalStorage = localStorage.getItem("uid");
   const [formValues, setFormValues] = useState({
     userName: userDetails.userName || "",
     phone: userDetails.phone || "",
@@ -104,7 +105,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
       const singaporeMobileRegex = /^(\+65\s?)?[89]\d{3}\s?\d{4}$/;
 
       const isValidPhone = singaporeMobileRegex.test(value);
-      console.log(isValidPhone);
+      // console.log(isValidPhone);
       if (!isValidPhone) {
         // Handle the case when the phone number is not valid
         return "Please enter a valid Singaporean mobile number";
@@ -208,7 +209,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
       setIsEmailValid(false);
     }
 
-    console.log(formattedValue);
+    // console.log(formattedValue);
     setFormValues((prevValues) => ({
       ...prevValues,
       [name]: formattedValue,
@@ -222,7 +223,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
   useEffect(() => {
     if (formValues.postalCode.length === 6) {
       setFetchingAddress(true);
-      console.log(formValues.postalCode);
+      // console.log(formValues.postalCode);
       if (timeoutIdRef.current) {
         // Clear previous timeout if there was any
         clearTimeout(timeoutIdRef.current);
@@ -265,13 +266,16 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
       try {
         
         try {
-          const USERUID = userDetails.userUID;
-          const userDetailsRef = doc(usersCollection, USERUID);
+          console.log(userDetails)
+          // const USERUID = userDetails.userUID;
+          const userDetailsRef = doc(usersCollection, userUIDInLocalStorage);
+          // console.log(USERUID)
           getDoc(userDetailsRef)
             .then((docSnap) => {
               if (docSnap.exists()) {
                 const existingUserDetails = docSnap.data();
                 const updatedUserDetails = { ...existingUserDetails };
+                
                 // Loop through the keys of the existingUserDetails object
                 Object.keys(existingUserDetails).forEach((key) => {
                   // Check if the key is present in the formValues object
@@ -292,13 +296,15 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
                 });
 
                 try {
-                  const updatedData = { userDetails: updatedUserDetails };
-                  dispatch(setUserDetails(updatedData));
-                  setDoc(userDetailsRef, updatedData);
+                  // const updatedData = { updatedUserDetails };
+                  // console.log('updatedData',updatedData);
+                  console.log('updatedUserDetails',{userDetails:  updatedUserDetails});
+                  dispatch(setUserDetails({userDetails:  updatedUserDetails}));
+                  setDoc(userDetailsRef, {userDetails:  updatedUserDetails});
                   // console.log("User information updated in Firestore.");
                   localStorage.setItem(
                     "userDetails",
-                    JSON.stringify(updatedData)
+                    JSON.stringify({userDetails:  updatedUserDetails})
                   );
                 } catch (error) {
                   console.error(
@@ -318,7 +324,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
               console.error("Error fetching user details:", error);
             });
         } catch (error) {
-          console.error("Error fetching calculatePrice function:", error);
+          console.error("Error fetching:", error);
         }
         onSave(formValues);
       } catch {

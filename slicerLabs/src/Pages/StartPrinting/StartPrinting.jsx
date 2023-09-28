@@ -46,7 +46,7 @@ const StartPrinting = ({setOKtoRoute}) => {
       console.log("cannot route")
       setOKtoRoute(false);
     }else{
-      console.log("can Route")
+      // console.log("can Route")
       setOKtoRoute(true);
     }
   }, [isCheckedOut, isModelLoaded, isAddedToCart])
@@ -116,7 +116,7 @@ const StartPrinting = ({setOKtoRoute}) => {
       setShowPrompt(true);
     }
 
-    console.log(location.pathname)
+    // console.log(location.pathname)
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {

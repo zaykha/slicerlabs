@@ -37,10 +37,12 @@ import { resetUserDetails } from "../../ReduxStore/actions/userDetails";
 import { doc, getDoc } from "firebase/firestore";
 import ErrorPrompt from "../prompt/ErrorPrompt";
 const NavLinksarray = [
-  { title: "Home", path: "/" },
-  { title: "Services", path: "/services" },
-  { title: "Materials", path: "/materials" },
-  { title: "Learn", path: "/learn" },
+  // { title: "Home", path: "/" },
+  // { title: "Services", path: "/services" },
+  // { title: "Materials", path: "/materials" },
+  // { title: "Learn", path: "/learn" },
+  { title: "Resources", path: "/services" },
+  // { title: "FAQ", path: "/faq" },
   { title: "Contact", path: "/ContactUs" },
   // { title: "Login", path: "/login" },
 ];
@@ -84,7 +86,7 @@ const NavbarForChecks = ({ togglesidebar, OKtoRoute }) => {
   };
   useEffect(() => {
     setIsLoading(true);
-    console.log(OKtoRoute);
+    // console.log(OKtoRoute);
     setIsLoading(false);
   }, [isLoading, userName, isAdmin]);
   // useEffect(() => {

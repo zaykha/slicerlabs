@@ -41,9 +41,7 @@ const Footer = () => {
                 <Footerpartition>
                     <Fheader>Contact Us</Fheader>
                     <Fcontent>
-                        685 Market Street,
-                        Las Vegas, LA 95820,
-                        United States.
+                    661C Jurong West Street 64, Singapore 643661
                     </Fcontent>
                 </Footerpartition>
 
@@ -53,12 +51,12 @@ const Footer = () => {
                 <Fheader>Materials</Fheader>
 
                 <Flinks>
-                    <Flink>Acrylonitrile Butadiene Styrene (ABS)</Flink>
-                    <Flink>Polylactic Acid (PLA)</Flink>
-                    <Flink>Thermoplastic Polyurethane (TPU)</Flink>
-                    <Flink>Nylon</Flink>
-                    <Flink>Polyethylene Terephthalate Glycol (PETG)</Flink>
-                    <Flink>Resins</Flink>
+                    <Flink to="/services">Acrylonitrile Butadiene Styrene (ABS)</Flink>
+                    <Flink to="/services">Polylactic Acid (PLA)</Flink>
+                    <Flink to="/services">Thermoplastic Polyurethane (TPU)</Flink>
+                    <Flink to="/services">Nylon</Flink>
+                    <Flink to="/services">Polyethylene Terephthalate Glycol (PETG)</Flink>
+                    <Flink to="/services">Resins</Flink>
                 </Flinks>
             </FooterContent>
 
@@ -66,10 +64,10 @@ const Footer = () => {
                 <Fheader>Support</Fheader>
 
                 <Flinks>
-                    <Flink>Contact</Flink>
-                    <Flink>FAQ</Flink>
-                    <Flink>Material Guide</Flink>
-                    <Flink>Service Update</Flink>
+                    <Flink to="/ContactUs">Contact</Flink>
+                    {/* <Flink>FAQ</Flink>
+                    <Flink>Material Guide</Flink> */}
+                    <Flink to="/terms&policies">Service Update</Flink>
                 </Flinks>
             </FooterContent>
         </FooterContentcontainer>
@@ -79,17 +77,17 @@ const Footer = () => {
                 @Copyright 2023 | SlicerLabs | All Rights Reserved 
             </Copyright>
             <Socials>
-                <Sociallogolink>
-                    <Socialimg src={FB}></Socialimg>
+                <Sociallogolink to="https://www.facebook.com" target="_blank">
+                    <Socialimg src={FB} ></Socialimg>
                 </Sociallogolink>
 
-                <Sociallogolink>
-                <Socialimg src={INSTA}></Socialimg>
+                <Sociallogolink to="https://www.instagram.com/slicerlabs/" target="_blank">
+                <Socialimg src={INSTA} ></Socialimg>
 
                 </Sociallogolink>
 
-                <Sociallogolink>
-                <Socialimg src={Mail}></Socialimg>
+                <Sociallogolink to="mailto:slicerlabs@gmail.com">
+                <Socialimg src={Mail} ></Socialimg>
 
                 </Sociallogolink>
             </Socials>

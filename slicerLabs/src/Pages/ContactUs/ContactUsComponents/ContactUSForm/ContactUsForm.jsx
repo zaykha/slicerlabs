@@ -37,27 +37,27 @@ const ContactUsForm = () => {
                     <CUFstatsimg src={locationicon}></CUFstatsimg>
                     <CUFstatswraper>
                         <CUFstatshead>Address</CUFstatshead>
-                        <CUFstatscontent>3A Toh Guan Rd E, Singapore 608834</CUFstatscontent>
+                        <CUFstatscontent>661C Jurong West Street 64, Singapore 643661</CUFstatscontent>
                     </CUFstatswraper>
                 </CUFstatscontainer>
                 
                 <CUFstatscontainer>
-                    <CUFstatsimg src={emailicon}></CUFstatsimg>
+                    <CUFstatsimg src={smartphoneicon}></CUFstatsimg>
                     <CUFstatswraper>
                         <CUFstatshead>Contact</CUFstatshead>
-                        <CUFstatscontent>+65 6848 1548, +65 6784 1579</CUFstatscontent>
+                        <CUFstatscontent>+65 8188 3267</CUFstatscontent>
                     </CUFstatswraper>
                 </CUFstatscontainer>
 
                 <CUFstatscontainer>
-                    <CUFstatsimg src={smartphoneicon}></CUFstatsimg>
+                    <CUFstatsimg src={emailicon}></CUFstatsimg>
                     <CUFstatswraper>
                         <CUFstatshead>E-mail</CUFstatshead>
-                        <CUFstatscontent>contact@slicerlabs.com</CUFstatscontent>
+                        <CUFstatscontent>slicerlabs@gmail.com</CUFstatscontent>
                     </CUFstatswraper>
                 </CUFstatscontainer>
 
-                <CUFCTAcard>
+                {/* <CUFCTAcard>
                     <CUFCTAcardheader>Stay connected with Us</CUFCTAcardheader>
                     <CUFCTAcardcontent>Subscribe to our News letter to get updated on latest News and Promotions</CUFCTAcardcontent>
                     <CUFCTABTN>Subscribe</CUFCTABTN>
@@ -66,7 +66,10 @@ const ContactUsForm = () => {
                 <CUFCTAcard>
                     <CUFCTAcardheader>Already have a 3D file?</CUFCTAcardheader>
                     <CUFCTABTN>Upload File</CUFCTABTN>
-                </CUFCTAcard>
+                </CUFCTAcard> */}
+                 <CUFCTAcard>
+                 <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.733146385878!2d103.70248147677039!3d1.3363511616153514!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da0f8d47addcf5%3A0xd1f73cb231a37e9c!2sBlock%20661A%20HDB%20Jurong%20West!5e0!3m2!1sen!2smm!4v1693414940380!5m2!1sen!2smm" width="600" height="450"  allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                 </CUFCTAcard>
             </CUFstats>
                 <CUFForm>
                     <CUFFormHeader><SSpan>Send</SSpan> Message</CUFFormHeader>

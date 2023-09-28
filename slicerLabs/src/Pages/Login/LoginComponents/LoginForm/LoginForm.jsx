@@ -199,7 +199,7 @@ const LoginForm = () => {
               );
 
               console.log("Document data in Login:", docSnap.data());
-              const AdminCheck = docSnap.data().adminPrivileges;
+              const AdminCheck = docSnap.data().userDetails?.adminPrivileges;
               setIsAdmin(AdminCheck);
               setIsLoginComplete(true);
               setIsLoggingIn(false);
@@ -276,7 +276,11 @@ const LoginForm = () => {
             console.log("Document data in SSO:", docSnap.data());
 
             // Navigate to the desired page after successful sign-in
-            navigate("/cart");
+            cartItems.length > 0
+            ? navigate("/cart")
+            : isAdmin
+            ? navigate("/Dashboard")
+            : navigate("/");
           } else {
             // docSnap.data() will be undefined in this case
             console.log("No such document!");
@@ -340,7 +344,7 @@ const LoginForm = () => {
         {passwordError && <div style={{ color: "red" }}>{passwordError}</div>}
         <LoginFlexdiv>
           {/* <RememberMe type="checkbox" /> */}
-          <RememberMelabel></RememberMelabel>
+          <RememberMelabel>Single Sign-On Enabled: Sign in once to access all services.</RememberMelabel>
 
           {isLoggingIn ? (
             <SpinningLoader />

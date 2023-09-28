@@ -43,5 +43,6 @@ export const HeroPhrase = styled.div`
 
 export const Herop = styled.div`
     text-align: center;
-    color: #FFFFFF;
+    color: grey;
+    margin: 10px;
 `;

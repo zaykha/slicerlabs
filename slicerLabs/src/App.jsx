@@ -53,6 +53,8 @@ import NavbarForChecks from "./globalcomponents/navbar/navbarForChecks";
 import RotatingLoader from "./globalcomponents/DropDown/RotatingLoader";
 import { UPHeaderFullline1 } from "./Pages/UserProfile/UserProfileElement";
 import SplashScreen from "./globalcomponents/DropDown/SplashScreen";
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
@@ -74,6 +76,15 @@ function App() {
   const userDetails = useSelector((state) => state.userDetails);
   const cartItems = useSelector((state) => state?.cartItems?.cartItems);
   const hasMountedRef = useRef(false);
+  useEffect(() => {
+    AOS.init({
+      duration: 1000, // Animation duration (in milliseconds)
+      offset: 200,   // Offset from the top of the window (in pixels)
+      easing: 'ease-in-out', // Easing for the animation (default is 'ease')
+      once: true // Whether animations should only happen once
+    });
+  }, []);
+  
   useEffect(() => {
     if (!hasMountedRef.current) {
       const auth = getAuth();
@@ -138,7 +149,7 @@ function App() {
               const userDetails = userDetailsData;
               const AdminCheck = userDetailsData?.adminPrivileges;
               setIsAdmin(AdminCheck);
-              console.log(AdminCheck);
+              // console.log(AdminCheck);
               if (unparsedStoreditems && unparsedStoreditems.length > 0) {
                 const { error } = usePaymentSuccessHandler(
                   user.uid,

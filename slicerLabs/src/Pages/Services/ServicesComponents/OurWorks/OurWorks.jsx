@@ -6,6 +6,7 @@ import proto3 from "../../../../assets/Proto3.png"
 import proto4 from "../../../../assets/Proto4.png"
 import proto5 from "../../../../assets/Proto5.png"
 import { SCheader1, SSpan } from "../../Serviceselement";
+import { LTsubHeader } from "../../../Learn/LearnComponents/LearnTech/LearnTechelement";
 
 
 const Container = styled.div`
@@ -43,9 +44,10 @@ const Slide = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 30px;
+  gap: 20px;
   font-size: 72px;
   background: linear-gradient(180deg, #1D1F2B 0%, #1A1A1A 100%);
+  // border:1px solid red;
 `;
 const SlideHeader= styled.div`
   width: 100%;
@@ -53,8 +55,9 @@ const SlideHeader= styled.div`
   font-size: 1.4rem;
 `;
 const SliderIMG= styled.img`
-  width: 40%;
+  width: 100%;
   height: 200px;
+  object-fit:contain;
   z-index:2;
 `;
 const SliderImgbg = styled.div`
@@ -116,11 +119,17 @@ const RightArrow = styled(Arrow)`
 `;
 
 const slides = [  
-    { id: 1, Title: "Project 1", imgsrc:proto1, content:"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s" },  
-    { id: 2, Title: "Project 2", imgsrc:proto2, content:"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s" },  
-    { id: 3, Title: "Project 3", imgsrc:proto3, content:"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s" },  
-    { id: 4, Title: "Project 4", imgsrc:proto4, content:"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s" },  
-    { id: 5, Title: "Project 5", imgsrc:proto5, content:"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s" },];
+    { id: 1, Title: "Industrial Design", imgsrc:proto1, content:"Form-finding design part for students" },  
+    { id: 2, Title: "Capsule sleeve holder", imgsrc:proto2, content:"PLA prototyping part for commercial company" },  
+    { id: 3, Title: "PCB mount", imgsrc:proto3, content:"PCB Mounting part for mass production Wifi-Scanner" },  
+    { id: 4, Title: "Class-material", imgsrc:proto4, content:"3D Printing workshop for community center" },  
+    { id: 5, Title: "Jigs and Fixtures", imgsrc:proto5, content:"Fitting jig for commercial company" },
+    { id: 6, Title: "Mass production", imgsrc:proto1, content:"Mass production hand-tool for commercial company" },
+    { id: 7, Title: "Custom nozzle fittings", imgsrc:proto5, content:"Customized part for replacement for water pump" },
+    { id: 8, Title: "Figurine mold cast", imgsrc:proto5, content:"3D modelled parts for casting for small businesses" },
+    { id: 9, Title: "Miniatures", imgsrc:proto5, content:"Decorative items for product design student" },
+
+  ];
 
 const Carousel = () => {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -140,12 +149,14 @@ const Carousel = () => {
   return (
 
     <OurworksContainer>
-        <SCheader1>Our <SSpan>Works</SSpan></SCheader1>
+       <LTsubHeader>MADE IN SLICERLABS</LTsubHeader>
+        <SCheader1>Featured <SSpan>Prints</SSpan> </SCheader1>
     <Container>
         <SliderViewport>
       <SlideContainer
         style={{
           transform: `translateX(-${activeSlide * 500}px)`,
+          width: `${slides.length * 500}px`,
         }}
       >
         {slides.map((slide, index) => (

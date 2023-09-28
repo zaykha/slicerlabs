@@ -62,6 +62,7 @@ import { getDownloadURL, getStorage, ref } from "firebase/storage";
 
 const TaskPage = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [FetchingData, setFetchingData] = useState(false);
   const [statusUpdateInProgress, setStatusUpdateInProgress] = useState(false);
   const [productIssue, setProductIssue] = useState([]);
@@ -216,12 +217,12 @@ const TaskPage = () => {
   }
   useEffect(() => {
     // Call the function on component mount
-    // setFetchingData(true);
+    setIsLoading(true);
     if (!FetchingData && !statusUpdateInProgress) {
       getPurchaseInstancesForUser(userUIDInLocalStorage);
       getProductIssueForUser(userUIDInLocalStorage);
     }
-    // setFetchingData(false);
+    setIsLoading(false);
   }, [FetchingData, statusUpdateInProgress]);
   // Function to handle status change
 
@@ -435,7 +436,7 @@ const TaskPage = () => {
 
       <LoginFromcontainer>
         <ItemHeaderprofile>Pending Tasks</ItemHeaderprofile>
-        {FetchingData ? (
+        {isLoading ? (
           <SpinningLoader />
         ) : (
           <>

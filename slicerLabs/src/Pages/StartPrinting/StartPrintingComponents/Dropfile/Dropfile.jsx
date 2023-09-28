@@ -25,39 +25,43 @@ import * as THREE from "three";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { MeshNormalMaterial, Box3, Vector3, Mesh, LoadingManager } from "three";
-import { deleteFileFromDB, storeFileInDB } from "../../../../indexedDBUtilis";
+import {
+  deleteAllRecordsFromDB,
+  deleteFileFromDB,
+  storeFileInDB,
+} from "../../../../indexedDBUtilis";
+import { TocartCTABtn } from "../MaterialsOptions/MaterialsOptionselements";
+import ModelSizeChecker from "./ModelSizeChecker";
 
 const STLModelSizeChecker = ({ model }) => {
   const { camera } = useThree();
   const boundingBoxRef = useRef();
 
- 
-    if (model && boundingBoxRef.current) {
-      // Calculate the size of the model's bounding box
-      const boundingBox = new Box3().setFromObject(model);
-      const size = new Vector3();
-      boundingBox.getSize(size);
+  if (model && boundingBoxRef.current) {
+    // Calculate the size of the model's bounding box
+    const boundingBox = new Box3().setFromObject(model);
+    const size = new Vector3();
+    boundingBox.getSize(size);
 
-      // Get the size of the camera frustum
-      const frustumSize =
-        Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
+    // Get the size of the camera frustum
+    const frustumSize =
+      Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
 
-      // Calculate the scale factor based on the size of the model and the frustum size
-      const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
+    // Calculate the scale factor based on the size of the model and the frustum size
+    const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
 
-      // Apply the scale factor to the model
-      model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+    // Apply the scale factor to the model
+    model.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
-      // Set the camera position based on the model's size
-      const cameraPosition = {
-        x: camera.position.x,
-        y: camera.position.y,
-        z: camera.position.z,
-      };
-      camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-      model.rotation.x = Math.PI;
-    }
-
+    // Set the camera position based on the model's size
+    const cameraPosition = {
+      x: camera.position.x,
+      y: camera.position.y,
+      z: camera.position.z,
+    };
+    camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+    model.rotation.x = Math.PI;
+  }
 
   return <primitive object={model} ref={boundingBoxRef} />;
 };
@@ -96,20 +100,13 @@ const Dropfile = ({
         camera.updateProjectionMatrix();
       }
     }, [camera, cameraPosition]);
-    // useFrame(() => {
-    //   console.log('Camera Position:', camera.position.toArray());
-    // });
-
     return null;
   };
 
   const generateUniqueId = () => {
     return uuidv4();
   };
-  // useEffect(() => {
-  //   // console.log(model);
-  //   console.log(LoadProgress);
-  // }, [setProgress]);
+
   useEffect(() => {
     if (isCheckedOut || isAddedToCart) {
       setModel(null);
@@ -147,12 +144,12 @@ const Dropfile = ({
           })
         )
       );
-      
+
       const fileExtension = acceptedFiles[0].name
         .split(".")
         .pop()
         .toLowerCase();
-        await storeFileInDB(acceptedFiles[0],fileExtension, modelId);
+      await storeFileInDB(acceptedFiles[0], fileExtension, modelId);
       console.log(fileExtension);
       setFiletype(fileExtension);
       const reader = new FileReader();
@@ -190,7 +187,7 @@ const Dropfile = ({
             objLoader.load(
               fileContent,
               (objData) => {
-                console.log(objData)
+                console.log(objData);
                 const material = new MeshNormalMaterial();
 
                 objData.traverse((child) => {
@@ -200,8 +197,26 @@ const Dropfile = ({
                 });
                 objData.updateMatrix();
 
+                const boundingBox = new THREE.Box3().setFromObject(objData);
+                const dimensions = boundingBox.getSize(new THREE.Vector3());
+                const scaleFactor = 1; // Adjust this based on your assumptions
+
+                const dimensionsInMM = {
+                  width: dimensions.x * scaleFactor,
+                  height: dimensions.y * scaleFactor,
+                  depth: dimensions.z * scaleFactor,
+                };
+
+                console.log("Dimensions in millimeters:", dimensionsInMM);
                 // const serializedModel = JSON.stringify(objData);
-                dispatch(addModel({ id: modelId, fileName:acceptedFiles[0].name , model: objData }));
+                dispatch(
+                  addModel({
+                    id: modelId,
+                    fileName: acceptedFiles[0].name,
+                    model: objData,
+                    dimensions: dimensionsInMM
+                  })
+                );
                 setModel(objData);
                 setCameraPosition([
                   -7.726866370752757, 7.241928986275022, -8.091348270643504,
@@ -209,6 +224,8 @@ const Dropfile = ({
                 setIsLoading(false);
                 setIsModelLoaded(true);
                 setIsAddedToCart(false);
+
+                
               },
               // undefined,
               function (xhr) {
@@ -227,7 +244,6 @@ const Dropfile = ({
               }
             );
           } else if (fileExtension === "stl") {
-       
             const stlLoader = new STLLoader();
             stlLoader.load(
               fileContent,
@@ -239,14 +255,36 @@ const Dropfile = ({
                   const stlMesh = new THREE.Mesh(stlGeometry, material);
                   // Assign the mesh to the provided ref
                   meshRef.current = stlMesh;
+                   // Calculate dimensions in millimeters
+                   const boundingBox = new THREE.Box3().setFromObject(
+                    stlGeometry
+                  );
+                  const dimensions = boundingBox.getSize(new THREE.Vector3());
+
+                  // Assuming you have a scale factor to convert units to mm
+                  const scaleFactor = 1; // Adjust this based on your assumptions
+
+                  const dimensionsInMM = {
+                    width: dimensions.x * scaleFactor,
+                    height: dimensions.y * scaleFactor,
+                    depth: dimensions.z * scaleFactor,
+                  };
                   setModel(stlMesh);
                   setIsLoading(false);
                   setIsModelLoaded(true);
-                  dispatch(addModel({ id: modelId, model: stlMesh }));
+                  dispatch(
+                    addModel({
+                      id: modelId,
+                      fileName: acceptedFiles[0].name,
+                      model: stlMesh,
+                      dimensions: dimensionsInMM
+                    })
+                  );
                   setCameraPosition([
                     -7.726866370752757, 7.241928986275022, -8.091348270643504,
                   ]);
                   setIsAddedToCart(false);
+                 
                 } else {
                   // Handle the case where the STL geometry is invalid
                   setIsSupportedFileType(false);
@@ -346,38 +384,38 @@ const Dropfile = ({
   //   return <primitive object={model} ref={boundingBoxRef} />;
   // };
 
-  const ModelSizeChecker = ({ model }) => {
-    const { camera } = useThree();
-    const boundingBoxRef = useRef();
+  // const ModelSizeChecker = ({ model }) => {
+  //   const { camera } = useThree();
+  //   const boundingBoxRef = useRef();
 
-    if (model && boundingBoxRef.current) {
-      // Calculate the size of the model's bounding box
-      const boundingBox = new Box3().setFromObject(model);
-      const size = new Vector3();
-      boundingBox.getSize(size);
+  //   if (model && boundingBoxRef.current) {
+  //     // Calculate the size of the model's bounding box
+  //     const boundingBox = new Box3().setFromObject(model);
+  //     const size = new Vector3();
+  //     boundingBox.getSize(size);
 
-      // Get the size of the camera frustum
-      const frustumSize =
-        Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
+  //     // // Get the size of the camera frustum
+  //     const frustumSize =
+  //       Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
 
-      // Calculate the scale factor based on the size of the model and the frustum size
-      const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
+  //     // Calculate the scale factor based on the size of the model and the frustum size
+  //     const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
+  //     // const scaleFactor = 1;
+  //     // Apply the scale factor to the model
+  //     model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+  //     model.position.set(0, 0, 0);
+  //     // Set the camera position based on the model's size
+  //     const cameraPosition = {
+  //       x: camera.position.x,
+  //       y: camera.position.y,
+  //       z: camera.position.z,
+  //     };
+  //     camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+  //     model.rotation.x = Math.PI;
+  //   }
 
-      // Apply the scale factor to the model
-      model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-      // Set the camera position based on the model's size
-      const cameraPosition = {
-        x: camera.position.x,
-        y: camera.position.y,
-        z: camera.position.z,
-      };
-      camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-      model.rotation.x = Math.PI;
-    }
-
-    return <primitive object={model} ref={boundingBoxRef} />;
-  };
+  //   return <primitive object={model} ref={boundingBoxRef} />;
+  // };
   const ProgressBar = ({ LoadProgress }) => {
     return (
       <div>
@@ -435,7 +473,7 @@ const Dropfile = ({
                 <STLModelSizeChecker  model={model}/>
                 // model && <primitive object={model} ref={meshRef} />
               )} */}
- <ModelSizeChecker model={model} />
+              <ModelSizeChecker model={model} />
               <CameraControls cameraPosition={cameraPosition} />
             </Canvas>
 
@@ -486,6 +524,7 @@ const Dropfile = ({
           </DropzoneContainer>
         </DropzoneFormcontainer>
       )}
+      {/* <TocartCTABtn onClick={deleteAllRecordsFromDB}>Delete all in indexDB</TocartCTABtn> */}
     </>
   );
 };

@@ -15,9 +15,9 @@ const Learn = () => {
     <>
  
       <LearnHero/>
-      <ToBlogs/>
-      <LearnTech/>
-      <LearnMaterials/>
+      {/* <ToBlogs/> */}
+      {/* <LearnTech/> */}
+      {/* <LearnMaterials/> */}
       <LearnServices/>
    
     </>

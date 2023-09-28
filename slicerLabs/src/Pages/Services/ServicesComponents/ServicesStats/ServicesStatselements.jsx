@@ -26,7 +26,8 @@ export const S1contents = styled.div`
     }
 `;
 export const S1content = styled.div`
-    width: 400px;
+    width: 450px;
+    height: 450px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -34,15 +35,15 @@ export const S1content = styled.div`
     margin:10px auto;
     background: #015176;
     padding: 40px;
-
-    &:hover{
-        background: #015289;
+    @media screen and (max-width:1200px){
+        width: 100%;
     }
+    
 `;
 export const Servicespright = styled.div`
     width: 100%;
     text-align: right;
-    font-size:0.92rem;
+    font-size:0.82rem;
     color: white;
 `;
 export const Scardhearder = styled.div`
@@ -52,8 +53,26 @@ export const Scardhearder = styled.div`
     color:#48b2e5;
 `;
 export const Scardp = styled.div`
-    width: 80%;
+    width: 100%;
+    text-align: left;
+    color: white;
+    margin: 10px auto;
+    font-size:0.82rem;
+`;
+export const Scardp1 = styled.div`
+    width: 100%;
     text-align: center;
     color: white;
     margin: 10px auto;
+`;
+export const IMGServices = styled.img`
+    width: 100%;
+    height: 100%;
+    margin: auto;
+     object-fit: contain;
+    @media screen and (max-width: 1200px){
+        width: 100%;
+        margin: 0;
+        height: auto;
+    }
 `;

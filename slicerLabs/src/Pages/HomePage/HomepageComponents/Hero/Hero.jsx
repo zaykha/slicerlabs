@@ -4,7 +4,10 @@ import { HeroContainer, HeroPhrase, Herop } from './Heroelement'
 
 export const Hero = () => {
   return (
-    <HeroContainer>     
+    <HeroContainer data-aos="fade-in">  
+       <Herop>
+            Est. 2021
+        </Herop>   
         <HeroPhrase>
             TRANSFORM YOU IDEAS INTO PHYSICAL OBJECTS
         </HeroPhrase>

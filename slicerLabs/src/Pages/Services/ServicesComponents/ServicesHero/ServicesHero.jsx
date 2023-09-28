@@ -11,14 +11,14 @@ import {
     RightContentservice,
     ToServicesContainer 
 } from '../../../HomePage/HomepageComponents/ToServices/ToServiceselement'
-import Makerbot from '../../../../assets/makerbot.png';
+import Makerbot from '../../../../assets/1235.png';
 
 
 const ServicesHero = () => {
   return (
     <ToServicesContainer>
     <InfoCTAContainer>
-    <RightContentservice>
+    <RightContentservice data-aos="zoom-out-right">
         <CTAh1>Complete 3D printing solutions </CTAh1><Sfoot>– we've got you covered</Sfoot>
                 <Infop>From the convenience of your home, 
                     access our full range of plastic polymer 3D printing options, 
@@ -29,7 +29,7 @@ const ServicesHero = () => {
             
        
         </RightContentservice>
-        <LeftContent>
+        <LeftContent data-aos="zoom-out-left">
             <InfoIMG src={Makerbot}>
 
             </InfoIMG>

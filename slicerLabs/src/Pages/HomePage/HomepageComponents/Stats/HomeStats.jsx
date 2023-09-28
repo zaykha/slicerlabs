@@ -26,7 +26,7 @@ const HomeStats = () => {
             <HSp>from design to delivery</HSp>
 
             <HSFlex>
-                <Stats>
+                <Stats data-aos="fade-up" data-aos-delay="300">
                     <Shead>
                         1-1000 parts
                     </Shead>
@@ -36,7 +36,7 @@ const HomeStats = () => {
                     </Sfoot>
                 </Stats>
 
-                <Stats>
+                <Stats data-aos="fade-up">
                     <Shead>
                         38% savings
                     </Shead>
@@ -46,7 +46,7 @@ const HomeStats = () => {
                     </Sfoot>
                 </Stats>
 
-                <Stats>
+                <Stats data-aos="fade-up" data-aos-delay="100">
                     <Shead>
                         3s Quote
                     </Shead>
@@ -56,7 +56,7 @@ const HomeStats = () => {
                     </Sfoot>
                 </Stats>
 
-                <Stats>
+                <Stats data-aos="fade-up" data-aos-delay="200">
                     <Shead>
                         1-4 days
                     </Shead>

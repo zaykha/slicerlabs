@@ -39,7 +39,7 @@ export const NavbarContainer = styled.div`
   z-index: 1;
   width: 40%;
   // padding: 0 24px;
-  max-width: 1100px;
+  max-width: 300px;
 
   // border: 1px solid red;
 `;
@@ -88,6 +88,7 @@ export const NavMenu = styled.ul`
   justify-content: center;
   list-style: none;
   text-align: center;
+  // border: 1px solid red;
 
   @media screen and (max-width: 1000px) {
     display: none;
@@ -100,6 +101,7 @@ export const NavItem = styled.li`
   align-items: center;
   justify-content: center;
   // margin: 0 5px;
+  // border: 1px solid green;
 `;
 export const IMGTAG = styled.img`
   // filter: invert(24%) sepia(56%) saturate(2532%) hue-rotate(304deg) brightness(93%) contrast(91%);
