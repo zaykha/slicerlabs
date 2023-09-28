@@ -289,8 +289,8 @@ const Cartpage = () => {
   const getStripeKey = async () => {
     try {
       const response = await fetch(
-        // "http://localhost:3000/get-stripe-key",
-        `https://cerulean-hermit-crab-robe.cyclic.cloud/get-stripe-key`,
+        "http://localhost:3000/get-stripe-key",
+        // `https://cerulean-hermit-crab-robe.cyclic.cloud/get-stripe-key`,
         );
       if (response.ok) {
         const data = await response.json();
@@ -316,8 +316,8 @@ const Cartpage = () => {
     console.log(items);
     try {
       const response = await fetch(
-        // "http://localhost:3000/validate-price", 
-        `https://cerulean-hermit-crab-robe.cyclic.cloud/validate-price`,
+        "http://localhost:3000/validate-price", 
+        // `https://cerulean-hermit-crab-robe.cyclic.cloud/validate-price`,
         {
         method: "POST",
         headers: {

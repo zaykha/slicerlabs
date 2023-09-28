@@ -24,10 +24,10 @@ const ServicesStats = () => {
       <LTsubHeader>MADE IN SLICERLABS</LTsubHeader>
         <SCheader1>Product <SSpan>Technology</SSpan> </SCheader1>
         <S1contents>
-          <S1content>
+          <S1content data-aos="flip-left">
             <IMGServices src={Makerbot} />
           </S1content>
-          <S1content>
+          <S1content data-aos="flip-right">
             <Servicespright>Functional(FDM)</Servicespright>
             <Scardhearder>Our Printer Capabilities</Scardhearder>
             <Scardp>

@@ -15,10 +15,10 @@ import INFOCTAIMG from "../../../../assets/quote2.png";
 const InfoCTA = () => {
   return (
     <InfoCTAContainer>
-      <LeftContent>
-        <InfoIMG src={INFOCTAIMG}></InfoIMG>
+      <LeftContent data-aos="fade-right">
+        <InfoIMG  src={INFOCTAIMG}></InfoIMG>
       </LeftContent>
-      <RightContent>
+      <RightContent data-aos="fade-left">
         <CTAh1>Instant quotes</CTAh1>
         <Sheader>- No delays, No fuss</Sheader>
         <Infop>

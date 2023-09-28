@@ -51,7 +51,7 @@ const Testimonials = () => {
         <CTAh1>
           Trusted By Our Customers
         </CTAh1><Sheader>-working with True wonder</Sheader>
-        <Testcontainer>
+        <Testcontainer data-aos="fade-in">
           {testimonials.map((testimonial, index) => (
             <Avatar key={index} src={testimonial.avatar}></Avatar>
           ))}

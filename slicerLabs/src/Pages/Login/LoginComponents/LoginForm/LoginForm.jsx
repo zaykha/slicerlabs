@@ -125,8 +125,8 @@ const LoginForm = () => {
           localStorage.setItem("idToken", idToken);
           localStorage.setItem("uid", uid);
           const response = await fetch(
-            "http://localhost:3000/calculate-function",
-            // `https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function`,
+            // "http://localhost:3000/calculate-function",
+            `https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function`,
             {
               method: "GET",
               headers: {

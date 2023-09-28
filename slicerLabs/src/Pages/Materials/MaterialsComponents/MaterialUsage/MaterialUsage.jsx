@@ -24,7 +24,7 @@ const MaterialUsage = () => {
       </SCheader1>
       <MUContainer>
         <MUBox>
-          <MUcontent>
+          <MUcontent data-aos="fade-right">
             <MUHeader>General Purpose</MUHeader>
             <MUSubHeader>
               Outstanding performance. Excellent detail.
@@ -36,12 +36,12 @@ const MaterialUsage = () => {
             </MUp>
             <CTABtn to={"/Learn"}>Learn More</CTABtn>
           </MUcontent>
-          <MUIMG src={saer}></MUIMG>
+          <MUIMG src={saer} data-aos="fade-left"></MUIMG>
         </MUBox>
       </MUContainer>
       <MUBox>
-        <MUIMG src={saer2}></MUIMG>
-        <MUcontent>
+        <MUIMG src={saer2} data-aos="fade-right"></MUIMG>
+        <MUcontent data-aos="fade-left">
           <MUHeader>Engineering Resins</MUHeader>
           <MUSubHeader>Functional prototyping materials.</MUSubHeader>
           <MUp>
@@ -54,7 +54,7 @@ const MaterialUsage = () => {
       </MUBox>
       <MUContainer>
         <MUBox>
-          <MUcontent>
+          <MUcontent data-aos="fade-left">
             <MUHeader>Thermoplastic Filament</MUHeader>
             <MUSubHeader>plant-based material </MUSubHeader>
             <MUp>
@@ -64,7 +64,7 @@ const MaterialUsage = () => {
             </MUp>
             <CTABtn to={"/Learn"}>Learn More</CTABtn>
           </MUcontent>
-          <MUIMG src={asdw}></MUIMG>
+          <MUIMG src={asdw} data-aos="fade-right"></MUIMG>
         </MUBox>
       </MUContainer>
     </>

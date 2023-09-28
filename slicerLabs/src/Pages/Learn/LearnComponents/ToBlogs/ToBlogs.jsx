@@ -9,8 +9,8 @@ export const ToBlogs = () => {
     <TBcontainer>
         <TBFlex>
             <TBcontent>
-                <MUHeader>Why 3D Print?</MUHeader>
-                <MUp>
+                <MUHeader data-aos="fade-right">Why 3D Print?</MUHeader>
+                <MUp data-aos="fade-right" data-aos-delay="300">
                 3D printing has revolutionized the way we create and produce objects.
                  With this technology, we can turn digital 
                  designs into physical objects with precision and accuracy. 
@@ -21,9 +21,9 @@ export const ToBlogs = () => {
                 and affordable for both individuals and businesses.
                 </MUp>
             </TBcontent>
-            <TBIMG src={blog3} ></TBIMG>
+            <TBIMG src={blog3} data-aos="fade-left"  data-aos-delay="200"></TBIMG>
         </TBFlex>
-        <CTABtn>Full Article {">"}</CTABtn>
+        {/* <CTABtn>Full Article {">"}</CTABtn> */}
     </TBcontainer>
   )
 }

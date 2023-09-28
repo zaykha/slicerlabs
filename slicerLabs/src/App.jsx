@@ -41,6 +41,8 @@ import TermsAndPolicies from "./Pages/Register/RegisterComponents/TermsAndPolici
 import BlogPage from "./AdminRelated/BlogPage/BlogPage";
 import ConfigPage from "./AdminRelated/ConfigPage/ConfigPage";
 import NavbarForChecks from "./globalcomponents/navbar/navbarForChecks";
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
@@ -63,6 +65,15 @@ function App() {
   const cartItems = useSelector((state) => state?.cartItems?.cartItems);
   const hasMountedRef = useRef(false);
   useEffect(() => {
+    AOS.init({
+      duration: 1000, // Animation duration (in milliseconds)
+      offset: 200,   // Offset from the top of the window (in pixels)
+      easing: 'ease-in-out', // Easing for the animation (default is 'ease')
+      once: true // Whether animations should only happen once
+    });
+  }, []);
+  
+  useEffect(() => {
     if (!hasMountedRef.current) {
       const auth = getAuth();
       // startAuthListener();
@@ -77,8 +88,8 @@ function App() {
           // and store it in local storage.
           try {
             const response = await fetch(
-              "http://localhost:3000/calculate-function",
-              // "https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function",
+              // "http://localhost:3000/calculate-function",
+              "https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function",
               {
                 method: "GET",
                 headers: {
@@ -125,7 +136,7 @@ function App() {
               const userDetails = userDetailsData;
               const AdminCheck = userDetailsData?.adminPrivileges;
               setIsAdmin(AdminCheck);
-              console.log(AdminCheck);
+              // console.log(AdminCheck);
               if (unparsedStoreditems && unparsedStoreditems.length > 0) {
                 const { error } = usePaymentSuccessHandler(
                   user.uid,

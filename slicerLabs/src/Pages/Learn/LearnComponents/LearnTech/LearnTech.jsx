@@ -47,6 +47,7 @@ const LearnTech = () => {
 
       {blogPosts.map((post) => (
         <BlogPost
+          
           key={post.id}
           title={post.title}
           content={post.content}
@@ -61,7 +62,7 @@ const LearnTech = () => {
 
 const BlogPost = ({ title, content, imageUrl, toggleExpand, onToggleExpand }) => {
   return (
-    <LTBlogCard toggleExpand={toggleExpand} onClick={onToggleExpand}>
+    <LTBlogCard data-aos="fade-down" toggleExpand={toggleExpand} onClick={onToggleExpand}>
       <LTBlogIMG src={imageUrl}></LTBlogIMG>
       <LTBDivider>
         <LTBlogHeader>{title}</LTBlogHeader>
