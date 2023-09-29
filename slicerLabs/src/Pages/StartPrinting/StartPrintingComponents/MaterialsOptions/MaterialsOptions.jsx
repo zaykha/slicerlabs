@@ -69,24 +69,24 @@ const MaterialsOptions = ({
   });
   const [materialSettings, setMaterialSettings] = useState({
     printTimePerUnitVolume: {
-      ABS: 0.00104, // g/mm^3 (converted from g/cm^3)
-      PLA: 0.00125, // g/mm^3 (converted from g/cm^3)
-      TPU: 0.00121, // g/mm^3 (converted from g/cm^3)
-      NYLON: 0.00114, // g/mm^3 (converted from g/cm^3)
-      PETG: 0.00127, // g/mm^3 (converted from g/cm^3)
-      RESIN: 0.00105, // g/mm^3 (converted from g/cm^3)
+      ABS: 0.06, // minutes/mm^3
+      PLA: 0.04, // minutes/mm^3
+      TPU: 0.06, // minutes/mm^3
+      NYLON: 0.07, // minutes/mm^3
+      PETG: 0.05, // minutes/mm^3
+      RESIN: 0.03, // minutes/mm^3
     },
     materialCosts: {
-      ABS: 0.05, // SGD per gram
+      ABS: 0.06, // SGD per gram
       PLA: 0.04, // SGD per gram
       TPU: 0.06, // SGD per gram
       NYLON: 0.07, // SGD per gram
       PETG: 0.05, // SGD per gram
       RESIN: 0.1, // SGD per gram
     },
-    hourlyRate: 20,
-    laborCost: 25,
-    overheadCost: 5,
+    hourlyRate: 24,
+    laborCost: 20,
+    overheadCost: 4,
   });
   useEffect(() => {
     // Perform actions or update the UI based on changes in the cart array
