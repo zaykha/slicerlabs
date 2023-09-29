@@ -60,8 +60,9 @@ import { MeshNormalMaterial, Box3, Vector3, Mesh, LoadingManager } from "three";
 import { getAuth } from "firebase/auth";
 import ErrorPrompt from "../../globalcomponents/prompt/ErrorPrompt";
 import ConfirmationPrompt from "../../globalcomponents/prompt/ConfirmationPrompt";
-import { ConfigCollection } from "../../firebase";
+import { ConfigCollection, ServerConfig } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
+import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
 
 const ProgressBar = ({ step }) => {
   return (
@@ -95,6 +96,7 @@ const Cartpage = () => {
   };
   const userUIDInLocalStorage = localStorage.getItem("uid");
   const [shouldFetchData, setShouldFetchData] = useState(true);
+  const [isProceedingToPayment, setIsProceedingToPayment] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [endCoordinates, setEndCoordinates] = useState("");
@@ -289,9 +291,9 @@ const Cartpage = () => {
   const getStripeKey = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/get-stripe-key",
-        // `https://cerulean-hermit-crab-robe.cyclic.cloud/get-stripe-key`,
-        );
+        // "https://cerulean-hermit-crab-robe.cyclic.cloud/get-stripe-key"
+        `${ServerConfig}/get-stripe-key`
+      );
       if (response.ok) {
         const data = await response.json();
         const stripe = new Stripe(data.publishableKey, {
@@ -316,16 +318,17 @@ const Cartpage = () => {
     console.log(items);
     try {
       const response = await fetch(
-        "http://localhost:3000/validate-price", 
-        // `https://cerulean-hermit-crab-robe.cyclic.cloud/validate-price`,
+        // "https://cerulean-hermit-crab-robe.cyclic.cloud/validate-price",
+        `${ServerConfig}/validate-price`,
         {
-        method: "POST",
-        headers: {
-          Authorization: storedIdToken,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(items),
-      });
+          method: "POST",
+          headers: {
+            Authorization: storedIdToken,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(items),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Error validating prices with microservice.");
@@ -345,6 +348,7 @@ const Cartpage = () => {
     setShowPrompt(false);
   };
   const handleProceedToPayment = async () => {
+    setIsProceedingToPayment(true);
     const auth = getAuth();
     const user = auth.currentUser;
 
@@ -388,11 +392,11 @@ const Cartpage = () => {
         dimensions,
         quantity, // Adjust the expected price based on quantity
         price,
-        userUID,
-        materialSettings
+        userUID:userUIDInLocalStorage,
+        materialSettings,
       });
     });
-    console.log("itemsForValidation", itemsForValidation)
+    console.log("itemsForValidation", itemsForValidation);
     localStorage.setItem(
       "TTLprice",
       JSON.stringify({ totalPrice: TTLPriceBeforeRouting.toFixed(2) })
@@ -401,9 +405,9 @@ const Cartpage = () => {
       "TempItemsDetailsStorage",
       JSON.stringify(itemsForValidation)
     );
-  //   useEffect(() => {
-  //   console.log(userConfirmationPrompt);
-  // }, [userConfirmationPrompt]);
+    //   useEffect(() => {
+    //   console.log(userConfirmationPrompt);
+    // }, [userConfirmationPrompt]);
     // // Check if there is any data in localStorage
     // if (storedItems) {
     //   // Use the retrieved data
@@ -421,8 +425,8 @@ const Cartpage = () => {
       if (response.valid) {
         // If prices are valid, proceed to Stripe.js for payment
         const checkoutSessionResponse = await fetch(
-          // "http://localhost:3000/create-checkout-session",
-        `https://cerulean-hermit-crab-robe.cyclic.cloud/create-checkout-session`,
+          // "https://cerulean-hermit-crab-robe.cyclic.cloud/create-checkout-session",
+          `${ServerConfig}/create-checkout-session`,
           {
             method: "POST",
             headers: {
@@ -470,6 +474,7 @@ const Cartpage = () => {
         });
         // alert("There was an issue with the prices. Please review your cart.");
       }
+      setIsProceedingToPayment(false);
     } catch (error) {
       // Handle any error that occurred during the validation or payment process
       console.error("Error processing payment:", error);
@@ -479,7 +484,9 @@ const Cartpage = () => {
         header: "Error",
         message: "Error processing payment. Please try again later.",
       });
+      setIsProceedingToPayment(false);
     }
+    setIsProceedingToPayment(false);
   };
 
   const handleDeleteAllRecords = () => {
@@ -586,9 +593,13 @@ const Cartpage = () => {
                 </Grandtotaldisplay>
               </PaymentRinner>
 
-              <NextBtn onClick={handleProceedToPayment}>
-                Proceed to Payment
-              </NextBtn>
+              {isProceedingToPayment ? (
+                <RotatingLoader />
+              ) : (
+                <NextBtn onClick={handleProceedToPayment}>
+                  Proceed to Payment
+                </NextBtn>
+              )}
             </PaymentroutingContainer>
           </>
         )}
@@ -608,12 +619,10 @@ const Cartpage = () => {
           onClose={() =>
             setConfirmationHandling({ ...confirmationHandling, state: false })
           }
-          onConfirm={() =>{
-            setConfirmationHandling({ ...confirmationHandling, state: false })
-            navigate("/login")
-          }
-            
-          }
+          onConfirm={() => {
+            setConfirmationHandling({ ...confirmationHandling, state: false });
+            navigate("/login");
+          }}
         />
       )}
     </>

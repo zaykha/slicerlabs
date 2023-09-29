@@ -15,7 +15,7 @@ import {
   SocialDiv,
   SocialIcon,
 } from "./LoginFormelements";
-import { auth, db, usersCollection } from "../../../../firebase";
+import { ServerConfig, auth, db, usersCollection } from "../../../../firebase";
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
@@ -53,13 +53,40 @@ const LoginForm = () => {
   const [passwordError, setPasswordError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [IsLoginComplete, setIsLoginComplete] = useState(false);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
+  const userDetails = useSelector((state) => state.userDetails);
   const [showPasswordResetPrompt, setShowPasswordResetPrompt] = useState(false);
   const [ErrorHandling, setErrorHandling] = useState({
     state: false,
     header: "",
     message: "",
   });
+  useEffect(() => {
+    // Only run the effect if both userDetails has changed and login is complete
+    if (IsLoginComplete && userDetails) {
+      console.log("userDetails after update:", userDetails);
+
+      // Create a Promise and handle navigation after asynchronous operations
+      const navigatePromise = new Promise((resolve) => {
+        if (cartItems.length > 0) {
+          navigate("/cart");
+        } else if (isAdmin) {
+          navigate("/Dashboard");
+        } else {
+          navigate("/");
+        }
+
+        // Resolve the Promise after navigation
+        resolve();
+      });
+
+      // Use .then() to run navigation after Promise is resolved
+      navigatePromise.then(() => {
+        console.log("Navigation completed");
+      });
+    }
+  }, [userDetails, IsLoginComplete]);
   const validateEmail = (inputEmail) => {
     if (!inputEmail) {
       return "Email field is required.";
@@ -126,22 +153,24 @@ const LoginForm = () => {
           localStorage.setItem("uid", uid);
           const response = await fetch(
             // "http://localhost:3000/calculate-function",
-            `https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function`,
+            // "https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function",
+            `${ServerConfig}/calculate-function`,
             {
               method: "GET",
               headers: {
                 Authorization: idToken,
               },
             }
-          ).catch(error=>{
+          ).catch((error) => {
             setErrorHandling({
               state: true,
               header: "An Error Occured",
-              message: "Fetch error:", error,
+              message: "Fetch error:",
+              error,
             });
             // console.log("Fetch error:", error);
             throw error;
-          })
+          });
 
           if (!response.ok) {
             // Handle the response error, if any
@@ -161,23 +190,34 @@ const LoginForm = () => {
           const userDetailsRef = doc(usersCollection, uid);
           const docSnap = await getDoc(userDetailsRef);
           if (docSnap.exists()) {
-            dispatch(setUserDetails(docSnap.data().userDetails));
-            dispatch(setAuthenticationStatus(true));
-            localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
+            try {
+              dispatch(setUserDetails(docSnap.data()));
+              dispatch(setAuthenticationStatus(true));
+              localStorage.setItem(
+                "userDetails",
+                JSON.stringify(docSnap.data().userDetails)
+              );
 
-            console.log("Document data in Login:", docSnap.data().userDetails);
-            const AdminCheck = docSnap.data().userDetails?.adminPrivileges;
-            setIsAdmin(AdminCheck);
+              console.log("Document data in Login:", docSnap.data());
+              const AdminCheck = docSnap.data().userDetails?.adminPrivileges;
+              setIsAdmin(AdminCheck);
+              setIsLoginComplete(true);
+              setIsLoggingIn(false);
+              // Create a Promise to handle navigation after asynchronous operations
+              // Using useEffect to log userDetails after it's updated
+            //  setTimeout(()=>{
+              
+            //  },2000)
+            } catch (error) {
+              // Handle any errors that occurred during the operations
+              console.error("Error in Login:", error);
+            }
           } else {
             // docSnap.data() will be undefined in this case
             console.log("No such document!");
           }
-          cartItems.length > 0
-            ? navigate("/cart")
-            : isAdmin
-            ? navigate("/Dashboard")
-            : navigate("/");
-          // Return a promise after dispatching user details and authentication status
+
+          // // Return a promise after dispatching user details and authentication status
           // const navigationPromise = new Promise((resolve) => {
           //   resolve();
           // });
@@ -229,11 +269,11 @@ const LoginForm = () => {
           const userDetailsRef = doc(usersCollection, uid);
           const docSnap = getDoc(userDetailsRef);
           if (docSnap.exists()) {
-            dispatch(setUserDetails(docSnap.data().userDetails));
+            dispatch(setUserDetails(docSnap.data()));
             dispatch(setAuthenticationStatus(true));
             localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
 
-            console.log("Document data in SSO:", docSnap.data().userDetails);
+            console.log("Document data in SSO:", docSnap.data());
 
             // Navigate to the desired page after successful sign-in
             cartItems.length > 0

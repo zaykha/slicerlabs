@@ -28,7 +28,7 @@ import { MdCheckCircleOutline } from "react-icons/md";
 import { NextBtnCancel } from "./UserProfileElement";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { NextBtn } from "../Cart/Cartpageelement";
-import { usersCollection } from "../../firebase";
+import { ServerConfig, usersCollection } from "../../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
 
@@ -107,8 +107,8 @@ const EditLoginDetailForm = ({ onClose }) => {
     try {
       setIsValidatingEmail(true);
       const response = await fetch(
-        // `http://localhost:3000/validate-email?email=${email}`,
-        `https://cerulean-hermit-crab-robe.cyclic.cloud/validate-email?email=${email}`,
+        `${ServerConfig}/validate-email?email=${email}`,
+        // `https://cerulean-hermit-crab-robe.cyclic.cloud/validate-email?email=${email}`
       );
       const data = await response.json();
       console.log(data);
@@ -154,7 +154,7 @@ const EditLoginDetailForm = ({ onClose }) => {
                   getDoc(userDetailsRef)
                     .then((docSnap) => {
                       if (docSnap.exists()) {
-                        const existingUserDetails = docSnap.data().userDetails;
+                        const existingUserDetails = docSnap.data();
                         const updatedUserDetails = { ...existingUserDetails };
                         // Loop through the keys of the existingUserDetails object
                         Object.keys(existingUserDetails).forEach((key) => {

@@ -19,7 +19,7 @@ import {
   TermsLink,
   ValidateEmailButton,
 } from "./Registerformelement";
-import { auth, db, usersCollection } from "../../../firebase";
+import { ServerConfig, auth, db, usersCollection } from "../../../firebase";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -277,8 +277,8 @@ const Registerform = () => {
     const email = encodeURIComponent(formValues.email);
     try {
       const response = await fetch(
-        // `http://localhost:3000/validate-email?email=${email}`
-        `https://cerulean-hermit-crab-robe.cyclic.cloud/validate-email?email=${email}`,
+        `${ServerConfig}/validate-email?email=${email}`,
+        // `https://cerulean-hermit-crab-robe.cyclic.cloud/validate-email?email=${email}`
       );
       const data = await response.json();
       console.log(data);

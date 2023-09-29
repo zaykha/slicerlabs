@@ -31,3 +31,9 @@ export const ProductConcernCollection = collection(firestore, "ProductIssue");
 export const BlogCollection = collection(firestore, "Blogs");
 export const ConfigCollection = collection(firestore, "ConfigSettings");
 export const BlogStorage = getStorage(app);
+
+
+//server switching between dev and prod
+export const DevServer="http://localhost:3000";
+export const ProdServer="https://cerulean-hermit-crab-robe.cyclic.cloud";
+export const ServerConfig= ProdServer;

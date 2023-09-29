@@ -76,7 +76,7 @@ const TaskPage = () => {
   const [Loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const userDetails = useSelector((state) => state?.userDetails);
-  const [localUser, setLocalUser] = useState(userDetails.userDetails);
+  const [localUser, setLocalUser] = useState(userDetails);
   const userUIDInLocalStorage = localStorage.getItem("uid");
   const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
@@ -692,6 +692,7 @@ const TaskPage = () => {
         {/* <StyledAddButton to="/">
           <span style={plusSignStyle}>+</span>
         </StyledAddButton> */}
+        <button onClick={handleLogout}>Logout</button>
       </LoginFromcontainer>
 
       {/* {Loading ? (

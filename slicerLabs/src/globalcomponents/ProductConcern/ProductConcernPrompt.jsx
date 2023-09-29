@@ -12,6 +12,7 @@ import {
   InnerLayerP,
   InnerLayersP,
   NextBtnCancel,
+  UPHeaderFullline1,
 } from "../../Pages/UserProfile/UserProfileElement";
 import {
   FieldValue,
@@ -143,7 +144,7 @@ const ProductConcernPrompt = ({
   const [selectedProduct, setSelectedProduct] = useState("");
   const [concernNote, setConcernNote] = useState("");
   const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetails = JSON.parse(userDetailsUnparsed).userDetails;
+  const userDetails = JSON.parse(userDetailsUnparsed);
   const userUIDInLocalStorage = localStorage.getItem("uid");
   const [formErrors, setFormErrors] = useState({
     selectProductError: "",
@@ -268,7 +269,7 @@ const ProductConcernPrompt = ({
                 })
             )
           ) : (
-            <></>
+            <UPHeaderFullline1>No Items Have Been Delivered</UPHeaderFullline1>
           )}
         </SelectProduct>
 
