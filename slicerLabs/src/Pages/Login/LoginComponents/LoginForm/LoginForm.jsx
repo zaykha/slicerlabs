@@ -260,7 +260,6 @@ const LoginForm = () => {
           // IdP data available using getAdditionalUserInfo(result)
           // ...
           // Handle successful sign-in
-          console.log(user);
           const uid = user.uid;
 
           localStorage.setItem("jwtToken", token);
@@ -268,7 +267,8 @@ const LoginForm = () => {
 
           const userDetailsRef = doc(usersCollection, uid);
           const docSnap = getDoc(userDetailsRef);
-          if (docSnap.exists()) {
+          if (docSnap && typeof docSnap.exists === 'function' && docSnap.exists()) {
+          console.log(docSnap.data());
             dispatch(setUserDetails(docSnap.data()));
             dispatch(setAuthenticationStatus(true));
             localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
