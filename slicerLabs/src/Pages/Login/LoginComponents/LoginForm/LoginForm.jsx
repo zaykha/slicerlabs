@@ -40,7 +40,7 @@ import {
   InputContainer,
   Inputelem,
 } from "../../../Register/RegisterComponents/Registerformelement";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { AiOutlineConsoleSql, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import ErrorPrompt from "../../../../globalcomponents/prompt/ErrorPrompt";
 
 const LoginForm = () => {
@@ -251,7 +251,7 @@ const LoginForm = () => {
       }
 
       await signInWithPopup(auth, authProvider)
-        .then((result) => {
+        .then(async (result) => {
           // This gives you a Google Access Token. You can use it to access the Google API.
           const credential = GoogleAuthProvider.credentialFromResult(result);
           const token = credential.accessToken;
@@ -261,13 +261,13 @@ const LoginForm = () => {
           // ...
           // Handle successful sign-in
           const uid = user.uid;
-
+          console.log(uid);
           localStorage.setItem("jwtToken", token);
           localStorage.setItem("uid", uid);
 
           const userDetailsRef = doc(usersCollection, uid);
-          const docSnap = getDoc(userDetailsRef);
-          if (docSnap && typeof docSnap.exists === 'function' && docSnap.exists()) {
+          const docSnap =  await getDoc(userDetailsRef);
+          if (docSnap.exists()) {
           console.log(docSnap.data());
             dispatch(setUserDetails(docSnap.data()));
             dispatch(setAuthenticationStatus(true));
