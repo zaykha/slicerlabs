@@ -368,18 +368,18 @@ const LoginForm = () => {
           <SocialIcon src={googleicon}></SocialIcon>
           Google
         </SocialDiv>
-        <SocialDiv onClick={() => handleSSO("whatsapp")}>
+        {/* <SocialDiv onClick={() => handleSSO("whatsapp")}>
           <SocialIcon src={whatsappicon}></SocialIcon>
           Whatsapp
-        </SocialDiv>
+        </SocialDiv> */}
         <SocialDiv onClick={() => handleSSO("facebook")}>
           <SocialIcon src={facebookicon}></SocialIcon>
           Facebook
         </SocialDiv>
-        <SocialDiv>
+        {/* <SocialDiv>
           <SocialIcon src={linkedinicon}></SocialIcon>
           Linkedin
-        </SocialDiv>
+        </SocialDiv> */}
       </LoginShortcuts>
     </LoginFromcontainer>
   );

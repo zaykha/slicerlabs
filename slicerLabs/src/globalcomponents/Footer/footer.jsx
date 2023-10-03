@@ -20,7 +20,7 @@ import logo4 from '../../assets/Asset 4.png';
 import FB from '../../assets/fb.png';
 import INSTA from '../../assets/insta.png';
 import Mail from '../../assets/mail.png';
-
+import whatsappicon from "../../assets/whatsapp.png";
 const Footer = () => {
   return (
     <Footercontainer>
@@ -77,8 +77,8 @@ const Footer = () => {
                 @Copyright 2023 | SlicerLabs | All Rights Reserved 
             </Copyright>
             <Socials>
-                <Sociallogolink to="https://www.facebook.com" target="_blank">
-                    <Socialimg src={FB} ></Socialimg>
+                <Sociallogolink to="https://wa.me/+6581883267?text=Hello%20there!" target="_blank">
+                    <Socialimg src={whatsappicon} ></Socialimg>
                 </Sociallogolink>
 
                 <Sociallogolink to="https://www.instagram.com/slicerlabs/" target="_blank">
