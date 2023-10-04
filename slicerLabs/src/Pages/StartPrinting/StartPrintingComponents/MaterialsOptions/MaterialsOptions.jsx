@@ -537,7 +537,11 @@ const MaterialsOptions = ({
           ) : (
             <></>
           )}
-          {/* <MinP>Your Product will be Produced in ? business days.</MinP> */}
+          {price ? (
+            <MinP>Costs (Price-Match Guarantee): Small issue. We will ensure that our quotes are the cheapest in town to make sure that you get the bang for the buck pricings. Supply an official invoice from the supplier and we will match it should you find one cheaper than our quote!</MinP>
+          ) : (
+            <></>
+          )}
         </LoginContainer>
       </LoginFromcontainer>
       <Tocartflexdiv ref={belowDivRef}>
