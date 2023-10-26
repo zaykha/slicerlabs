@@ -5,7 +5,7 @@ import {
   getAllFilesFromDB,
 } from "../../indexedDBUtilis";
 import { collection, addDoc } from "firebase/firestore";
-import { PurchasedItemsCollection } from "../../firebase";
+import { PurchasedItemsCollection, ServerConfig } from "../../firebase";
 import { setSuccessPaymentState } from "../../ReduxStore/actions/Authentication";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -27,7 +27,7 @@ const usePaymentSuccessHandler = async (
     headers: {
       accept: "application/json",
       "content-type": "application/json",
-      // "api-key": process.env.BREVO_API_KEY,
+      "api-key": process.env.BREVO_API_KEY,
     },
     body: JSON.stringify({
       sender: { name: "SlicerLabs", email: "zaykha@gmail.com" },
@@ -69,7 +69,10 @@ const usePaymentSuccessHandler = async (
       // batchId: "5c6cfa04-eed9-42c2-8b5c-6d470d978e9d",
     }),
   };
-
+  const emailData = {
+    to: userDetails.email,
+    subject: "Purchase Confirmation With SlicerLabs",
+  };
   const formatDateTime = (dateTime) => {
     const options = {
       year: "numeric",
@@ -172,14 +175,22 @@ const usePaymentSuccessHandler = async (
             await addDoc(PurchasedItemsCollection, dataToAdd);
             console.log("data sent to firebase");
 
-            fetch('https://api.brevo.com/v3/smtp/email', BrevoOptions)
+            fetch(`${ServerConfig}/send-email`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(emailData),
+            })
+            // fetch('https://api.brevo.com/v3/smtp/email', BrevoOptions)
             .then(response => response.json())
             .then(response => {
-              console.log("Email sent with Brevo:", response);
+              console.log("Email sent:", response);
               // Rest of your code after successful API call
             })
             .catch(err => {
-              console.error("Error sending email with Brevo:", err);
+              console.error("Error sending email:", err);
               // Handle the error, e.g., show an error message to the user
             });
             // Rest of your code after successful addition to Firestore

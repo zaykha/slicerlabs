@@ -40,7 +40,7 @@ import {
   InputContainer,
   Inputelem,
 } from "../../../Register/RegisterComponents/Registerformelement";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { AiOutlineConsoleSql, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import ErrorPrompt from "../../../../globalcomponents/prompt/ErrorPrompt";
 
 const LoginForm = () => {
@@ -251,7 +251,7 @@ const LoginForm = () => {
       }
 
       await signInWithPopup(auth, authProvider)
-        .then((result) => {
+        .then(async (result) => {
           // This gives you a Google Access Token. You can use it to access the Google API.
           const credential = GoogleAuthProvider.credentialFromResult(result);
           const token = credential.accessToken;
@@ -260,15 +260,15 @@ const LoginForm = () => {
           // IdP data available using getAdditionalUserInfo(result)
           // ...
           // Handle successful sign-in
-
           const uid = user.uid;
-
+          console.log(uid);
           localStorage.setItem("jwtToken", token);
           localStorage.setItem("uid", uid);
 
           const userDetailsRef = doc(usersCollection, uid);
-          const docSnap = getDoc(userDetailsRef);
+          const docSnap =  await getDoc(userDetailsRef);
           if (docSnap.exists()) {
+          console.log(docSnap.data());
             dispatch(setUserDetails(docSnap.data()));
             dispatch(setAuthenticationStatus(true));
             localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
@@ -287,13 +287,13 @@ const LoginForm = () => {
           }
         })
         .catch((error) => {
-          // Handle Errors here.
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          // The email of the user's account used.
-          const email = error.customData.email;
-          // The AuthCredential type that was used.
-          const credential = GoogleAuthProvider.credentialFromError(error);
+          // // Handle Errors here.
+          // const errorCode = error.code;
+          // const errorMessage = error.message;
+          // // The email of the user's account used.
+          // const email = error.customData.email;
+          // // The AuthCredential type that was used.
+          // const credential = GoogleAuthProvider.credentialFromError(error);
           // ...
           console.log(error);
         });
@@ -368,18 +368,18 @@ const LoginForm = () => {
           <SocialIcon src={googleicon}></SocialIcon>
           Google
         </SocialDiv>
-        <SocialDiv onClick={() => handleSSO("whatsapp")}>
+        {/* <SocialDiv onClick={() => handleSSO("whatsapp")}>
           <SocialIcon src={whatsappicon}></SocialIcon>
           Whatsapp
-        </SocialDiv>
+        </SocialDiv> */}
         <SocialDiv onClick={() => handleSSO("facebook")}>
           <SocialIcon src={facebookicon}></SocialIcon>
           Facebook
         </SocialDiv>
-        <SocialDiv>
+        {/* <SocialDiv>
           <SocialIcon src={linkedinicon}></SocialIcon>
           Linkedin
-        </SocialDiv>
+        </SocialDiv> */}
       </LoginShortcuts>
     </LoginFromcontainer>
   );

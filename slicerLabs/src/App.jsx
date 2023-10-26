@@ -50,11 +50,11 @@ import TermsAndPolicies from "./Pages/Register/RegisterComponents/TermsAndPolici
 import BlogPage from "./AdminRelated/BlogPage/BlogPage";
 import ConfigPage from "./AdminRelated/ConfigPage/ConfigPage";
 import NavbarForChecks from "./globalcomponents/navbar/navbarForChecks";
-import AOS from 'aos';
-import 'aos/dist/aos.css';
 import RotatingLoader from "./globalcomponents/DropDown/RotatingLoader";
 import { UPHeaderFullline1 } from "./Pages/UserProfile/UserProfileElement";
 import SplashScreen from "./globalcomponents/DropDown/SplashScreen";
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
