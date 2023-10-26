@@ -257,7 +257,8 @@ const Dropfile = ({
                   meshRef.current = stlMesh;
                    // Calculate dimensions in millimeters
                    const boundingBox = new THREE.Box3().setFromObject(
-                    stlGeometry
+                    // stlGeometry
+                    stlMesh
                   );
                   const dimensions = boundingBox.getSize(new THREE.Vector3());
 
