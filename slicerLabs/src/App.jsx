@@ -55,6 +55,7 @@ import { UPHeaderFullline1 } from "./Pages/UserProfile/UserProfileElement";
 import SplashScreen from "./globalcomponents/DropDown/SplashScreen";
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import FAQ from "./Pages/FAQ/FAQ";
 
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
@@ -275,6 +276,17 @@ function App() {
           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
           <Navbar togglesidebar={togglesidebar} />
           <ContactUs />
+          <Footer />
+        </>
+      ),
+    },
+    {
+      path: "/faq",
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar togglesidebar={togglesidebar} />
+          <FAQ />
           <Footer />
         </>
       ),

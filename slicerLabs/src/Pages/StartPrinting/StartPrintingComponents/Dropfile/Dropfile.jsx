@@ -119,6 +119,7 @@ const Dropfile = ({
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: ".stl,.obj",
+    multiple: true,
     onDrop: async (acceptedFiles, rejectedFiles) => {
       setIsLoading(true);
       if (rejectedFiles.length > 0) {
