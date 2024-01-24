@@ -14,13 +14,15 @@ const cartSlice = createSlice({
       state.tempModelId = action.payload;
     },
     addModel(state, action) {
-      const { id, fileName, model, dimensions } = action.payload; 
+      const { id, fileName, model, dimensions, options, pricePerUnit } = action.payload; 
       // const clonedModel = cloneDeep(model);
       state.cartItems.push({
         id,
         fileName,
         model,
-        dimensions
+        dimensions,
+        options,
+        pricePerUnit
       });
       state.tempModelId = id;
     },
@@ -92,12 +94,12 @@ const cartSlice = createSlice({
     },
     updatePrice(state, action) {
       const { ProductId, newPrice } = action.payload;
-      // console.log(ProductId, newPrice)
+      console.log(ProductId, newPrice)
       const itemIndex = state.cartItems.findIndex(
         (item) => item.id === ProductId
       );
       if (itemIndex !== -1) {
-        state.cartItems[itemIndex].options.price = newPrice;
+        state.cartItems[itemIndex].pricePerUnit = newPrice;
       }
     },
     updateModel(state, action){

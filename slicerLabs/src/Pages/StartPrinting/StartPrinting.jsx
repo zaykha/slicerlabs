@@ -156,9 +156,10 @@ const StartPrinting = ({setOKtoRoute}) => {
         setIsCheckedOut={setIsCheckedOut}
         isAddedToCart={isAddedToCart}
         setIsAddedToCart={setIsAddedToCart}
+        setisFormFilled={setisFormFilled}
       />
 
-      {isModelLoaded ? (
+      {/* {isModelLoaded ? (
         <MaterialsOptions
           tempModelId={tempModelId}
           setTempModelId={setTempModelId}
@@ -174,7 +175,7 @@ const StartPrinting = ({setOKtoRoute}) => {
         />
       ) : (
         <></>
-      )}
+      )} */}
       {StoreItems.length > 0 ? (
         <>
           <div

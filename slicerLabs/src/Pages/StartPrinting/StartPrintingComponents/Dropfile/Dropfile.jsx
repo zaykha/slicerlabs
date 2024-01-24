@@ -18,7 +18,10 @@ import {
   addModel,
   addModelToTempState,
   deleteModel,
+  updateColor,
+  updateMaterial,
   updateModel,
+  updatePrice,
 } from "../../../../ReduxStore/reducers/CartItemReducer";
 import { v4 as uuidv4 } from "uuid";
 import * as THREE from "three";
@@ -30,8 +33,27 @@ import {
   deleteFileFromDB,
   storeFileInDB,
 } from "../../../../indexedDBUtilis";
-import { TocartCTABtn } from "../MaterialsOptions/MaterialsOptionselements";
+import {
+  Mdropdownlabel,
+  MinP,
+  Minputqtt,
+  MOdropdown,
+  Moption,
+  NotiPrompt,
+  PMAlertBox,
+  PMButton,
+  PMContainer,
+  TocartCTABtn,
+  Tocartflexdiv,
+} from "../MaterialsOptions/MaterialsOptionselements";
 import ModelSizeChecker from "./ModelSizeChecker";
+import Carousel from "../../../../globalcomponents/Carousel/Carousel";
+import { useNavigate } from "react-router-dom";
+import {
+  LoginContainer,
+  LoginFlexdiv,
+  LoginFromcontainer,
+} from "../../../Login/LoginComponents/LoginForm/LoginFormelements";
 
 const STLModelSizeChecker = ({ model }) => {
   const { camera } = useThree();
@@ -75,11 +97,12 @@ const Dropfile = ({
   setIsCheckedOut,
   isAddedToCart,
   setIsAddedToCart,
+  setisFormFilled,
 }) => {
   const [files, setFiles] = useState([]);
   const [filetype, setFiletype] = useState("");
 
-  const [model, setModel] = useState(null);
+  const [model, setModel] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSupportedFileType, setIsSupportedFileType] = useState(true);
   const [LoadProgress, setProgress] = useState(0);
@@ -103,19 +126,181 @@ const Dropfile = ({
     return null;
   };
 
+  //Material Options
+  const aboveDivRef = useRef(null);
+  const belowDivRef = useRef(null);
+  const leftDivRef = useRef(null);
+  const rightDivRef = useRef(null);
+  const [material, setMaterial] = useState("");
+  const cart = useSelector((state) => state.cartItems);
+  // const dimensions = cart?.cartItems[0]?.dimensions;
+  const [color, setColor] = useState("");
+  const [width, setWidth] = useState(10);
+  const [height, setHeight] = useState(10);
+  const [depth, setDepth] = useState(10);
+  const [quantity, setQuantity] = useState(1);
+  const Navigate = useNavigate();
+  // const [price, setPrice] = useState(0);
+  const ProductId = useSelector((state) => state.cartItems.tempModelId);
+  const [cartCount, setCartCount] = useState(cart.length > 0 ? cart.length : 0);
+  const idToken = localStorage.getItem("idToken");
+  const userUIDInLocalStorage = localStorage.getItem("uid");
+  const [ErrorHandling, setErrorHandling] = useState({
+    state: false,
+    header: "",
+    message: "",
+  });
+  const [materialSettings, setMaterialSettings] = useState({
+    printTimePerUnitVolume: {
+      ABS: 0.06, // minutes/mm^3
+      PLA: 0.04, // minutes/mm^3
+      TPU: 0.06, // minutes/mm^3
+      NYLON: 0.07, // minutes/mm^3
+      PETG: 0.05, // minutes/mm^3
+      RESIN: 0.03, // minutes/mm^3
+    },
+    materialCosts: {
+      ABS: 0.06, // SGD per gram
+      PLA: 0.04, // SGD per gram
+      TPU: 0.06, // SGD per gram
+      NYLON: 0.07, // SGD per gram
+      PETG: 0.05, // SGD per gram
+      RESIN: 0.1, // SGD per gram
+    },
+    hourlyRate: 24,
+    laborCost: 20,
+    overheadCost: 4,
+  });
+  useEffect(() => {
+    setCartCount(cart.length);
+    console.log(cart);
+  }, [cart]);
+  const parseStoredFunction = (functionName, storedFunction) => {
+    try {
+      const Unstring = JSON.parse(storedFunction);
+
+      // Use eval() to convert the object to a function
+      const parsedFunction = eval(`(${Unstring})`);
+      // console.log(parsedFunction)
+      // const parsedFunction = new Function(`return ${functionization}`)
+      if (typeof parsedFunction === "function") {
+        return parsedFunction;
+      } else {
+        throw new Error(`Parsed ${functionName} is not a function`);
+      }
+    } catch (error) {
+      console.error(`Error parsing ${functionName} function:`, error);
+      return null;
+    }
+  };
+  const calculatePriceString = localStorage.getItem("calculatePriceFunction");
+  // useEffect(() => {
+  //   if (material && color && width && height && depth) {
+  //     setisFormFilled(true);
+  //   }
+  //   if (calculatePriceString) {
+  //     const calculatePriceFunctionToStore = parseStoredFunction(
+  //       "calculatePrice",
+  //       calculatePriceString
+  //     );
+
+  //     updatePrice(calculatePriceFunctionToStore);
+  //   }
+  // }, [material, color, width, height, depth, cart]);
+  const updatePriceLocal = (
+    anotherFunction,
+    material,
+    color,
+    width,
+    height,
+    depth,
+    ModelId
+  ) => {
+    console.log(anotherFunction);
+    if (anotherFunction && material && color && width && height && depth) {
+      const newPrice = anotherFunction(
+        material,
+        color,
+        {
+          width,
+          height,
+          depth,
+        },
+        materialSettings
+      ) || 100;
+      // setPrice(newPrice);
+      console.log(ModelId, newPrice)
+      dispatch(updatePrice({ProductId: ModelId, newPrice}));
+    } else {
+      console.log("calc fail");
+    }
+  };
+
+  const cartString = encodeURIComponent(JSON.stringify(cart.options));
+
+  const handleMaterialChange = (e, id) => {
+    const newMaterial = e.target.value;
+    dispatch(updateMaterial({ ProductId: id, newMaterial }));
+  };
+
+  const handleColorChange = (e, id) => {
+    const newColor = e.target.value;
+    dispatch(updateColor({ ProductId: id, newColor }));
+  };
+
+  const handleAddToCart = () => {
+    if (!material || !color || !width || !height || !depth || !quantity) {
+      // alert("please fill in empty fields");
+      setErrorHandling({
+        state: true,
+        header: "An Error Occured",
+        message: "please fill in empty fields",
+      });
+    } else {
+      setMaterial("");
+      setColor("");
+      setWidth(10);
+      setHeight(10);
+      setDepth(10);
+      setQuantity(1);
+      setPrice(0);
+      const finalItem = {
+        ProductId, // generate a unique ID for the item
+        material,
+        color,
+        dimensions: {
+          width,
+          height,
+          depth,
+        },
+        quantity,
+        price,
+      };
+      handleCheckOutInChild();
+      dispatch(
+        addMaterialOptions({ checkID: tempModelId, options: finalItem })
+      );
+      setIsAddedToCart(true);
+      setIsModelLoaded(false);
+      setisFormFilled(false);
+      // setIsCheckedOut(true);
+      console.log(cart);
+    }
+  };
+
   const generateUniqueId = () => {
     return uuidv4();
   };
 
   useEffect(() => {
     if (isCheckedOut || isAddedToCart) {
-      setModel(null);
+      setModel([]);
       // setIsModelLoaded(false);
       setFiles(null);
     }
   }, [isCheckedOut, isAddedToCart]);
 
-  const modelId = generateUniqueId();
+  // const modelId = generateUniqueId();
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: ".stl,.obj",
@@ -128,141 +313,76 @@ const Dropfile = ({
         return;
       }
 
-      const uploadedFile = acceptedFiles[0];
+      // const uploadedFile = acceptedFiles[0];
       const maxSize = 60 * 1024 * 1024; // 60MB in bytes
-      if (uploadedFile.size > maxSize) {
-        setError("File size exceeds the maximum allowed (60MB).");
-        setIsLoading(false);
-        return;
-      }
+      for (const uploadedFile of acceptedFiles) {
+        if (uploadedFile.size > maxSize) {
+          setError("File size exceeds the maximum allowed (60MB).");
+          setIsLoading(false);
+          return;
+        }
+        const modelId = generateUniqueId();
+        const fileExtension = uploadedFile.name.split(".").pop().toLowerCase();
 
-      setIsLoading(true);
-      setIsSupportedFileType(true);
-      setFiles(
-        acceptedFiles.map((file) =>
-          Object.assign(file, {
-            preview: URL.createObjectURL(file),
-          })
-        )
-      );
+        setIsSupportedFileType(true);
+        setFiles(
+          acceptedFiles.map((file) =>
+            Object.assign(file, {
+              preview: URL.createObjectURL(file),
+            })
+          )
+        );
+        await storeFileInDB(uploadedFile, fileExtension, modelId);
+        setFiletype(fileExtension);
 
-      const fileExtension = acceptedFiles[0].name
-        .split(".")
-        .pop()
-        .toLowerCase();
-      await storeFileInDB(acceptedFiles[0], fileExtension, modelId);
-      console.log(fileExtension);
-      setFiletype(fileExtension);
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const fileContent = reader.result;
-          console.log("fileContent", acceptedFiles[0]);
-          if (fileExtension === "obj") {
-            // Define the onProgress callback function
-            const manager = new LoadingManager();
-            const uploadedFile = acceptedFiles[0];
-            const totalSize = uploadedFile.size;
+        const reader = new FileReader();
 
-            manager.onLoad = function () {
-              console.log("Loading complete!");
-              setIsLoading(false);
-              setIsModelLoaded(true);
-            };
+        reader.onload = async () => {
+          try {
+            const fileContent = reader.result;
 
-            manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-              const percentLoaded = Math.floor(
-                (itemsLoaded / itemsTotal) * 100
-              );
-              // set3DProgress(percentLoaded);
-              // console.log(itemsTotal, itemsLoaded, percentLoaded);
-            };
+            if (fileExtension === "obj") {
+              // Define the onProgress callback function
+              const manager = new LoadingManager();
+              // const uploadedFile = acceptedFiles[0];
+              const totalSize = uploadedFile.size;
 
-            manager.onError = function (url) {
-              console.log("There was an error loading " + url);
-              setIsLoading(false);
-              setIsModelLoaded(false);
-            };
-
-            const objLoader = new OBJLoader(manager);
-            objLoader.load(
-              fileContent,
-              (objData) => {
-                console.log(objData);
-                const material = new MeshNormalMaterial();
-
-                objData.traverse((child) => {
-                  if (child instanceof Mesh) {
-                    child.material = material;
-                  }
-                });
-                objData.updateMatrix();
-
-                const boundingBox = new THREE.Box3().setFromObject(objData);
-                const dimensions = boundingBox.getSize(new THREE.Vector3());
-                const scaleFactor = 1; // Adjust this based on your assumptions
-
-                const dimensionsInMM = {
-                  width: dimensions.x * scaleFactor,
-                  height: dimensions.y * scaleFactor,
-                  depth: dimensions.z * scaleFactor,
-                };
-
-                console.log("Dimensions in millimeters:", dimensionsInMM);
-                // const serializedModel = JSON.stringify(objData);
-                dispatch(
-                  addModel({
-                    id: modelId,
-                    fileName: acceptedFiles[0].name,
-                    model: objData,
-                    dimensions: dimensionsInMM
-                  })
-                );
-                setModel(objData);
-                setCameraPosition([
-                  -7.726866370752757, 7.241928986275022, -8.091348270643504,
-                ]);
+              manager.onLoad = function () {
+                console.log("Loading complete!");
                 setIsLoading(false);
                 setIsModelLoaded(true);
-                setIsAddedToCart(false);
+              };
 
-                
-              },
-              // undefined,
-              function (xhr) {
-                // const percentLoaded = Math.floor((xhr.loaded / totalSize) * 100);
-                // set3DProgress(percentLoaded)
-                console.log(Math.floor((xhr.loaded / totalSize) * 100));
-              },
-              // onProgress,
-              (error) => {
-                console.log("An error happened", error);
-                setIsSupportedFileType(false);
-                setIsLoading(false);
-                setError(
-                  "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
+              manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+                const percentLoaded = Math.floor(
+                  (itemsLoaded / itemsTotal) * 100
                 );
-              }
-            );
-          } else if (fileExtension === "stl") {
-            const stlLoader = new STLLoader();
-            stlLoader.load(
-              fileContent,
-              (stlGeometry) => {
-                console.log(stlGeometry);
-                if (stlGeometry) {
-                  // Create a mesh using the loaded geometry and a material
-                  const material = new THREE.MeshNormalMaterial();
-                  const stlMesh = new THREE.Mesh(stlGeometry, material);
-                  // Assign the mesh to the provided ref
-                  meshRef.current = stlMesh;
-                   // Calculate dimensions in millimeters
-                   const boundingBox = new THREE.Box3().setFromObject(
-                    stlMesh
-                  );
-                  const dimensions = boundingBox.getSize(new THREE.Vector3());
+                // set3DProgress(percentLoaded);
+                // console.log(itemsTotal, itemsLoaded, percentLoaded);
+              };
 
-                  // Assuming you have a scale factor to convert units to mm
+              manager.onError = function (url) {
+                console.log("There was an error loading " + url);
+                setIsLoading(false);
+                setIsModelLoaded(false);
+              };
+
+              const objLoader = new OBJLoader(manager);
+              objLoader.load(
+                fileContent,
+                (objData) => {
+                  console.log(objData);
+                  const material = new MeshNormalMaterial();
+
+                  objData.traverse((child) => {
+                    if (child instanceof Mesh) {
+                      child.material = material;
+                    }
+                  });
+                  objData.updateMatrix();
+
+                  const boundingBox = new THREE.Box3().setFromObject(objData);
+                  const dimensions = boundingBox.getSize(new THREE.Vector3());
                   const scaleFactor = 1; // Adjust this based on your assumptions
 
                   const dimensionsInMM = {
@@ -270,153 +390,450 @@ const Dropfile = ({
                     height: dimensions.y * scaleFactor,
                     depth: dimensions.z * scaleFactor,
                   };
-                  setModel(stlMesh);
-                  setIsLoading(false);
-                  setIsModelLoaded(true);
+
+                  // console.log("Dimensions in millimeters:", dimensionsInMM);
+                  // const serializedModel = JSON.stringify(objData);
                   dispatch(
                     addModel({
                       id: modelId,
-                      fileName: acceptedFiles[0].name,
-                      model: stlMesh,
-                      dimensions: dimensionsInMM
+                      fileName: uploadedFile.name,
+                      model: objData,
+                      dimensions: dimensionsInMM,
+                      options: {
+                        material: "",
+                        color: "",
+                        quantity: 1,
+                      },
+                      pricePerUnit: 0,
                     })
                   );
+                  setModel((prevModels) => [
+                    ...prevModels,
+                    { LocalID: modelId, localModel: objData },
+                  ]);
                   setCameraPosition([
                     -7.726866370752757, 7.241928986275022, -8.091348270643504,
                   ]);
+                  setIsLoading(false);
+                  setIsModelLoaded(true);
                   setIsAddedToCart(false);
-                 
-                } else {
-                  // Handle the case where the STL geometry is invalid
+                },
+                // undefined,
+                function (xhr) {
+                  // const percentLoaded = Math.floor((xhr.loaded / totalSize) * 100);
+                  // set3DProgress(percentLoaded)
+                  // console.log(Math.floor((xhr.loaded / totalSize) * 100));
+                },
+                // onProgress,
+                (error) => {
+                  console.log("Error loading OBJ:", error);
                   setIsSupportedFileType(false);
                   setIsLoading(false);
-                  setError("Invalid STL file or file is corrupted.");
+                  setError(
+                    "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
+                  );
                 }
-              },
-              (xhr) => {
-                // Progress callback for STL loading
-                const percentLoaded = Math.floor(
-                  (xhr.loaded / xhr.total) * 100
-                );
-                console.log(percentLoaded);
-              },
-              (error) => {
-                console.log("An error happened", error);
-                setIsSupportedFileType(false);
-                setIsLoading(false);
-                setError(
-                  "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
-                );
-              }
-            );
-          } else {
+              );
+            } else if (fileExtension === "stl") {
+              const stlLoader = new STLLoader();
+              stlLoader.load(
+                fileContent,
+                (stlGeometry) => {
+                  console.log(stlGeometry);
+                  if (stlGeometry) {
+                    // Create a mesh using the loaded geometry and a material
+                    const material = new THREE.MeshNormalMaterial();
+                    const stlMesh = new THREE.Mesh(stlGeometry, material);
+                    // Assign the mesh to the provided ref
+                    meshRef.current = stlMesh;
+                    // Calculate dimensions in millimeters
+                    const boundingBox = new THREE.Box3().setFromObject(stlMesh);
+                    const dimensions = boundingBox.getSize(new THREE.Vector3());
+
+                    // Assuming you have a scale factor to convert units to mm
+                    const scaleFactor = 1; // Adjust this based on your assumptions
+
+                    const dimensionsInMM = {
+                      width: dimensions.x * scaleFactor,
+                      height: dimensions.y * scaleFactor,
+                      depth: dimensions.z * scaleFactor,
+                    };
+                    setModel((prevModels) => [
+                      ...prevModels,
+                      { LocalID: modelId, localModel: stlMesh },
+                    ]);
+                    setIsLoading(false);
+                    setIsModelLoaded(true);
+                    dispatch(
+                      addModel({
+                        id: modelId,
+                        fileName: acceptedFiles[0].name,
+                        model: stlMesh,
+                        dimensions: dimensionsInMM,
+                        options: {
+                          material: "",
+                          color: "",
+                          quantity: 1,
+                        },
+                        pricePerUnit: 0,
+                      })
+                    );
+                    setCameraPosition([
+                      -7.726866370752757, 7.241928986275022, -8.091348270643504,
+                    ]);
+                    setIsAddedToCart(false);
+                  } else {
+                    // Handle the case where the STL geometry is invalid
+                    setIsSupportedFileType(false);
+                    setIsLoading(false);
+                    setError("Invalid STL file or file is corrupted.");
+                  }
+                },
+                (xhr) => {
+                  // Progress callback for STL loading
+                  const percentLoaded = Math.floor(
+                    (xhr.loaded / xhr.total) * 100
+                  );
+                  console.log(percentLoaded);
+                },
+                (error) => {
+                  console.log("An error happened", error);
+                  setIsSupportedFileType(false);
+                  setIsLoading(false);
+                  setError(
+                    "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
+                  );
+                }
+              );
+            } else {
+              setIsSupportedFileType(false);
+              setError(
+                "Invalid file type. Please upload only .stl and .obj files."
+              );
+            }
+
+            // Continue processing other files if any
+            if (
+              acceptedFiles.indexOf(uploadedFile) ===
+              acceptedFiles.length - 1
+            ) {
+              setIsLoading(false);
+              setIsModelLoaded(true);
+              setIsAddedToCart(false);
+            }
+          } catch (error) {
+            console.log(error);
             setIsSupportedFileType(false);
             setIsLoading(false);
             setError(
-              "Invalid file type. Please upload only .stl and .obj files."
+              "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
             );
           }
+        };
 
-          // await saveModelToIndexedDB(modelId, fileContent, fileExtension);
-          setTempModelId(modelId);
-          dispatch(addModelToTempState(modelId));
-          console.log(model, "this is model in dropfile");
-        } catch (error) {
-          console.log(error);
-          setIsSupportedFileType(false);
-          setIsLoading(false);
-          setError(
-            "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
-          );
-        }
-      };
-      reader.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percentLoaded = Math.floor((event.loaded / event.total) * 100);
-          setProgress(percentLoaded);
-        }
-      };
+        reader.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentLoaded = Math.floor(
+              (event.loaded / event.total) * 100
+            );
+            setProgress(percentLoaded);
+          }
+        };
 
-      // setProgress(0);
-      reader.readAsDataURL(acceptedFiles[0]);
+        reader.readAsDataURL(uploadedFile);
+      }
     },
   });
 
   const handleDelete = () => {
-    setModel(null);
+    setModel([]);
     setIsModelLoaded(false);
     setFiles(null); // remove the file from the state
     // deleteModelFromIndexedDB(modelId);
     setProgress(0);
-    dispatch(deleteModel(tempModelId));
-    deleteFileFromDB(modelId);
+    // dispatch(deleteModel(tempModelId));
+    // deleteFileFromDB(modelID);
+    deleteAllRecordsFromDB();
   };
+  useLayoutEffect(() => {
+    const updatePosition = () => {
+      const aboveDiv = aboveDivRef.current;
+      const belowDiv = belowDivRef.current;
 
-  // const ModelSizeChecker = ({ model }) => {
-  //   const { camera } = useThree();
-  //   const boundingBoxRef = useRef();
+      if (aboveDiv && belowDiv) {
+        const aboveHeight = aboveDiv.getBoundingClientRect().height;
+        belowDiv.style.top = `${aboveHeight + 520}px`;
+      }
+    };
 
-  //   useLayoutEffect(() => {
-  //     const checkModelSize = () => {
-  //       const boundingBox = new Box3().setFromObject(model);
-  //       const size = new Vector3();
-  //       boundingBox.getSize(size);
+    const updateHorizontalPosition = () => {
+      const leftDiv = leftDivRef.current;
+      const rightDiv = rightDivRef.current;
 
-  //       // Get the size of the camera frustum
-  //       const frustumSize =
-  //         Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
+      if (leftDiv && rightDiv) {
+        const aboveWidth = leftDiv.getBoundingClientRect().width;
+        rightDiv.style.left = `${aboveWidth + 15}px`;
+      }
+    };
 
-  //       // Calculate the scale factor based on the size of the model and the frustum size
-  //       const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
+    const handleResize = () => {
+      updatePosition();
+      updateHorizontalPosition();
+    };
 
-  //       // Apply the scale factor to the model
-  //       model.scale.set(scaleFactor, scaleFactor, scaleFactor);
+    handleResize(); // Set initial positions on page load
+    window.addEventListener("resize", handleResize);
 
-  //       // // Position the model at the center of the viewport
-  //       // const modelCenter = boundingBox.getCenter(new Vector3());
-  //       // model.position.sub(modelCenter);
-  //     };
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [material, color, width, height, depth]);
+  const handleChange = (
+    newMaterial,
+    newColor,
+    newWidth,
+    newHeight,
+    newDepth,
+    ModelId
+  ) => {
+    // Check if both material and color are available
+    if (newMaterial && newColor) {
+      // Calculate price or perform any other action
+      if (calculatePriceString) {
+        const calculatePriceFunctionToStore = parseStoredFunction(
+          "calculatePrice",
+          calculatePriceString
+        );
 
-  //     if (model && boundingBoxRef.current) {
-  //       checkModelSize();
-  //     }
-  //   }, [model, camera]);
+        updatePriceLocal(
+          calculatePriceFunctionToStore,
+          newMaterial,
+          newColor,
+          newWidth,
+          newHeight,
+          newDepth,
+          ModelId
+        );
+      }
+    }
+  };
+  const carouselItems = cart.cartItems.map((individualModel, index) => {
+    const { material, color, quantity } = individualModel.options || {};
+    const { width, height, depth } = individualModel.dimensions || {};
+    const price =individualModel.pricePerUnit || 1;
+    return (
+      <div key={index} style={{ width: "100%" }}>
+        {/* Your existing code for DropzoneFormcontainer */}
+        <DropzoneFormcontainer style={{ width: "100%" }}>
+          <DropzoneContainer>
+            <Canvas
+              style={{
+                width: "100%",
+                height: "100%",
+                position: "absolute",
+              }}
+            >
+              <Grid cellSize={3} infiniteGrid={true} />
+              <OrbitControls />
+              <ambientLight />
+              <pointLight position={[10, 10, 10]} />
 
-  //   return <primitive object={model} ref={boundingBoxRef} />;
-  // };
+              {/* Render the individual model with ModelSizeChecker */}
+              <ModelSizeChecker model={individualModel.model} />
 
-  // const ModelSizeChecker = ({ model }) => {
-  //   const { camera } = useThree();
-  //   const boundingBoxRef = useRef();
+              <CameraControls cameraPosition={cameraPosition} />
+            </Canvas>
 
-  //   if (model && boundingBoxRef.current) {
-  //     // Calculate the size of the model's bounding box
-  //     const boundingBox = new Box3().setFromObject(model);
-  //     const size = new Vector3();
-  //     boundingBox.getSize(size);
+            <button
+              style={{
+                width: "50px",
+                position: "absolute",
+                top: 0,
+                right: 0,
+                borderRadius: 10,
+              }}
+              onClick={handleDelete}
+            >
+              X
+            </button>
+          </DropzoneContainer>
+        </DropzoneFormcontainer>
 
-  //     // // Get the size of the camera frustum
-  //     const frustumSize =
-  //       Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
+        <LoginFromcontainer ref={aboveDivRef}>
+          <LoginContainer>
+            <Mdropdownlabel htmlFor={`material_${index}`}>
+              Materials
+            </Mdropdownlabel>
+            <MOdropdown
+              value={individualModel.options?.material}
+              onChange={(e) => {
+                handleMaterialChange(e, individualModel.id);
+                handleChange(
+                  e.target.value,
+                  color,
+                  width,
+                  height,
+                  depth,
+                  individualModel.id
+                );
+              }}
+              id={`material_${index}`}
+            >
+              <Moption value="">Please Select a Material</Moption>
+              <Moption value="ABS">
+                Acrylonitrile Butadiene Styrene (ABS)
+              </Moption>
+              <Moption value="PLA">Polylactic Acid (PLA)</Moption>
+              <Moption value="TPU">Thermoplastic Polyurethane (TPU)</Moption>
+              <Moption value="NYLON">Nylon</Moption>
+              <Moption value="PETG">
+                Polyethylene Terephthalate Glycol (PETG)
+              </Moption>
+              <Moption value="Resin">Resins</Moption>
+            </MOdropdown>
 
-  //     // Calculate the scale factor based on the size of the model and the frustum size
-  //     const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
-  //     // const scaleFactor = 1;
-  //     // Apply the scale factor to the model
-  //     model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-  //     model.position.set(0, 0, 0);
-  //     // Set the camera position based on the model's size
-  //     const cameraPosition = {
-  //       x: camera.position.x,
-  //       y: camera.position.y,
-  //       z: camera.position.z,
-  //     };
-  //     camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-  //     model.rotation.x = Math.PI;
-  //   }
+            <Mdropdownlabel htmlFor={`color_${index}`}>
+              Finshing & Color
+            </Mdropdownlabel>
+            <MOdropdown
+              value={individualModel.options?.color}
+              onChange={(e) => {
+                handleColorChange(e, individualModel.id);
+                handleChange(
+                  material,
+                  e.target.value,
+                  width,
+                  height,
+                  depth,
+                  individualModel.id
+                );
+              }}
+              id={`color_${index}`}
+            >
+              <Moption value="">Please Select a Color</Moption>
+              <Moption value="white">White</Moption>
+              <Moption value="black">Black</Moption>
+              <Moption value="transparent">Transparent</Moption>
+            </MOdropdown>
 
-  //   return <primitive object={model} ref={boundingBoxRef} />;
-  // };
+            <Mdropdownlabel htmlFor="width">
+              Dimension ( Width x Height x Depth ) in mm
+            </Mdropdownlabel>
+
+            <div
+              style={{
+                display: "flex",
+              }}
+            >
+              <input
+                type="number"
+                placeholder="Width"
+                value={Math.round(individualModel.dimensions.width)}
+                readOnly // Make the input field uneditable
+                step="1" // Allow only whole numbers
+                style={{
+                  width: "28%",
+                  background: "rgba(38, 38, 38, 0.43)",
+                  border: "1px solid #4a4a4a",
+                  borderRadius: "10px",
+                  color: "white",
+                  margin: "0px auto 15px",
+                  padding: "8px",
+                  textAlign: "center",
+                  height: "40px",
+                  fontSize: "1.1rem",
+                  pointerEvents: "none", // Make it unclickable
+                }}
+              />
+
+              <input
+                type="number"
+                placeholder="Height"
+                value={Math.round(individualModel.dimensions.height)}
+                readOnly // Make the input field uneditable
+                step="1" // Allow only whole numbers
+                style={{
+                  width: "28%",
+                  background: "rgba(38, 38, 38, 0.43)",
+                  border: "1px solid #4a4a4a",
+                  borderRadius: "10px",
+                  color: "white",
+                  margin: "0px auto 15px",
+                  padding: "8px",
+                  textAlign: "center",
+                  height: "40px",
+                  fontSize: "1.1rem",
+                  pointerEvents: "none", // Make it unclickable
+                }}
+              />
+
+              <input
+                type="number"
+                placeholder="Depth"
+                value={Math.round(individualModel.dimensions.depth)}
+                readOnly // Make the input field uneditable
+                step="1" // Allow only whole numbers
+                style={{
+                  width: "28%",
+                  background: "rgba(38, 38, 38, 0.43)",
+                  border: "1px solid #4a4a4a",
+                  borderRadius: "10px",
+                  color: "white",
+                  margin: "0px auto 15px",
+                  padding: "8px",
+                  textAlign: "center",
+                  height: "40px",
+                  fontSize: "1.1rem",
+                  pointerEvents: "none", // Make it unclickable
+                }}
+              />
+            </div>
+            {material && color && width && height && depth ? (
+              <div>
+                <Mdropdownlabel htmlFor={`quantity_${index}`}>
+                  Quantity
+                </Mdropdownlabel>
+                <LoginFlexdiv>
+                  <Minputqtt
+                    type="number"
+                    placeholder="Quantity"
+                    min="0"
+                    value={individualModel.options?.quantity}
+                    onChange={(e) =>
+                      handleQuantityChange(e, individualModel.id)
+                    }
+                  ></Minputqtt>
+                  <MinP>x </MinP>
+                  <MinP>${price} </MinP>
+                  <MinP>= </MinP>
+                  <MinP>$ {(price * parseInt(quantity)).toFixed(2)}</MinP>
+                </LoginFlexdiv>
+              </div>
+            ) : (
+              <></>
+            )}
+            {price ? (
+              <Mdropdownlabel>
+                Costs (Price-Match Guarantee): We will ensure that our quotes
+                are the cheapest in town to make sure that you get the bang for
+                the buck pricings. Supply an official invoice from the supplier
+                and we will match it should you find one cheaper than our quote!
+              </Mdropdownlabel>
+            ) : (
+              <></>
+            )}
+          </LoginContainer>
+        </LoginFromcontainer>
+        <Tocartflexdiv ref={belowDivRef}>
+          {price ? (
+            <TocartCTABtn onClick={handleAddToCart}>ADD TO CART</TocartCTABtn>
+          ) : (
+            <></>
+          )}
+        </Tocartflexdiv>
+      </div>
+    );
+  });
   const ProgressBar = ({ LoadProgress }) => {
     return (
       <div>
@@ -454,48 +871,12 @@ const Dropfile = ({
         </ErrorContainer>
       )}
 
-      {model && !isLoading ? (
-        <DropzoneFormcontainer>
-          <DropzoneContainer>
-            <Canvas
-              style={{
-                width: "100%",
-                height: "100%",
-                position: "absolute",
-              }}
-            >
-              <Grid cellSize={3} infiniteGrid={true} />
-              <OrbitControls />
-              <ambientLight />
-              <pointLight position={[10, 10, 10]} />
-              {/* {filetype === "obj" ? (
-                <ModelSizeChecker model={model} />
-              ) : (
-                <STLModelSizeChecker  model={model}/>
-                // model && <primitive object={model} ref={meshRef} />
-              )} */}
-              <ModelSizeChecker model={model} />
-              <CameraControls cameraPosition={cameraPosition} />
-            </Canvas>
-
-            <button
-              style={{
-                width: "50px",
-                position: "absolute",
-                top: 0,
-                right: 0,
-                borderRadius: 10,
-              }}
-              onClick={handleDelete}
-            >
-              X
-            </button>
-          </DropzoneContainer>
-        </DropzoneFormcontainer>
+      {model?.length > 0 && !isLoading ? (
+        <Carousel items={carouselItems} />
       ) : (
         <></>
       )}
-      {!model && !isLoading ? (
+      {model.length === 0 && !isLoading ? (
         <DropzoneFormcontainer {...getRootProps()}>
           <DropzoneContainer>
             <input {...getInputProps()} />

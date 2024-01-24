@@ -85,11 +85,53 @@ function App() {
       once: true // Whether animations should only happen once
     });
   }, []);
+  async function fetchCalculatePriceFunction() {
+    try {
+      const response = await fetch(`${ServerConfig}/calculate-function`, {
+        method: "GET",
+        // headers: {
+        //   Authorization: idToken,
+        // },
+      });
   
+      if (!response.ok) {
+        // Handle the response error, if any
+        console.error("Error fetching calculatePrice function");
+        return null; // Return null or an appropriate value to indicate failure
+      }
+  
+      const data = await response.json();
+      // Assuming data contains all three functions: calculatePrice, calculateMassAndPrintTime, and calculatePostProcessingTime
+      const { calculatePrice } = data;
+  
+      // Serialize the functions to JSON strings
+      const calculatePriceString = JSON.stringify(calculatePrice);
+  
+      // Store the functions in local storage
+      localStorage.setItem("calculatePriceFunction", calculatePriceString);
+  
+      return calculatePrice; // Return the calculatePrice function
+    } catch (error) {
+      console.error("An error occurred while fetching data:", error);
+      return null; // Return null or an appropriate value to indicate failure
+    }
+  }
   useEffect(() => {
     if (!hasMountedRef.current) {
       const auth = getAuth();
       // startAuthListener();
+      fetchCalculatePriceFunction()
+      .then((calculatePriceFunction) => {
+        // Handle the result here, you can set it in your component's state or do something else
+        if (calculatePriceFunction) {
+          // Do something with calculatePriceFunction
+          console.log('fetch cal func successful')
+        } else {
+          // Handle the case where fetching failed
+          console.log('fetch cal func failed')
+        }
+      });
+   
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
           // If the user is logged in, get the ID token
@@ -100,36 +142,36 @@ function App() {
           // Now you can make the fetch request to retrieve the calculatePrice function
           // and store it in local storage.
           try {
-            const response = await fetch(
-              // "http://localhost:3000/calculate-function",
-              // "https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function",
-                `${ServerConfig}/calculate-function`,
-              {
-                method: "GET",
-                headers: {
-                  Authorization: idToken,
-                },
-              }
-            );
+            // const response = await fetch(
+            //   // "http://localhost:3000/calculate-function",
+            //   // "https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function",
+            //     `${ServerConfig}/calculate-function`,
+            //   {
+            //     method: "GET",
+            //     headers: {
+            //       Authorization: idToken,
+            //     },
+            //   }
+            // );
 
-            if (!response.ok) {
-              // Handle the response error, if any
-              console.error("Error fetching calculatePrice function");
-              return;
-            }
+            // if (!response.ok) {
+            //   // Handle the response error, if any
+            //   console.error("Error fetching calculatePrice function");
+            //   return;
+            // }
 
-            const data = await response.json();
-            // Assuming data contains all three functions: calculatePrice, calculateMassAndPrintTime, and calculatePostProcessingTime
-            const { calculatePrice } = data;
+            // const data = await response.json();
+            // // Assuming data contains all three functions: calculatePrice, calculateMassAndPrintTime, and calculatePostProcessingTime
+            // const { calculatePrice } = data;
 
-            // Serialize the functions to JSON strings
-            const calculatePriceString = JSON.stringify(calculatePrice);
+            // // Serialize the functions to JSON strings
+            // const calculatePriceString = JSON.stringify(calculatePrice);
 
-            // Store the functions in local storage
-            localStorage.setItem(
-              "calculatePriceFunction",
-              calculatePriceString
-            );
+            // // Store the functions in local storage
+            // localStorage.setItem(
+            //   "calculatePriceFunction",
+            //   calculatePriceString
+            // );
             // console.log("useeffect triggered");
             // Continue with your other logic
             const USERUID = user.uid;
