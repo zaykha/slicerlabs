@@ -138,3 +138,57 @@ export const Errbutton = styled.button`
 export const ContainerforResponse = styled.div`
   margin: 100px 0;
 `;
+
+export const QuantityButton = styled.button`
+width: 30px;
+background: rgba(38, 38, 38, 0.43);
+border: 1px solid white;
+border-radius: 10px;
+color: white;
+margin: ${({ customMargin }) => customMargin || '0 5px 0 0'};
+padding: 4px 8px;
+text-align: center;
+font-size: 1.1rem;
+
+&:hover {
+  background: rgba(38, 38, 38, 0.6);
+  color: #4a4a4a;
+  border: 1px solid #4a4a4a;
+  cursor: pointer;
+  // Add any other hover effects you want
+}
+
+@media (max-width: 1200px) {
+  margin: 10px;
+  // Add styles for smaller viewports if needed
+}
+`;
+export const QtyDiv = styled.div`
+    display:flex;
+    width:40%;
+    align-items:center;
+    // margin-top:10px;
+    margin-bottom: 20px;
+    // justify-content: space-between;
+
+`;
+export const QtyDiv2 = styled.div`
+    display:flex;
+    width:60%;
+    align-items:center;
+    // margin-top:10px;
+    margin-bottom: 20px;
+    // justify-content: space-between;
+
+`;
+export const QtyFlexDiv = styled.div`
+    display:flex;
+    width:100%;
+    align-items:center;
+    margin-top:10px;
+    margin-bottom: 20px;
+    justify-content: center;
+    @media screen and (max-width: 1200px) {
+        flex-direction: column;
+      }
+`;

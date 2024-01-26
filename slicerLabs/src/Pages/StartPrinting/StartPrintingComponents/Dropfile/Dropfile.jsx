@@ -5,6 +5,10 @@ import {
   Errbutton,
   ErrorCard,
   ErrorContainer,
+  QtyDiv,
+  QtyDiv2,
+  QtyFlexDiv,
+  QuantityButton,
   UPFullline,
   UPHeaderFullline,
 } from "./Dropfileelements";
@@ -17,7 +21,9 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   addModel,
   addModelToTempState,
+  decreaseQuantity,
   deleteModel,
+  increaseQuantity,
   updateColor,
   updateMaterial,
   updateModel,
@@ -54,6 +60,7 @@ import {
   LoginFlexdiv,
   LoginFromcontainer,
 } from "../../../Login/LoginComponents/LoginForm/LoginFormelements";
+import { decrementCartCount } from "../../../../ReduxStore/actions/cartCountActions";
 
 const STLModelSizeChecker = ({ model }) => {
   const { camera } = useThree();
@@ -88,17 +95,7 @@ const STLModelSizeChecker = ({ model }) => {
   return <primitive object={model} ref={boundingBoxRef} />;
 };
 
-const Dropfile = ({
-  tempModelId,
-  setTempModelId,
-  isModelLoaded,
-  setIsModelLoaded,
-  isCheckedOut,
-  setIsCheckedOut,
-  isAddedToCart,
-  setIsAddedToCart,
-  setisFormFilled,
-}) => {
+const Dropfile = ({}) => {
   const [files, setFiles] = useState([]);
   const [filetype, setFiletype] = useState("");
 
@@ -173,7 +170,7 @@ const Dropfile = ({
   });
   useEffect(() => {
     setCartCount(cart.length);
-    console.log(cart);
+    // console.log(cart);
   }, [cart]);
   const parseStoredFunction = (functionName, storedFunction) => {
     try {
@@ -216,21 +213,22 @@ const Dropfile = ({
     depth,
     ModelId
   ) => {
-    console.log(anotherFunction);
+    // console.log(anotherFunction);
     if (anotherFunction && material && color && width && height && depth) {
-      const newPrice = anotherFunction(
-        material,
-        color,
-        {
-          width,
-          height,
-          depth,
-        },
-        materialSettings
-      ) || 100;
+      const newPrice =
+        anotherFunction(
+          material,
+          color,
+          {
+            width,
+            height,
+            depth,
+          },
+          materialSettings
+        ) || 100;
       // setPrice(newPrice);
-      console.log(ModelId, newPrice)
-      dispatch(updatePrice({ProductId: ModelId, newPrice}));
+      // console.log(ModelId, newPrice)
+      dispatch(updatePrice({ ProductId: ModelId, newPrice }));
     } else {
       console.log("calc fail");
     }
@@ -280,9 +278,9 @@ const Dropfile = ({
       dispatch(
         addMaterialOptions({ checkID: tempModelId, options: finalItem })
       );
-      setIsAddedToCart(true);
-      setIsModelLoaded(false);
-      setisFormFilled(false);
+      // setIsAddedToCart(true);
+      // setIsModelLoaded(false);
+      // setisFormFilled(false);
       // setIsCheckedOut(true);
       console.log(cart);
     }
@@ -292,13 +290,13 @@ const Dropfile = ({
     return uuidv4();
   };
 
-  useEffect(() => {
-    if (isCheckedOut || isAddedToCart) {
-      setModel([]);
-      // setIsModelLoaded(false);
-      setFiles(null);
-    }
-  }, [isCheckedOut, isAddedToCart]);
+  // useEffect(() => {
+  //   if (isCheckedOut || isAddedToCart) {
+  //     setModel([]);
+  //     // setIsModelLoaded(false);
+  //     setFiles(null);
+  //   }
+  // }, [isCheckedOut, isAddedToCart]);
 
   // const modelId = generateUniqueId();
 
@@ -350,7 +348,7 @@ const Dropfile = ({
               manager.onLoad = function () {
                 console.log("Loading complete!");
                 setIsLoading(false);
-                setIsModelLoaded(true);
+                // setIsModelLoaded(true);
               };
 
               manager.onProgress = function (url, itemsLoaded, itemsTotal) {
@@ -364,7 +362,7 @@ const Dropfile = ({
               manager.onError = function (url) {
                 console.log("There was an error loading " + url);
                 setIsLoading(false);
-                setIsModelLoaded(false);
+                // setIsModelLoaded(false);
               };
 
               const objLoader = new OBJLoader(manager);
@@ -415,8 +413,8 @@ const Dropfile = ({
                     -7.726866370752757, 7.241928986275022, -8.091348270643504,
                   ]);
                   setIsLoading(false);
-                  setIsModelLoaded(true);
-                  setIsAddedToCart(false);
+                  // setIsModelLoaded(true);
+                  // setIsAddedToCart(false);
                 },
                 // undefined,
                 function (xhr) {
@@ -463,7 +461,7 @@ const Dropfile = ({
                       { LocalID: modelId, localModel: stlMesh },
                     ]);
                     setIsLoading(false);
-                    setIsModelLoaded(true);
+                    // setIsModelLoaded(true);
                     dispatch(
                       addModel({
                         id: modelId,
@@ -518,8 +516,8 @@ const Dropfile = ({
               acceptedFiles.length - 1
             ) {
               setIsLoading(false);
-              setIsModelLoaded(true);
-              setIsAddedToCart(false);
+              // setIsModelLoaded(true);
+              // setIsAddedToCart(false);
             }
           } catch (error) {
             console.log(error);
@@ -545,15 +543,18 @@ const Dropfile = ({
     },
   });
 
-  const handleDelete = () => {
-    setModel([]);
-    setIsModelLoaded(false);
-    setFiles(null); // remove the file from the state
-    // deleteModelFromIndexedDB(modelId);
+  const handleDelete = (tempModelId) => {
+    // Assuming setModel is the useState setter for your model state
+    setModel((prevModels) =>
+      prevModels.filter((model) => model.LocalID !== tempModelId)
+    );
+    setIsLoading(false);
     setProgress(0);
-    // dispatch(deleteModel(tempModelId));
-    // deleteFileFromDB(modelID);
-    deleteAllRecordsFromDB();
+    dispatch(deleteModel(tempModelId));
+    dispatch(decrementCartCount());
+    deleteFileFromDB(tempModelId);
+    // deleteAllRecordsFromDB();
+    console.log(model.length);
   };
   useLayoutEffect(() => {
     const updatePosition = () => {
@@ -588,6 +589,13 @@ const Dropfile = ({
       window.removeEventListener("resize", handleResize);
     };
   }, [material, color, width, height, depth]);
+  const increaseQuantityAction = (ProductId) => {
+    dispatch(increaseQuantity({ ProductId }));
+  };
+
+  const decreaseQuantityAction = (ProductId) => {
+    dispatch(decreaseQuantity({ ProductId }));
+  };
   const handleChange = (
     newMaterial,
     newColor,
@@ -620,9 +628,10 @@ const Dropfile = ({
   const carouselItems = cart.cartItems.map((individualModel, index) => {
     const { material, color, quantity } = individualModel.options || {};
     const { width, height, depth } = individualModel.dimensions || {};
-    const price =individualModel.pricePerUnit || 1;
+    const price = individualModel.pricePerUnit || 0;
+    console.log(`Item ${index}, Price: ${price}`);
     return (
-      <div key={index} style={{ width: "100%" }}>
+      <div key={index} style={{ width: "100%", height: "auto" }}>
         {/* Your existing code for DropzoneFormcontainer */}
         <DropzoneFormcontainer style={{ width: "100%" }}>
           <DropzoneContainer>
@@ -652,14 +661,16 @@ const Dropfile = ({
                 right: 0,
                 borderRadius: 10,
               }}
-              onClick={handleDelete}
+              onClick={() => handleDelete(individualModel.id)}
             >
               X
             </button>
           </DropzoneContainer>
         </DropzoneFormcontainer>
 
-        <LoginFromcontainer ref={aboveDivRef}>
+        <LoginFromcontainer
+        // ref={aboveDivRef}
+        >
           <LoginContainer>
             <Mdropdownlabel htmlFor={`material_${index}`}>
               Materials
@@ -793,44 +804,60 @@ const Dropfile = ({
                 <Mdropdownlabel htmlFor={`quantity_${index}`}>
                   Quantity
                 </Mdropdownlabel>
-                <LoginFlexdiv>
-                  <Minputqtt
-                    type="number"
-                    placeholder="Quantity"
-                    min="0"
-                    value={individualModel.options?.quantity}
-                    onChange={(e) =>
-                      handleQuantityChange(e, individualModel.id)
-                    }
-                  ></Minputqtt>
-                  <MinP>x </MinP>
-                  <MinP>${price} </MinP>
-                  <MinP>= </MinP>
-                  <MinP>$ {(price * parseInt(quantity)).toFixed(2)}</MinP>
-                </LoginFlexdiv>
+                <QtyFlexDiv>
+                  <QtyDiv>
+                    <QuantityButton
+                      onClick={() => increaseQuantityAction(individualModel.id)}
+                      customMargin="0 5px 0 0"
+                    >
+                      +
+                    </QuantityButton>
+                    <Minputqtt
+                      type="number"
+                      placeholder="Quantity"
+                      min="1"
+                      value={individualModel.options?.quantity}
+                      onChange={(e) =>
+                        handleQuantityChange(e, individualModel.id)
+                      }
+                    ></Minputqtt>
+                    <QuantityButton
+                      onClick={() => decreaseQuantityAction(individualModel.id)}
+                      customMargin="0 0 0 5px"
+                    >
+                      -
+                    </QuantityButton>
+                  </QtyDiv>
+                  <QtyDiv2>
+                    <MinP>x </MinP>
+                    <MinP>${price} </MinP>
+                    <MinP>= </MinP>
+                    <MinP>$ {(price * parseInt(quantity)).toFixed(2)}</MinP>
+                  </QtyDiv2>
+                </QtyFlexDiv>
               </div>
             ) : (
               <></>
             )}
-            {price ? (
+            {price !== 0 ? (
               <Mdropdownlabel>
                 Costs (Price-Match Guarantee): We will ensure that our quotes
                 are the cheapest in town to make sure that you get the bang for
                 the buck pricings. Supply an official invoice from the supplier
-                and we will match it should you find one cheaper than our quote!
+                and a screen shot of our price page we will match it, should you
+                find one cheaper than our quote!
               </Mdropdownlabel>
             ) : (
               <></>
             )}
           </LoginContainer>
         </LoginFromcontainer>
-        <Tocartflexdiv ref={belowDivRef}>
-          {price ? (
-            <TocartCTABtn onClick={handleAddToCart}>ADD TO CART</TocartCTABtn>
-          ) : (
-            <></>
-          )}
-        </Tocartflexdiv>
+        {/* onClick={handleAddToCart} */}
+        {/* {price !== 0 && (
+          <Tocartflexdiv>
+            <TocartCTABtn>ADD TO CART</TocartCTABtn>
+          </Tocartflexdiv>
+        )} */}
       </div>
     );
   });
@@ -871,12 +898,18 @@ const Dropfile = ({
         </ErrorContainer>
       )}
 
-      {model?.length > 0 && !isLoading ? (
-        <Carousel items={carouselItems} />
+      {model.length > 0 && !isLoading ? (
+        <>
+          <Carousel items={carouselItems} />
+          {cart.cartItems.every((item) => item.pricePerUnit !== 0) && (
+            <Tocartflexdiv>
+              <TocartCTABtn>ADD TO CART</TocartCTABtn>
+            </Tocartflexdiv>
+          )}
+        </>
       ) : (
-        <></>
-      )}
-      {model.length === 0 && !isLoading ? (
+        <>
+         {model.length === 0 && !isLoading ? (
         <DropzoneFormcontainer {...getRootProps()}>
           <DropzoneContainer>
             <input {...getInputProps()} />
@@ -892,6 +925,9 @@ const Dropfile = ({
       ) : (
         <></>
       )}
+        </>
+      )}
+     
 
       {isLoading && (
         <DropzoneFormcontainer>

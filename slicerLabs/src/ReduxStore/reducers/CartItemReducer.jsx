@@ -114,9 +114,9 @@ const cartSlice = createSlice({
     deleteModel(state, action) {
       const modelIdToDelete = action.payload;
       state.cartItems = state.cartItems.filter((item) => item.id !== modelIdToDelete);
-      if (state.tempModelId === modelIdToDelete) {
-        state.tempModelId = null;
-      } 
+      // if (state.tempModelId === modelIdToDelete) {
+      //   state.tempModelId = null;
+      // } 
     },
     resetCartState(state) {
       return initialState; // Reset the state to the initial value

@@ -28,12 +28,12 @@ import ErrorPrompt from "../../globalcomponents/prompt/ErrorPrompt";
 const StartPrinting = ({setOKtoRoute}) => {
   const cart = useSelector((state) => state.cartItems);
   const Location = useLocation();
-  const [isModelLoaded, setIsModelLoaded] = useState(false);
-  const [isCheckedOut, setIsCheckedOut] = useState(false);
-  const [isAddedToCart, setIsAddedToCart] = useState(cart.cartItems.length > 0);
-  const [isFormFilled, setisFormFilled] = useState(false);
+  // const [isModelLoaded, setIsModelLoaded] = useState(false);
+  // const [isCheckedOut, setIsCheckedOut] = useState(false);
+  // const [isAddedToCart, setIsAddedToCart] = useState(false);
+  // const [isFormFilled, setisFormFilled] = useState(false);
   const StoreItems = useSelector((state) => state.cartItems.cartItems);
-  const [tempModelId, setTempModelId] = useState(null);
+  // const [tempModelId, setTempModelId] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const navigate = useNavigate();
   const [ErrorHandling, setErrorHandling] = useState({
@@ -41,15 +41,16 @@ const StartPrinting = ({setOKtoRoute}) => {
     header: "",
     message: "",
   });
-  useEffect(() => {
-    if(!isCheckedOut && isModelLoaded && !isAddedToCart){
-      console.log("cannot route")
-      setOKtoRoute(false);
-    }else{
-      // console.log("can Route")
-      setOKtoRoute(true);
-    }
-  }, [isCheckedOut, isModelLoaded, isAddedToCart])
+  // useEffect(() => {
+  //   if(!isCheckedOut && isModelLoaded && !isAddedToCart){
+  //     console.log("cannot route")
+  //     setOKtoRoute(false);
+  //     console.log(StoreItems);
+  //   }else{
+  //     // console.log("can Route")
+  //     setOKtoRoute(true);
+  //   }
+  // }, [isCheckedOut, isModelLoaded, isAddedToCart])
   
   
   const handleBeforeUnload = (e) => {
@@ -148,15 +149,15 @@ const StartPrinting = ({setOKtoRoute}) => {
       <CUsubheader>to get instant quote!</CUsubheader>
 
       <Dropfile
-        tempModelId={tempModelId}
-        setTempModelId={setTempModelId}
-        isModelLoaded={isModelLoaded}
-        setIsModelLoaded={setIsModelLoaded}
-        isCheckedOut={isCheckedOut}
-        setIsCheckedOut={setIsCheckedOut}
-        isAddedToCart={isAddedToCart}
-        setIsAddedToCart={setIsAddedToCart}
-        setisFormFilled={setisFormFilled}
+        // tempModelId={tempModelId}
+        // setTempModelId={setTempModelId}
+        // isModelLoaded={isModelLoaded}
+        // setIsModelLoaded={setIsModelLoaded}
+        // isCheckedOut={isCheckedOut}
+        // setIsCheckedOut={setIsCheckedOut}
+        // isAddedToCart={isAddedToCart}
+        // setIsAddedToCart={setIsAddedToCart}
+        // setisFormFilled={setisFormFilled}
       />
 
       {/* {isModelLoaded ? (
@@ -176,9 +177,9 @@ const StartPrinting = ({setOKtoRoute}) => {
       ) : (
         <></>
       )} */}
-      {StoreItems.length > 0 ? (
+      {StoreItems.length > 1000 ? (
         <>
-          <div
+          {/* <div
             style={{
               display: "flex",
               justifyContent: "center",
@@ -194,16 +195,16 @@ const StartPrinting = ({setOKtoRoute}) => {
               (cart.cartItems.length > 0 && !isModelLoaded && isAddedToCart) ? (
                 <FaCheck style={{ marginTop: "10px" }} />
               ) : (
-                <FaExclamationCircle style={{ marginTop: "10px" }} />
+                <FaExclamationCircle style={{ marginTop: "10px", color: "#f74566" }} />
               )}
-            </StyledAddButtonForStartPrinting>
+            </StyledAddButtonForStartPrinting> */}
 
             {/* {cart && isFormFilled ? (
               <NotiPrompt>{cart.cartItems.length}</NotiPrompt>
             ) : (
               <></>
             )} */}
-          </div>
+          {/* </div> */}
         </>
       ) : (
         <></>

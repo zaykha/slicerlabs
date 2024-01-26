@@ -7,14 +7,13 @@ export const Mdropdownlabel = styled.label`
     font-size: 0.8rem;
     color:#a4a4a4;
     margin: 1px auto 5px;
-    
 `;
 
 
 export const MOdropdown = styled.select`
     width: 100%;
     background: rgba(87, 87, 87, 0.43);
-    border: 1px solid #D5D5D5;
+    border: 1px solid ${({ value }) => (value ? 'green' : '#D5D5D5')};
     border-radius: 10px;
     color:white;
     margin:0px auto 15px;
@@ -48,9 +47,9 @@ export const Minputqtt = styled.input.attrs({
     type: 'number',
   })`
     /* Styles for the input field */
-    width: 100px;
+    width: 90px;
     height: 32px;
-    padding: 5px;
+    // padding: 5px;
     font-size: 16px;
     border: 1px solid #D5D5D5;
     background: rgba(87, 87, 87, 0.43);
@@ -63,6 +62,7 @@ export const MinP = styled.p`
     color:white;
     font-size: 1.1rem;
     text-align: center;
+    // border: 1px solid white;
 `;
 export const Tocartflexdiv = styled.div`
     display:flex;

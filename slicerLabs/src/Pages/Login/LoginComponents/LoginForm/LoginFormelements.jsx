@@ -100,6 +100,7 @@ export const LoginFlexdiv = styled.div`
     display:flex;
     width:100%;
     align-items:center;
+    margin-top:10px;
     margin-bottom: 20px;
     justify-content: space-between;
     @media screen and (max-width: 1200px) {
