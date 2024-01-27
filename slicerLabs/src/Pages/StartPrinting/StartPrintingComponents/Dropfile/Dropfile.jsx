@@ -479,7 +479,7 @@ const Dropfile = ({}) => {
                     setCameraPosition([
                       -7.726866370752757, 7.241928986275022, -8.091348270643504,
                     ]);
-                    setIsAddedToCart(false);
+                    // setIsAddedToCart(false);
                   } else {
                     // Handle the case where the STL geometry is invalid
                     setIsSupportedFileType(false);
@@ -898,7 +898,7 @@ const Dropfile = ({}) => {
         </ErrorContainer>
       )}
 
-      {model.length > 0 && !isLoading ? (
+      {cart.cartItems.length > 0 && !isLoading ? (
         <>
           <Carousel items={carouselItems} />
           {cart.cartItems.every((item) => item.pricePerUnit !== 0) && (
@@ -909,7 +909,7 @@ const Dropfile = ({}) => {
         </>
       ) : (
         <>
-         {model.length === 0 && !isLoading ? (
+         {cart.cartItems.length === 0 && !isLoading ? (
         <DropzoneFormcontainer {...getRootProps()}>
           <DropzoneContainer>
             <input {...getInputProps()} />

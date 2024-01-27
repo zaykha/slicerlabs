@@ -28,10 +28,10 @@ import ErrorPrompt from "../../globalcomponents/prompt/ErrorPrompt";
 const StartPrinting = ({setOKtoRoute}) => {
   const cart = useSelector((state) => state.cartItems);
   const Location = useLocation();
-  // const [isModelLoaded, setIsModelLoaded] = useState(false);
-  // const [isCheckedOut, setIsCheckedOut] = useState(false);
-  // const [isAddedToCart, setIsAddedToCart] = useState(false);
-  // const [isFormFilled, setisFormFilled] = useState(false);
+  const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [isCheckedOut, setIsCheckedOut] = useState(false);
+  const [isAddedToCart, setIsAddedToCart] = useState(false);
+  const [isFormFilled, setisFormFilled] = useState(false);
   const StoreItems = useSelector((state) => state.cartItems.cartItems);
   // const [tempModelId, setTempModelId] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -41,16 +41,16 @@ const StartPrinting = ({setOKtoRoute}) => {
     header: "",
     message: "",
   });
-  // useEffect(() => {
-  //   if(!isCheckedOut && isModelLoaded && !isAddedToCart){
-  //     console.log("cannot route")
-  //     setOKtoRoute(false);
-  //     console.log(StoreItems);
-  //   }else{
-  //     // console.log("can Route")
-  //     setOKtoRoute(true);
-  //   }
-  // }, [isCheckedOut, isModelLoaded, isAddedToCart])
+  useEffect(() => {
+    if(!isCheckedOut && isModelLoaded && !isAddedToCart){
+      console.log("cannot route")
+      setOKtoRoute(false);
+      console.log(StoreItems);
+    }else{
+      // console.log("can Route")
+      setOKtoRoute(true);
+    }
+  }, [isCheckedOut, isModelLoaded, isAddedToCart])
   
   
   const handleBeforeUnload = (e) => {
