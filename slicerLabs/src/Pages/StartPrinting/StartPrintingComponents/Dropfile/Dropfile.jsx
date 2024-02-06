@@ -122,7 +122,11 @@ const Dropfile = ({}) => {
     }, [camera, cameraPosition]);
     return null;
   };
-
+  const printBedWidth = 235; // mm
+  const printBedDepth = 235; // mm
+  const printVolumeWidth = 220; // mm
+  const printVolumeDepth = 220; // mm
+  const printVolumeHeight = 250; // mm
   //Material Options
   const aboveDivRef = useRef(null);
   const belowDivRef = useRef(null);
@@ -313,12 +317,18 @@ const Dropfile = ({}) => {
 
       // const uploadedFile = acceptedFiles[0];
       const maxSize = 60 * 1024 * 1024; // 60MB in bytes
+      // Check if any file exceeds the maximum size
+      if (acceptedFiles.some((file) => file.size > maxSize)) {
+        setError("One or more files exceed the maximum allowed size (60MB).");
+        setIsLoading(false);
+        return;
+      }
       for (const uploadedFile of acceptedFiles) {
-        if (uploadedFile.size > maxSize) {
-          setError("File size exceeds the maximum allowed (60MB).");
-          setIsLoading(false);
-          return;
-        }
+        // if (uploadedFile.size > maxSize) {
+        //   setError("File size exceeds the maximum allowed (60MB).");
+        //   setIsLoading(false);
+        //   return;
+        // }
         const modelId = generateUniqueId();
         const fileExtension = uploadedFile.name.split(".").pop().toLowerCase();
 
@@ -388,31 +398,80 @@ const Dropfile = ({}) => {
                     height: dimensions.y * scaleFactor,
                     depth: dimensions.z * scaleFactor,
                   };
-
+                  if (
+                    dimensionsInMM.width <= printBedWidth &&
+                    dimensionsInMM.depth <= printBedDepth &&
+                    dimensionsInMM.height <= printVolumeHeight
+                  ) {
+                    if (
+                      dimensionsInMM.width <= printVolumeWidth &&
+                      dimensionsInMM.depth <= printVolumeDepth
+                    ) {
+                      // Model fits within print volume
+                      dispatch(
+                        addModel({
+                          id: modelId,
+                          fileName: uploadedFile.name,
+                          model: objData,
+                          dimensions: dimensionsInMM,
+                          options: {
+                            material: "",
+                            color: "",
+                            quantity: 1,
+                          },
+                          pricePerUnit: 0,
+                        })
+                      );
+                      setModel((prevModels) => [
+                        ...prevModels,
+                        { LocalID: modelId, localModel: objData },
+                      ]);
+                      setCameraPosition([
+                        -7.726866370752757, 7.241928986275022,
+                        -8.091348270643504,
+                      ]);
+                      setIsLoading(false);
+                      return true;
+                    } else {
+                      // Model exceeds width or depth of print volume
+                      setError(
+                        `${uploadedFile.name} is not within our printer capability. Maximum print volume dimensions are ${printVolumeWidth}x${printVolumeDepth}x${printVolumeHeight} mm. Please feel free to contact us at "slicerlabs@gmail.com" for alternative solutions.`
+                      );
+                      setIsLoading(false);
+                      return;
+                    }
+                  } else {
+                    // Model exceeds print bed size
+                    setError(
+                      `${uploadedFile.name} is not within our printer capability. Maximum print bed dimensions are ${printBedWidth}x${printBedDepth} mm. Please feel free to contact us at "slicerlabs@gmail.com" for alternative solutions.`
+                    );
+                    setIsLoading(false);
+                    return;
+                  }
                   // console.log("Dimensions in millimeters:", dimensionsInMM);
                   // const serializedModel = JSON.stringify(objData);
-                  dispatch(
-                    addModel({
-                      id: modelId,
-                      fileName: uploadedFile.name,
-                      model: objData,
-                      dimensions: dimensionsInMM,
-                      options: {
-                        material: "",
-                        color: "",
-                        quantity: 1,
-                      },
-                      pricePerUnit: 0,
-                    })
-                  );
-                  setModel((prevModels) => [
-                    ...prevModels,
-                    { LocalID: modelId, localModel: objData },
-                  ]);
-                  setCameraPosition([
-                    -7.726866370752757, 7.241928986275022, -8.091348270643504,
-                  ]);
-                  setIsLoading(false);
+                  // dispatch(
+                  //   addModel({
+                  //     id: modelId,
+                  //     fileName: uploadedFile.name,
+                  //     model: objData,
+                  //     dimensions: dimensionsInMM,
+                  //     options: {
+                  //       material: "",
+                  //       color: "",
+                  //       quantity: 1,
+                  //     },
+                  //     pricePerUnit: 0,
+                  //   })
+                  // );
+                  // setModel((prevModels) => [
+                  //   ...prevModels,
+                  //   { LocalID: modelId, localModel: objData },
+                  // ]);
+                  // setCameraPosition([
+                  //   -7.726866370752757, 7.241928986275022, -8.091348270643504,
+                  // ]);
+                  // setIsLoading(false);
                   // setIsModelLoaded(true);
                   // setIsAddedToCart(false);
                 },
@@ -456,29 +515,80 @@ const Dropfile = ({}) => {
                       height: dimensions.y * scaleFactor,
                       depth: dimensions.z * scaleFactor,
                     };
-                    setModel((prevModels) => [
-                      ...prevModels,
-                      { LocalID: modelId, localModel: stlMesh },
-                    ]);
-                    setIsLoading(false);
-                    // setIsModelLoaded(true);
-                    dispatch(
-                      addModel({
-                        id: modelId,
-                        fileName: acceptedFiles[0].name,
-                        model: stlMesh,
-                        dimensions: dimensionsInMM,
-                        options: {
-                          material: "",
-                          color: "",
-                          quantity: 1,
-                        },
-                        pricePerUnit: 0,
-                      })
-                    );
-                    setCameraPosition([
-                      -7.726866370752757, 7.241928986275022, -8.091348270643504,
-                    ]);
+                    if (
+                      dimensionsInMM.width <= printBedWidth &&
+                      dimensionsInMM.depth <= printBedDepth &&
+                      dimensionsInMM.height <= printVolumeHeight
+                    ) {
+                      if (
+                        dimensionsInMM.width <= printVolumeWidth &&
+                        dimensionsInMM.depth <= printVolumeDepth
+                      ) {
+                        // Model fits within print volume
+                        setModel((prevModels) => [
+                          ...prevModels,
+                          { LocalID: modelId, localModel: stlMesh },
+                        ]);
+                        setIsLoading(false);
+                        // setIsModelLoaded(true);
+                        dispatch(
+                          addModel({
+                            id: modelId,
+                            fileName: acceptedFiles[0].name,
+                            model: stlMesh,
+                            dimensions: dimensionsInMM,
+                            options: {
+                              material: "",
+                              color: "",
+                              quantity: 1,
+                            },
+                            pricePerUnit: 0,
+                          })
+                        );
+                        setCameraPosition([
+                          -7.726866370752757, 7.241928986275022,
+                          -8.091348270643504,
+                        ]);
+                        return true;
+                      } else {
+                        // Model exceeds width or depth of print volume
+                        setError(
+                          `${uploadedFile.name} is not within our printer capability. Maximum print volume dimensions are ${printVolumeWidth}x${printVolumeDepth}x${printVolumeHeight} mm. Please feel free to contact us at "slicerlabs@gmail.com" for alternative solutions.`
+                        );
+                        setIsLoading(false);
+                        return;
+                      }
+                    } else {
+                      // Model exceeds print bed size
+                      setError(
+                        `${uploadedFile.name} is not within our printer capability. Maximum print bed dimensions are ${printBedWidth}x${printBedDepth} mm. Please feel free to contact us at "slicerlabs@gmail.com" for alternative solutions.`
+                      );
+                      setIsLoading(false);
+                      return;
+                    }
+                    // setModel((prevModels) => [
+                    //   ...prevModels,
+                    //   { LocalID: modelId, localModel: stlMesh },
+                    // ]);
+                    // setIsLoading(false);
+                    // // setIsModelLoaded(true);
+                    // dispatch(
+                    //   addModel({
+                    //     id: modelId,
+                    //     fileName: acceptedFiles[0].name,
+                    //     model: stlMesh,
+                    //     dimensions: dimensionsInMM,
+                    //     options: {
+                    //       material: "",
+                    //       color: "",
+                    //       quantity: 1,
+                    //     },
+                    //     pricePerUnit: 0,
+                    //   })
+                    // );
+                    // setCameraPosition([
+                    //   -7.726866370752757, 7.241928986275022, -8.091348270643504,
+                    // ]);
                     // setIsAddedToCart(false);
                   } else {
                     // Handle the case where the STL geometry is invalid
@@ -544,6 +654,9 @@ const Dropfile = ({}) => {
   });
 
   const handleDelete = (tempModelId) => {
+    const updatedCarouselItems = carouselItems.filter(
+      (item) => item.id !== tempModelId
+    );
     // Assuming setModel is the useState setter for your model state
     setModel((prevModels) =>
       prevModels.filter((model) => model.LocalID !== tempModelId)
@@ -902,32 +1015,31 @@ const Dropfile = ({}) => {
         <>
           <Carousel items={carouselItems} />
           {cart.cartItems.every((item) => item.pricePerUnit !== 0) && (
-            <Tocartflexdiv>
-              <TocartCTABtn>ADD TO CART</TocartCTABtn>
-            </Tocartflexdiv>
-          )}
+          <Tocartflexdiv>
+            <TocartCTABtn>ADD TO CART</TocartCTABtn>
+          </Tocartflexdiv>
+        )}
         </>
       ) : (
         <>
-         {cart.cartItems.length === 0 && !isLoading ? (
-        <DropzoneFormcontainer {...getRootProps()}>
-          <DropzoneContainer>
-            <input {...getInputProps()} />
-            <UPFullline>Support files -(STL,OBJ)</UPFullline>
-            <UPFullline>Max file size - 60MB</UPFullline>
-            <UPFullline>Model measurment - mm</UPFullline>
-            <UPHeaderFullline>
-              {" "}
-              Click Here Or Drop the File Directly.
-            </UPHeaderFullline>
-          </DropzoneContainer>
-        </DropzoneFormcontainer>
-      ) : (
-        <></>
-      )}
+          {cart.cartItems.length === 0 && !isLoading ? (
+            <DropzoneFormcontainer {...getRootProps()}>
+              <DropzoneContainer>
+                <input {...getInputProps()} />
+                <UPFullline>Support files -(STL,OBJ)</UPFullline>
+                <UPFullline>Max file size - 60MB</UPFullline>
+                <UPFullline>Model measurment - mm</UPFullline>
+                <UPHeaderFullline>
+                  {" "}
+                  Click Here Or Drop the File Directly.
+                </UPHeaderFullline>
+              </DropzoneContainer>
+            </DropzoneFormcontainer>
+          ) : (
+            <></>
+          )}
         </>
       )}
-     
 
       {isLoading && (
         <DropzoneFormcontainer>
