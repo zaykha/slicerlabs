@@ -350,11 +350,6 @@ const Dropfile = ({}) => {
         return;
       }
       for (const uploadedFile of acceptedFiles) {
-        // if (uploadedFile.size > maxSize) {
-        //   setError("File size exceeds the maximum allowed (60MB).");
-        //   setIsLoading(false);
-        //   return;
-        // }
         const modelId = generateUniqueId();
         const fileExtension = uploadedFile.name.split(".").pop().toLowerCase();
 
@@ -366,7 +361,7 @@ const Dropfile = ({}) => {
             })
           )
         );
-        await storeFileInDB(uploadedFile, fileExtension, modelId);
+        await storeFileInDB(uploadedFile, modelId);
         setFiletype(fileExtension);
 
         const reader = new FileReader();

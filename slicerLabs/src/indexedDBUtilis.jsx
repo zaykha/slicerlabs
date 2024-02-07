@@ -66,7 +66,7 @@ export const storeFileInDB = async (file, modelId) => {
 
     // Modify the file object to include the modelId
 
-    const request = store.put(fileWithModelId);
+    const request = store.add(fileWithModelId);
 
     request.onsuccess = () => {
       console.log("File stored in IndexedDB:", fileWithModelId);

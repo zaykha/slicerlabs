@@ -140,7 +140,7 @@ const usePaymentSuccessHandler = async (
     try {
       // Get all files from IndexedDB
       const files = await getAllFilesFromDB();
-
+      console.log('all files retrieved',files);
       // Send data to Firestore and perform additional functionalities here
       const success = await storeDataInFirestore(files, userUID);
 
