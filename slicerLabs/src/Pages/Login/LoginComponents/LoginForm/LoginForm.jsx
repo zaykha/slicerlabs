@@ -72,8 +72,10 @@ const LoginForm = () => {
         if (cartItems.length > 0) {
           navigate("/cart");
         } else if (isAdmin) {
-          navigate("/Dashboard");
+          console.log("isAdmin is true, navigating to /dashboard");
+          navigate("/dashboard");
         } else {
+          console.log("isAdmin is false, navigating to /");
           navigate("/");
         }
 
@@ -86,7 +88,7 @@ const LoginForm = () => {
         console.log("Navigation completed");
       });
     }
-  }, [userDetails, IsLoginComplete]);
+  }, [userDetails, IsLoginComplete, isAdmin]);
   const validateEmail = (inputEmail) => {
     if (!inputEmail) {
       return "Email field is required.";
@@ -198,16 +200,18 @@ const LoginForm = () => {
                 JSON.stringify(docSnap.data().userDetails)
               );
 
-              console.log("Document data in Login:", docSnap.data());
+              // console.log("Document data in Login:", docSnap.data());
               const AdminCheck = docSnap.data().userDetails?.adminPrivileges;
-              setIsAdmin(AdminCheck);
+              setIsAdmin(docSnap.data().userDetails?.adminPrivileges);
+              // console.log(isAdmin, docSnap.data().userDetails?.adminPrivileges )
               setIsLoginComplete(true);
               setIsLoggingIn(false);
               // Create a Promise to handle navigation after asynchronous operations
               // Using useEffect to log userDetails after it's updated
             //  setTimeout(()=>{
+            //   // console.log(isAdmin, docSnap.data().userDetails?.adminPrivileges )
               
-            //  },2000)
+            //  },1000)
             } catch (error) {
               // Handle any errors that occurred during the operations
               console.error("Error in Login:", error);
@@ -274,13 +278,15 @@ const LoginForm = () => {
             localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
 
             console.log("Document data in SSO:", docSnap.data());
-
+            setIsAdmin(docSnap.data().userDetails?.adminPrivileges || false);
             // Navigate to the desired page after successful sign-in
-            cartItems.length > 0
-            ? navigate("/cart")
-            : isAdmin
-            ? navigate("/Dashboard")
-            : navigate("/");
+            // cartItems.length > 0
+            // ? navigate("/cart")
+            // : isAdmin
+            // ? navigate("/dashboard")
+            // : navigate("/");
+            setIsLoginComplete(true);
+              setIsLoggingIn(false);
           } else {
             // docSnap.data() will be undefined in this case
             console.log("No such document!");

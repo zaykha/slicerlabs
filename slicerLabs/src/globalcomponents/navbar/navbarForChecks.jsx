@@ -60,11 +60,13 @@ const NavbarForChecks = ({ togglesidebar, OKtoRoute }) => {
   const { isAuthenticated } = useSelector((state) => state.authentication);
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetails =
-    useSelector((state) => state.userDetails) ||
+    // useSelector((state) => state.userDetails) ||
     JSON.parse(userDetailsUnparsed);
   const isAdmin = userDetails?.adminPrivileges;
   const userName = userDetails?.userName;
   const cartItems = useSelector((state) => state.cartItems?.cartItems);
+  const cartRedux = useSelector((state) => state.cartItems);
+
   const hasUndefinedProduct = cartItems?.some(
     (item) => !item || !item.options || !item.options.ProductId
   );
@@ -78,7 +80,8 @@ const NavbarForChecks = ({ togglesidebar, OKtoRoute }) => {
       setErrorHandling({
         state: true,
         header: "An Error Occured",
-        message: "Please Delete the current Item in the cart or Add to cart before routing to other page",
+        message:
+          "Please Delete the current Item in the cart or Add to cart before routing to other page",
       });
       console.log("Not OK to route");
     } else {
@@ -146,14 +149,22 @@ const NavbarForChecks = ({ togglesidebar, OKtoRoute }) => {
                         {"Admin"}
                       </NavLinks>
 
-                     {OKtoRoute? <DropdownContent>
-                        <NavLinksAdmin to="/dashBoard">Task Page</NavLinksAdmin>
-                        <NavLinksAdmin to="/config">Config Page</NavLinksAdmin>
-                        <NavLinksAdmin to="/blog">Blog Page</NavLinksAdmin>
-                        <NavLinksAdminLogout to="/" onClick={handleLogout}>
-                          LogOut
-                        </NavLinksAdminLogout>
-                      </DropdownContent>:<></>}
+                      {OKtoRoute ? (
+                        <DropdownContent>
+                          <NavLinksAdmin to="/dashBoard">
+                            Task Page
+                          </NavLinksAdmin>
+                          <NavLinksAdmin to="/config">
+                            Config Page
+                          </NavLinksAdmin>
+                          <NavLinksAdmin to="/blog">Blog Page</NavLinksAdmin>
+                          {/* <NavLinksAdminLogout to="/" onClick={handleLogout}>
+                            LogOut
+                          </NavLinksAdminLogout> */}
+                        </DropdownContent>
+                      ) : (
+                        <></>
+                      )}
                     </DropdownContainer>
                   </NavItem>
                 ) : (
@@ -198,13 +209,18 @@ const NavbarForChecks = ({ togglesidebar, OKtoRoute }) => {
             </ActionItems>
 
             <ActionItems>
-              {hasUndefinedProduct && !isLoading ? (
-                <NavLinks onClick={() => setErrorPromptShow(true)}>
+              {cartRedux.cartItems.every(
+                (item) =>
+                  item.pricePerUnit !== 0 &&
+                  item.options.material !== "" &&
+                  item.options.color !== ""
+              ) ? (
+                <NavLinks to="/cart">
                   <IMGTAG1 src={cart} alt="cart" />
                   {cartItems?.length > 0 && <span>{cartItems.length}</span>}
                 </NavLinks>
               ) : (
-                <NavLinks to="/cart">
+                <NavLinks onClick={() => setErrorPromptShow(true)}>
                   <IMGTAG1 src={cart} alt="cart" />
                   {cartItems?.length > 0 && <span>{cartItems.length}</span>}
                 </NavLinks>

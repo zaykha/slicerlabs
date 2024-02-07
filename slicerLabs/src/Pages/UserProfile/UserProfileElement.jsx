@@ -12,11 +12,13 @@ export const InnerHeaderWrapper = styled.div`
   flex-direction: row;
   align-items: center;
   margin-top: 20px;
-
+  // margin-bottom: 20px;
+  border-bottom: 1px solid rgba(225, 225, 225, 0.5);
+  padding-bottom: 20px;
   @media screen and (max-width: 1200px) {
     flex-direction: column;
     flex-wrap: wrap;
-    border-bottom: 1px solid rgba(225, 225, 225, 0.5);
+    
   }
 `;
 export const InnerHeaderWrapperbtm = styled.div`
@@ -169,6 +171,7 @@ export const InnerLayersP = styled.div`
   font-weight: 400;
   letter-spacing: 0;
   line-height: normal;
+  overflow:hidden;
   @media screen and (max-width: 1200px) {
     font-size: 12px;
   }

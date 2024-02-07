@@ -17,11 +17,15 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 
-const apiTokenforOneMap = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI4NTMyYWViMTE3MDAyY2U0YmRlMThiYmRkN2U2ZWU5MyIsImlzcyI6Imh0dHA6Ly9pbnRlcm5hbC1hbGItb20tcHJkZXppdC1pdC0xMjIzNjk4OTkyLmFwLXNvdXRoZWFzdC0xLmVsYi5hbWF6b25hd3MuY29tL2FwaS92Mi91c2VyL3Bhc3N3b3JkIiwiaWF0IjoxNjkwMTk5MDM0LCJleHAiOjE2OTA0NTgyMzQsIm5iZiI6MTY5MDE5OTAzNCwianRpIjoiTFhiSk05ajQzUjNzN2UyayIsInVzZXJfaWQiOjE0OSwiZm9yZXZlciI6ZmFsc2V9.hRkko29tvd4gk7oz_HlUu4MA-sFFz8d_TeKlifJpHUE"
+const apiTokenforOneMap = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI4NTMyYWViMTE3MDAyY2U0YmRlMThiYmRkN2U2ZWU5MyIsImlzcyI6Imh0dHA6Ly9pbnRlcm5hbC1hbGItb20tcHJkZXppdC1pdC0xMjIzNjk4OTkyLmFwLXNvdXRoZWFzdC0xLmVsYi5hbWF6b25hd3MuY29tL2FwaS92Mi91c2VyL3Bhc3N3b3JkIiwiaWF0IjoxNzA3MzE3NTAzLCJleHAiOjE3MDc1NzY3MDMsIm5iZiI6MTcwNzMxNzUwMywianRpIjoiZlFUYjZkd3BDak42Z0xiNSIsInVzZXJfaWQiOjE0OSwiZm9yZXZlciI6ZmFsc2V9.ZSFsyvoxsQ4NL_h9nuGG9-WOrNVF5ZGIG43vfNMwmc8"
 // Define your reverse geocode function that makes the API request
 const reverseGeocode = async (postalCode) => {
-  const url = `https://developers.onemap.sg/commonapi/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y`;
-  const response = await fetch(url);
+  const url = `https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${postalCode}&returnGeom=Y&getAddrDetails=Y&pageNum=1`;
+  const response = await fetch(url, {
+    headers: {
+      Authorization: apiTokenforOneMap, // Include your API token in the headers
+    },
+  });
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
@@ -42,10 +46,12 @@ export const fetchAddressDetails = createAsyncThunk(
     // console.log(postalCode)
     try {
       const results = await reverseGeocode(postalCode);
+      // console.log(results);
       return results; // Return the relevant data from the response
     } catch (error) {
       // The OneMap API does not use error.response.data, so we can just return the error message directly
       // console.log(error.message)
+      console.log(error.message)
       return  rejectWithValue(error.message);
     }
   }

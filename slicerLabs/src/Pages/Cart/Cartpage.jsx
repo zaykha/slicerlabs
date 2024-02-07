@@ -59,10 +59,12 @@ import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { MeshNormalMaterial, Box3, Vector3, Mesh, LoadingManager } from "three";
 import { getAuth } from "firebase/auth";
 import ErrorPrompt from "../../globalcomponents/prompt/ErrorPrompt";
-import ConfirmationPrompt from "../../globalcomponents/prompt/ConfirmationPrompt";
+
 import { ConfigCollection, ServerConfig } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
+import { decrementCartCount } from "../../ReduxStore/actions/cartCountActions";
+import ConfirmationPrompt from "../../globalcomponents/prompt/ConfirmPrompt";
 
 const ProgressBar = ({ step }) => {
   return (
@@ -242,7 +244,7 @@ const Cartpage = () => {
       (total, item) => total + item.pricePerUnit * item.options.quantity,
       0
     );
-      console.log(cartItemsDetails)
+    console.log(cartItemsDetails);
     setTTLPriceBeforeRouting(totalPrice);
     console.log("totalPrice:", TTLPriceBeforeRouting);
   }, [cartItemsDetails]);
@@ -263,6 +265,26 @@ const Cartpage = () => {
   const fetchConfigSettings = async () => {
     setIsFetchingMSetting(true);
     try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      // Check if the user is logged in
+      if (!user) {
+        // User is not logged in, prompt them to log in and redirect to the login page
+        // const confirmLogin = window.confirm(
+        //   "Please log in or create an account to proceed to payment."
+        // );
+        setErrorHandling({
+          state: true,
+          header: "Confirmation Needed",
+          message:
+            "Please log in or create an account to proceed to payment.",
+        });
+
+        // if (confirmLogin) {
+        //   navigate("/login"); // Redirect to the login page
+        // }
+        return; // Stop the function if the user is not logged in
+      }
       const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
       const configDocSnapshot = await getDoc(configDocRef);
 
@@ -376,12 +398,18 @@ const Cartpage = () => {
       //   "Please log in or create an account to proceed to payment."
       // );
 
-      setConfirmationHandling({
+      // setConfirmationHandling({
+      //   state: true,
+      //   header: "Confirmation Needed",
+      //   message: "Please log in or create an account to proceed to payment.",
+      // });
+      setErrorHandling({
         state: true,
         header: "Confirmation Needed",
-        message: "Please log in or create an account to proceed to payment.",
+        message:
+          "Please log in or create an account to proceed to payment.",
       });
-
+      setIsProceedingToPayment(false);
       // if (confirmLogin) {
       //   navigate("/login"); // Redirect to the login page
       // }
@@ -399,7 +427,7 @@ const Cartpage = () => {
     // Add each item from cartItemsDetails to the validation array
     cartItemsDetails.forEach((item) => {
       const { material, color, quantity } = item.options;
-      const { dimensions, pricePerUnit} = item;
+      const { dimensions, pricePerUnit } = item;
       const itemId = item.id;
       const fileName = item.fileName;
       itemsForValidation.push({
@@ -410,7 +438,7 @@ const Cartpage = () => {
         dimensions,
         quantity, // Adjust the expected price based on quantity
         pricePerUnit,
-        userUID:userUIDInLocalStorage,
+        userUID: userUIDInLocalStorage,
         materialSettings,
       });
     });
@@ -634,11 +662,18 @@ const Cartpage = () => {
         <ConfirmationPrompt
           header={confirmationHandling.header}
           message={confirmationHandling.message}
-          onClose={() =>
-            setConfirmationHandling({ ...confirmationHandling, state: false })
-          }
+          onClose={() => {
+            setConfirmationHandling((prev) => ({
+              ...prev,
+              state: false,
+            }));
+            console.log('closing');
+          }}
           onConfirm={() => {
-            setConfirmationHandling({ ...confirmationHandling, state: false });
+            setConfirmationHandling((prev) => ({
+              ...prev,
+              state: false,
+            }));
             navigate("/login");
           }}
         />

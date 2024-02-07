@@ -38,19 +38,13 @@ const NavLinksarray = [
   // { title: "Materials", path: "/materials" },
   // { title: "Learn", path: "/learn" },
   { title: "Services", path: "/services" },
- 
+
   { title: "Contact Us", path: "/ContactUs" },
   { title: "FAQ", path: "/faq" },
   // { title: "Login", path: "/login" },
 ];
 
-const Navbar = ({
-  togglesidebar,
-  OKtoRoute
-  // userDetails,
-  // cartItems,
-  // isAuthenticated
-}) => {
+const Navbar = ({ togglesidebar, OKtoRoute }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -63,27 +57,45 @@ const Navbar = ({
   const userDetails =
     // useSelector((state) => state.userDetails) ||
     JSON.parse(userDetailsUnparsed)?.userDetails;
+
   const isAdmin = userDetails?.adminPrivileges;
   const userName = userDetails?.userName;
   const cartItems = useSelector((state) => state.cartItems?.cartItems);
-  const hasUndefinedProduct = cartItems?.some(
-    (item) => !item || !item.options || !item.options.ProductId
-  );
+  const cartRedux = useSelector((state) => state.cartItems);
+
+  const hasUndefinedProduct = cartItems?.every((item) => {
+    item.pricePerUnit !== 0 &&
+      item.options.material !== "" &&
+      item.options.color !== "";
+  });
   const [ErrorHandling, setErrorHandling] = useState({
     state: false,
     header: "",
     message: "",
   });
+  const handleLinkClick = (link) => {
+    if (!OKtoRoute) {
+      setErrorHandling({
+        state: true,
+        header: "An Error Occured",
+        message:
+          "Please Delete the current Item in the cart or Add to cart before routing to other page",
+      });
+      console.log("Not OK to route");
+    } else {
+      console.log("OK to route");
+    }
+  };
   useEffect(() => {
     setIsLoading(true);
-    console.log(isAdmin, userDetails);
+    // console.log(isAdmin, userDetails);
     setIsLoading(false);
-  }, [isLoading, userName, isAdmin, dispatch]);
+  }, [isLoading, userName, isAdmin]);
   // useEffect(() => {
   //   location.state
 
   //   console.log(location.pathname)
-  
+
   // }, [location]);
   const handleLogout = () => {
     localStorage.clear();
@@ -107,7 +119,7 @@ const Navbar = ({
           <NavLogo to="/">
             <IMGTAG src={logo} alt="logo" />
           </NavLogo>
-          
+
           <NavbarContainer>
             <NavMenu>
               {NavLinksarray.map((link) => (
@@ -121,14 +133,14 @@ const Navbar = ({
                   </NavLinks>
                 </NavItem>
               ))}
-              {!isLoading?
-              !isLoading && isAuthenticated ? (
+              {!isLoading && isAuthenticated ? (
                 !isLoading && isAdmin ? (
                   <NavItem>
                     <DropdownContainer>
                       <NavLinks
                         to="/dashboard"
                         className={pathname === "/dashboard" ? "active" : ""}
+                        onClick={() => handleLinkClick()}
                       >
                         {"Admin"}
                       </NavLinks>
@@ -137,9 +149,9 @@ const Navbar = ({
                         <NavLinksAdmin to="/dashBoard">Task Page</NavLinksAdmin>
                         <NavLinksAdmin to="/config">Config Page</NavLinksAdmin>
                         <NavLinksAdmin to="/blog">Blog Page</NavLinksAdmin>
-                        <NavLinksAdminLogout to="/" onClick={handleLogout}>
-                          LogOut
-                        </NavLinksAdminLogout>
+                        {/* <NavLinksAdminLogout to="/" onClick={handleLogout}>
+                            LogOut
+                          </NavLinksAdminLogout> */}
                       </DropdownContent>
                     </DropdownContainer>
                   </NavItem>
@@ -166,7 +178,7 @@ const Navbar = ({
                     Login
                   </NavLinks>
                 </NavItem>
-              ):<></>}
+              )}
             </NavMenu>
           </NavbarContainer>
 
@@ -186,15 +198,22 @@ const Navbar = ({
             </ActionItems>
 
             <ActionItems>
-              {hasUndefinedProduct && !isLoading ? (
-                <NavLinks onClick={() => setErrorPromptShow(true)}>
+              {cartRedux.cartItems.every(
+                (item) =>
+                  item.pricePerUnit !== 0 &&
+                  item.options.material !== "" &&
+                  item.options.color !== ""
+              ) ? (
+                <NavLinks to="/cart">
                   <IMGTAG1 src={cart} alt="cart" />
                   {cartItems?.length > 0 && <span>{cartItems.length}</span>}
                 </NavLinks>
               ) : (
-                <NavLinks to="/cart">
+                <NavLinks onClick={() => setErrorPromptShow(true)}>
                   <IMGTAG1 src={cart} alt="cart" />
-                  {cartItems?.length > 0 && <span>{cartItems.length}</span>}
+                  {cartRedux.cartItems?.length > 0 && (
+                    <span>{cartItems.length}</span>
+                  )}
                 </NavLinks>
               )}
             </ActionItems>

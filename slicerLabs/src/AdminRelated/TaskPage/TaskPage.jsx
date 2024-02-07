@@ -158,6 +158,7 @@ const TaskPage = () => {
       }
 
       console.log("purchaseInstances", purchaseInstancesData);
+      console.log("address", formattedAddresses);
       purchaseInstancesData.map((instance) => {
         instance.purchasedItems.forEach((item) => {
           if (item.status === "Delivered") {
@@ -395,7 +396,7 @@ const TaskPage = () => {
   const storage = getStorage();
   const handleDownload = async (item, purchaseInstance) => {
     try {
-      const fileName= `${selectedFileUser}&${selectedFile}`
+      const fileName = `${selectedFileUser}&${selectedFile}`;
       // console.log(fileName)
       // Get the reference to the file in Firebase Storage
       const fileRef = ref(storage, `Purchased3DFiles/${fileName}`);
@@ -466,23 +467,35 @@ const TaskPage = () => {
                               Contact: {purchaseInstance.userPhone}
                             </InnerLayersP>
                             <InnerLayersP>
-                              {item.fileName}
-                              {/* .substring(6) */}
+                              {item.fileName.substring(6)}
+
                             </InnerLayersP>
                           </InnerHeader>
                           <InnerHeaderClickable
-                            onClick={() => handleFileClick(item,purchaseInstance)}
+                            onClick={() =>
+                              handleFileClick(item, purchaseInstance)
+                            }
                           >
                             <InnerLayerP>
                               FDM Printing({item.color})
                             </InnerLayerP>
                             <InnerLayersP>with</InnerLayersP>
+                            <InnerLayerP>{item.material}</InnerLayerP>
                             <InnerLayerP>
-                              {item.material} {item.dimensions.depth} x{" "}
-                              {item.dimensions.width} x {item.dimensions.height}
+                              {item.dimensions.depth.toFixed(2)} x{" "}
+                              {item.dimensions.width.toFixed(2)} x{" "}
+                              {item.dimensions.height.toFixed(2)}
                             </InnerLayerP>
-                            <InnerLayersP>Quantity of </InnerLayersP>
-                            <InnerLayerP>{item.quantity}</InnerLayerP>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-evenly",
+                              }}
+                            >
+                              <InnerLayersP>Quantity of </InnerLayersP>
+                              <InnerLayerP>x {item.quantity}</InnerLayerP>
+                            </div>
                           </InnerHeaderClickable>
                           <InnerHeaderP>
                             {formattedAddresses[outerIndex]}
@@ -503,7 +516,7 @@ const TaskPage = () => {
                             />
                           </InnerHeader>
                           <InnerHeaderLeft>
-                            SGD {item.price.toFixed(2)}
+                            SGD {item.pricePerUnit.toFixed(2)}
                             <InnerLayersP>Purchased Date:</InnerLayersP>
                             <InnerLayerP>
                               {purchaseInstance.purchasedAt}
@@ -519,7 +532,9 @@ const TaskPage = () => {
                                   state: false,
                                 })
                               }
-                              onConfirm={()=>handleDownload(item,purchaseInstance)}
+                              onConfirm={() =>
+                                handleDownload(item, purchaseInstance)
+                              }
                             />
                           )}
                         </InnerHeaderWrapper>
@@ -573,12 +588,22 @@ const TaskPage = () => {
                               FDM Printing({item.color})
                             </InnerLayerP>
                             <InnerLayersP>with</InnerLayersP>
+                            <InnerLayerP>{item.material}</InnerLayerP>
                             <InnerLayerP>
-                              {item.material} {item.dimensions.depth} x{" "}
-                              {item.dimensions.width} x {item.dimensions.height}
+                              {item.dimensions.depth.toFixed(2)} x{" "}
+                              {item.dimensions.width.toFixed(2)} x{" "}
+                              {item.dimensions.height.toFixed(2)}
                             </InnerLayerP>
-                            <InnerLayersP>Quantity of </InnerLayersP>
-                            <InnerLayerP>{item.quantity}</InnerLayerP>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-evenly",
+                              }}
+                            >
+                              <InnerLayersP>Quantity of </InnerLayersP>
+                              <InnerLayerP>x {item.quantity}</InnerLayerP>
+                            </div>
                           </InnerHeader>
                           <InnerHeaderP>
                             {formattedAddresses[outerIndex]}
@@ -600,7 +625,7 @@ const TaskPage = () => {
                             />
                           </InnerHeader>
                           <InnerHeaderLeft>
-                            SGD {item.price.toFixed(2)}
+                            SGD {item.pricePerUnit.toFixed(2)}
                             <InnerLayersP>Purchased Date:</InnerLayersP>
                             <InnerLayerP>
                               {purchaseInstance.purchasedAt}
@@ -642,16 +667,26 @@ const TaskPage = () => {
                             <InnerLayerP> {item.fileName}</InnerLayerP>
                           </InnerHeader>
                           <InnerHeader>
-                            <InnerLayerP>
+                          <InnerLayerP>
                               FDM Printing({item.color})
                             </InnerLayerP>
                             <InnerLayersP>with</InnerLayersP>
+                            <InnerLayerP>{item.material}</InnerLayerP>
                             <InnerLayerP>
-                              {item.material} {item.dimensions.depth} x{" "}
-                              {item.dimensions.width} x {item.dimensions.height}
+                              {item.dimensions.depth.toFixed(2)} x{" "}
+                              {item.dimensions.width.toFixed(2)} x{" "}
+                              {item.dimensions.height.toFixed(2)}
                             </InnerLayerP>
-                            <InnerLayersP>Quantity of </InnerLayersP>
-                            <InnerLayerP>{item.quantity}</InnerLayerP>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-evenly",
+                              }}
+                            >
+                              <InnerLayersP>Quantity of </InnerLayersP>
+                              <InnerLayerP>x {item.quantity}</InnerLayerP>
+                            </div>
                           </InnerHeader>
                           <InnerHeader>
                             <StatusDropdown
@@ -692,7 +727,7 @@ const TaskPage = () => {
         {/* <StyledAddButton to="/">
           <span style={plusSignStyle}>+</span>
         </StyledAddButton> */}
-        <button onClick={handleLogout}>Logout</button>
+        <NextBtn onClick={handleLogout}>Logout</NextBtn>
       </LoginFromcontainer>
 
       {/* {Loading ? (

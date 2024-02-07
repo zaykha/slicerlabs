@@ -139,7 +139,7 @@ const ProductConcernPrompt = ({
   purchaseInstances,
   onSubmitProductConcern,
   onClose,
-  setFetchingData
+  setFetchingData,
 }) => {
   const [selectedProduct, setSelectedProduct] = useState("");
   const [concernNote, setConcernNote] = useState("");
@@ -180,9 +180,12 @@ const ProductConcernPrompt = ({
       }
 
       try {
-        const userConcernsRef = doc(ProductConcernCollection, userUIDInLocalStorage);
+        const userConcernsRef = doc(
+          ProductConcernCollection,
+          userUIDInLocalStorage
+        );
         const userConcernsDoc = await getDoc(userConcernsRef);
-      
+
         if (!userConcernsDoc.exists()) {
           // Document doesn't exist, create a new document
           const newConcern = {
@@ -195,18 +198,22 @@ const ProductConcernPrompt = ({
               },
             ],
           };
-      
+
           await setDoc(userConcernsRef, newConcern);
         } else {
           const existingConcerns = userConcernsDoc.data()?.concerns || [];
-      
+
           const updatedConcerns = existingConcerns.map((existingConcern) =>
             existingConcern.productId === selectedProduct
               ? { ...existingConcern, concernNote }
               : existingConcern
           );
-      
-          if (!existingConcerns.find((concern) => concern.productId === selectedProduct)) {
+
+          if (
+            !existingConcerns.find(
+              (concern) => concern.productId === selectedProduct
+            )
+          ) {
             // Add the new concern to the array
             updatedConcerns.push({
               productId: selectedProduct,
@@ -215,22 +222,20 @@ const ProductConcernPrompt = ({
               concernNote,
             });
           }
-      
+
           await setDoc(userConcernsRef, { concerns: updatedConcerns });
         }
-      
+
         // Validate and process the form data
         onSubmitProductConcern(selectedProduct, concernNote);
-        setFetchingData(false)
+        setFetchingData(false);
       } catch (error) {
-        setFetchingData(false)
+        setFetchingData(false);
         console.error("Error submitting concern:", error);
         // Handle the error, e.g., show an error message to the user
       }
-      
-        
     }
-    setFetchingData(false)
+    setFetchingData(false);
   };
 
   return (

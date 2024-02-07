@@ -53,13 +53,13 @@ import NavbarForChecks from "./globalcomponents/navbar/navbarForChecks";
 import RotatingLoader from "./globalcomponents/DropDown/RotatingLoader";
 import { UPHeaderFullline1 } from "./Pages/UserProfile/UserProfileElement";
 import SplashScreen from "./globalcomponents/DropDown/SplashScreen";
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 import FAQ from "./Pages/FAQ/FAQ";
 
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+
   const dispatch = useDispatch();
   const [OKtoRoute, setOKtoRoute] = useState(true);
 
@@ -74,15 +74,19 @@ function App() {
     (state) => state.paymentState.isSuccessPaymentDone
   );
   const { isAuthenticated } = useSelector((state) => state.authentication);
-  const userDetails = useSelector((state) => state.userDetails);
+  const userDetailsUnparsed = localStorage.getItem("userDetails");
+  const userDetails =
+    useSelector((state) => state.userDetails) ||
+    JSON.parse(userDetailsUnparsed)?.userDetails;
+  const [isAdmin, setIsAdmin] = useState(userDetails?.adminPrivileges || false);
   const cartItems = useSelector((state) => state?.cartItems?.cartItems);
   const hasMountedRef = useRef(false);
   useEffect(() => {
     AOS.init({
       duration: 1000, // Animation duration (in milliseconds)
-      offset: 200,   // Offset from the top of the window (in pixels)
-      easing: 'ease-in-out', // Easing for the animation (default is 'ease')
-      once: true // Whether animations should only happen once
+      offset: 200, // Offset from the top of the window (in pixels)
+      easing: "ease-in-out", // Easing for the animation (default is 'ease')
+      once: true, // Whether animations should only happen once
     });
   }, []);
   async function fetchCalculatePriceFunction() {
@@ -93,23 +97,23 @@ function App() {
         //   Authorization: idToken,
         // },
       });
-  
+
       if (!response.ok) {
         // Handle the response error, if any
         console.error("Error fetching calculatePrice function");
         return null; // Return null or an appropriate value to indicate failure
       }
-  
+
       const data = await response.json();
       // Assuming data contains all three functions: calculatePrice, calculateMassAndPrintTime, and calculatePostProcessingTime
       const { calculatePrice } = data;
-  
+
       // Serialize the functions to JSON strings
       const calculatePriceString = JSON.stringify(calculatePrice);
-  
+
       // Store the functions in local storage
       localStorage.setItem("calculatePriceFunction", calculatePriceString);
-  
+
       return calculatePrice; // Return the calculatePrice function
     } catch (error) {
       console.error("An error occurred while fetching data:", error);
@@ -120,18 +124,17 @@ function App() {
     if (!hasMountedRef.current) {
       const auth = getAuth();
       // startAuthListener();
-      fetchCalculatePriceFunction()
-      .then((calculatePriceFunction) => {
+      fetchCalculatePriceFunction().then((calculatePriceFunction) => {
         // Handle the result here, you can set it in your component's state or do something else
         if (calculatePriceFunction) {
           // Do something with calculatePriceFunction
-          console.log('fetch cal func successful', calculatePriceFunction)
+          console.log("fetch cal func successful", calculatePriceFunction);
         } else {
           // Handle the case where fetching failed
-          console.log('fetch cal func failed')
+          console.log("fetch cal func failed");
         }
       });
-   
+
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
           // If the user is logged in, get the ID token
@@ -371,7 +374,7 @@ function App() {
     },
     {
       path: "/DashBoard",
-      element: userDetails.adminPrivileges ? (
+      element: (
         <>
           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
           <Navbar
@@ -380,19 +383,7 @@ function App() {
             cartItems={cartItems}
             isAuthenticated={isAuthenticated}
           />
-          <TaskPage />
-          <Footer />
-        </>
-      ) : (
-        <>
-          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-          <Navbar
-            togglesidebar={togglesidebar}
-            userDetails={userDetails}
-            cartItems={cartItems}
-            isAuthenticated={isAuthenticated}
-          />
-          <DashBoard />
+          {isAdmin ? <TaskPage /> : <DashBoard />}
           <Footer />
         </>
       ),

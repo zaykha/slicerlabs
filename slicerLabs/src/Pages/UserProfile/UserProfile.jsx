@@ -282,7 +282,7 @@ export const DashBoard = () => {
                       calculatePriceFunction
                     );
                   }
-                  console.log("logout");
+                  // console.log("logout");
                   // Reset redux store and navigate
                   dispatch(setAuthenticationStatus(false));
                   dispatch(resetCartCount());
@@ -316,9 +316,7 @@ export const DashBoard = () => {
       {FetchingData ? (
         <RotatingLoader />
       ) : (
-        <UPHeaderFullline1>
-          Welcome {userDetails.userName}
-        </UPHeaderFullline1>
+        <UPHeaderFullline1>Welcome {userDetails.userName}</UPHeaderFullline1>
       )}
 
       <LoginFromcontainer>
@@ -348,14 +346,24 @@ export const DashBoard = () => {
                         <InnerLayerP> {item.fileName}</InnerLayerP>
                       </InnerHeader>
                       <InnerHeader>
-                        <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
-                        <InnerLayersP>with</InnerLayersP>
+                        <InnerLayerP>FDM Printing ({item.color})</InnerLayerP>
+                        <InnerLayersP>with </InnerLayersP>
+                        <InnerLayerP>{item.material}</InnerLayerP>
                         <InnerLayerP>
-                          {item.material} {item.dimensions.depth} x{" "}
-                          {item.dimensions.width} x {item.dimensions.height}
+                          {item.dimensions.depth.toFixed(2)} x{" "}
+                          {item.dimensions.width.toFixed(2)} x{" "}
+                          {item.dimensions.height.toFixed(2)}
                         </InnerLayerP>
-                        <InnerLayersP>Quantity of </InnerLayersP>
-                        <InnerLayerP>{item.quantity}</InnerLayerP>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-evenly",
+                          }}
+                        >
+                          <InnerLayersP>Quantity of </InnerLayersP>
+                          <InnerLayerP>x {item.quantity}</InnerLayerP>
+                        </div>
                       </InnerHeader>
                       <InnerHeader>
                         {purchaseInstance.approxDeliDate || "TBD"}
@@ -406,19 +414,29 @@ export const DashBoard = () => {
                       <InnerHeader>
                         <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
                         <InnerLayersP>with</InnerLayersP>
+                        <InnerLayerP>{item.material}</InnerLayerP>
                         <InnerLayerP>
-                          {item.material} {item.dimensions.depth} x{" "}
-                          {item.dimensions.width} x {item.dimensions.height}
+                          {item.dimensions.depth.toFixed(2)} x{" "}
+                          {item.dimensions.width.toFixed(2)} x{" "}
+                          {item.dimensions.height.toFixed(2)}
                         </InnerLayerP>
-                        <InnerLayersP>Quantity of </InnerLayersP>
-                        <InnerLayerP>{item.quantity}</InnerLayerP>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-evenly",
+                          }}
+                        >
+                          <InnerLayersP>Quantity of </InnerLayersP>
+                          <InnerLayerP>x {item.quantity}</InnerLayerP>
+                        </div>
                       </InnerHeader>
                       <InnerHeader>
                         {purchaseInstance.approxDeliDate || "TBD"}
                       </InnerHeader>
                       <InnerHeader>{item.status}</InnerHeader>
                       <InnerHeaderLeft>
-                        SGD {item.price.toFixed(2)}
+                        SGD {item.pricePerUnit.toFixed(2)}
                       </InnerHeaderLeft>
                     </InnerHeaderWrapper>
                   );
@@ -462,10 +480,11 @@ export const DashBoard = () => {
                                   FDM Printing({item.color})
                                 </InnerLayerP>
                                 <InnerLayersP>with</InnerLayersP>
+                                <InnerLayerP>{item.material}</InnerLayerP>
                                 <InnerLayerP>
-                                  {item.material} {item.dimensions.depth} x{" "}
-                                  {item.dimensions.width} x{" "}
-                                  {item.dimensions.height}
+                                  {item.dimensions.depth.toFixed(2)} x{" "}
+                                  {item.dimensions.width.toFixed(2)} x{" "}
+                                  {item.dimensions.height.toFixed(2)}
                                 </InnerLayerP>
                                 <InnerLayersP>Quantity of </InnerLayersP>
                                 <InnerLayerP>{item.quantity}</InnerLayerP>
@@ -495,7 +514,7 @@ export const DashBoard = () => {
       </LoginFromcontainer>
 
       {Loading && FetchingData ? (
-        <RotatingLoader/>
+        <RotatingLoader />
       ) : (
         <LoginFromcontainer>
           <ItemHeaderprofile>Personalization</ItemHeaderprofile>
@@ -505,14 +524,15 @@ export const DashBoard = () => {
           <InnerHeaderWrapper>
             <DisplayHeader>Name</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.userName || userDetails?.userDetails?.userName }
+              {userDetails?.userName || userDetails?.userDetails?.userName}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
           <InnerHeaderWrapper>
             <DisplayHeader>Shipping Address</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.displayFullAddress || userDetails?.userDetails?.displayFullAddress}
+              {userDetails?.displayFullAddress ||
+                userDetails?.userDetails?.displayFullAddress}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
