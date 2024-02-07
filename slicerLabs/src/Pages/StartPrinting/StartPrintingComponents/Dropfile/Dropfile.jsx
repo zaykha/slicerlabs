@@ -35,6 +35,7 @@ import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { MeshNormalMaterial, Box3, Vector3, Mesh, LoadingManager } from "three";
 import {
+  countItemsInDB,
   deleteAllRecordsFromDB,
   deleteFileFromDB,
   storeFileInDB,
