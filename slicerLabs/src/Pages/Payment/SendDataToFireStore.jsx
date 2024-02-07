@@ -118,7 +118,7 @@ const usePaymentSuccessHandler = async (
 
   if (userPurchasedItems?.length > 0) {
     purchasedItems = userPurchasedItems.map((item) => {
-      const { fileName, price, quantity, material, color, dimensions, itemId } =
+      const { fileName, pricePerUnit, quantity, material, color, dimensions, itemId } =
         item;
       return {
         itemId,
@@ -127,7 +127,7 @@ const usePaymentSuccessHandler = async (
         color,
         dimensions,
         quantity,
-        price,
+        pricePerUnit,
         status: "Pre-Printing Procedures",
       };
     });
@@ -172,6 +172,7 @@ const usePaymentSuccessHandler = async (
           try {
             const documentId = `${userUID}`;
             // Add the data to Firestore
+            console.log(PurchasedItemsCollection, dataToAdd)
             await addDoc(PurchasedItemsCollection, dataToAdd);
             console.log("data sent to firebase");
 
