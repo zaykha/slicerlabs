@@ -61,6 +61,9 @@ import {
   LoginFromcontainer,
 } from "../../../Login/LoginComponents/LoginForm/LoginFormelements";
 import { decrementCartCount } from "../../../../ReduxStore/actions/cartCountActions";
+import { addingMoreModels } from "../../../../ReduxStore/actions/addingModel";
+import { doc, getDoc } from "firebase/firestore";
+import { ConfigCollection } from "../../../../firebase";
 
 const STLModelSizeChecker = ({ model }) => {
   const { camera } = useThree();
@@ -107,6 +110,9 @@ const Dropfile = ({}) => {
   const cameraRef = useRef();
   const meshRef = useRef();
   const dispatch = useDispatch();
+  const addingMoreModelLocal = useSelector(
+    (state) => state.addingMoreModel.isAdding
+  );
   // const ProductId = useSelector((state) => state.cartItems.tempModelId);
   const [cameraPosition, setCameraPosition] = useState([
     -7.726866370752757, 7.241928986275022, -8.091348270643504,
@@ -176,6 +182,24 @@ const Dropfile = ({}) => {
     setCartCount(cart.length);
     // console.log(cart);
   }, [cart]);
+  const fetchConfigSettings = async () => {
+    try {
+      const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
+      const configDocSnapshot = await getDoc(configDocRef);
+
+      if (configDocSnapshot.exists()) {
+        const data = configDocSnapshot.data();
+        setMaterialSettings(data);
+      }
+      console.log(materialSettings);
+    } catch (error) {
+      console.error("Error fetching configuration settings:", error);
+    }
+  };
+  useEffect(() => {
+    fetchConfigSettings();
+    console.log(cart.cartItems[0]?.dimensions);
+  }, []);
   const parseStoredFunction = (functionName, storedFunction) => {
     try {
       const Unstring = JSON.parse(storedFunction);
@@ -278,7 +302,7 @@ const Dropfile = ({}) => {
         quantity,
         price,
       };
-      handleCheckOutInChild();
+      // handleCheckOutInChild();
       dispatch(
         addMaterialOptions({ checkID: tempModelId, options: finalItem })
       );
@@ -312,6 +336,7 @@ const Dropfile = ({}) => {
       if (rejectedFiles.length > 0) {
         setError("Invalid file type or file is corrupted");
         setIsLoading(false);
+        dispatch(addingMoreModels(false));
         return;
       }
 
@@ -321,6 +346,7 @@ const Dropfile = ({}) => {
       if (acceptedFiles.some((file) => file.size > maxSize)) {
         setError("One or more files exceed the maximum allowed size (60MB).");
         setIsLoading(false);
+        dispatch(addingMoreModels(false));
         return;
       }
       for (const uploadedFile of acceptedFiles) {
@@ -358,6 +384,7 @@ const Dropfile = ({}) => {
               manager.onLoad = function () {
                 console.log("Loading complete!");
                 setIsLoading(false);
+                dispatch(addingMoreModels(false));
                 // setIsModelLoaded(true);
               };
 
@@ -372,6 +399,7 @@ const Dropfile = ({}) => {
               manager.onError = function (url) {
                 console.log("There was an error loading " + url);
                 setIsLoading(false);
+                dispatch(addingMoreModels(false));
                 // setIsModelLoaded(false);
               };
 
@@ -379,7 +407,7 @@ const Dropfile = ({}) => {
               objLoader.load(
                 fileContent,
                 (objData) => {
-                  console.log(objData);
+                  // console.log(objData);
                   const material = new MeshNormalMaterial();
 
                   objData.traverse((child) => {
@@ -431,6 +459,7 @@ const Dropfile = ({}) => {
                         -8.091348270643504,
                       ]);
                       setIsLoading(false);
+                      dispatch(addingMoreModels(false));
                       return true;
                     } else {
                       // Model exceeds width or depth of print volume
@@ -438,6 +467,7 @@ const Dropfile = ({}) => {
                         `${uploadedFile.name} is not within our printer capability. Maximum print volume dimensions are ${printVolumeWidth}x${printVolumeDepth}x${printVolumeHeight} mm. Please feel free to contact us at "slicerlabs@gmail.com" for alternative solutions.`
                       );
                       setIsLoading(false);
+                      dispatch(addingMoreModels(false));
                       return;
                     }
                   } else {
@@ -446,6 +476,7 @@ const Dropfile = ({}) => {
                       `${uploadedFile.name} is not within our printer capability. Maximum print bed dimensions are ${printBedWidth}x${printBedDepth} mm. Please feel free to contact us at "slicerlabs@gmail.com" for alternative solutions.`
                     );
                     setIsLoading(false);
+                    dispatch(addingMoreModels(false));
                     return;
                   }
                   // console.log("Dimensions in millimeters:", dimensionsInMM);
@@ -486,6 +517,7 @@ const Dropfile = ({}) => {
                   console.log("Error loading OBJ:", error);
                   setIsSupportedFileType(false);
                   setIsLoading(false);
+                  dispatch(addingMoreModels(false));
                   setError(
                     "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
                   );
@@ -549,6 +581,7 @@ const Dropfile = ({}) => {
                           -7.726866370752757, 7.241928986275022,
                           -8.091348270643504,
                         ]);
+                        dispatch(addingMoreModels(false));
                         return true;
                       } else {
                         // Model exceeds width or depth of print volume
@@ -556,6 +589,7 @@ const Dropfile = ({}) => {
                           `${uploadedFile.name} is not within our printer capability. Maximum print volume dimensions are ${printVolumeWidth}x${printVolumeDepth}x${printVolumeHeight} mm. Please feel free to contact us at "slicerlabs@gmail.com" for alternative solutions.`
                         );
                         setIsLoading(false);
+                        dispatch(addingMoreModels(false));
                         return;
                       }
                     } else {
@@ -564,6 +598,7 @@ const Dropfile = ({}) => {
                         `${uploadedFile.name} is not within our printer capability. Maximum print bed dimensions are ${printBedWidth}x${printBedDepth} mm. Please feel free to contact us at "slicerlabs@gmail.com" for alternative solutions.`
                       );
                       setIsLoading(false);
+                      dispatch(addingMoreModels(false));
                       return;
                     }
                     // setModel((prevModels) => [
@@ -594,6 +629,7 @@ const Dropfile = ({}) => {
                     // Handle the case where the STL geometry is invalid
                     setIsSupportedFileType(false);
                     setIsLoading(false);
+                    dispatch(addingMoreModels(false));
                     setError("Invalid STL file or file is corrupted.");
                   }
                 },
@@ -608,6 +644,7 @@ const Dropfile = ({}) => {
                   console.log("An error happened", error);
                   setIsSupportedFileType(false);
                   setIsLoading(false);
+                  dispatch(addingMoreModels(false));
                   setError(
                     "Invalid file type or file is corrupted. Please upload only .stl and .obj files."
                   );
@@ -615,6 +652,7 @@ const Dropfile = ({}) => {
               );
             } else {
               setIsSupportedFileType(false);
+              dispatch(addingMoreModels(false));
               setError(
                 "Invalid file type. Please upload only .stl and .obj files."
               );
@@ -626,6 +664,7 @@ const Dropfile = ({}) => {
               acceptedFiles.length - 1
             ) {
               setIsLoading(false);
+              dispatch(addingMoreModels(false));
               // setIsModelLoaded(true);
               // setIsAddedToCart(false);
             }
@@ -667,7 +706,7 @@ const Dropfile = ({}) => {
     dispatch(decrementCartCount());
     deleteFileFromDB(tempModelId);
     // deleteAllRecordsFromDB();
-    console.log(model.length);
+    // console.log(model.length);
   };
   useLayoutEffect(() => {
     const updatePosition = () => {
@@ -742,7 +781,7 @@ const Dropfile = ({}) => {
     const { material, color, quantity } = individualModel.options || {};
     const { width, height, depth } = individualModel.dimensions || {};
     const price = individualModel.pricePerUnit || 0;
-    console.log(`Item ${index}, Price: ${price}`);
+    // console.log(`Item ${index}, Price: ${price}`);
     return (
       <div key={index} style={{ width: "100%", height: "auto" }}>
         {/* Your existing code for DropzoneFormcontainer */}
@@ -1012,17 +1051,32 @@ const Dropfile = ({}) => {
       )}
 
       {cart.cartItems.length > 0 && !isLoading ? (
-        <>
+        <div style={{ display: "flex" }}>
           <Carousel items={carouselItems} />
-          {cart.cartItems.every((item) => item.pricePerUnit !== 0) && (
-          <Tocartflexdiv>
-            <TocartCTABtn>ADD TO CART</TocartCTABtn>
-          </Tocartflexdiv>
-        )}
-        </>
+          {addingMoreModelLocal && (
+            <div style={{ position: "absolute" }}>
+              <DropzoneFormcontainer {...getRootProps()}>
+                <DropzoneContainer>
+                  <input {...getInputProps()} />
+                  <UPFullline>Support files -(STL,OBJ)</UPFullline>
+                  <UPFullline>Max file size - 60MB</UPFullline>
+                  <UPFullline>Model measurment - mm</UPFullline>
+                  <UPHeaderFullline>
+                    {" "}
+                    Click Here Or Drop the File Directly.
+                  </UPHeaderFullline>
+                </DropzoneContainer>
+              </DropzoneFormcontainer>
+              <Tocartflexdiv>
+                <TocartCTABtn onClick={()=>dispatch(addingMoreModels(false))}>Left</TocartCTABtn>
+              </Tocartflexdiv>
+            </div>
+          )}
+        </div>
       ) : (
         <>
-          {cart.cartItems.length === 0 && !isLoading ? (
+          {(cart.cartItems.length === 0 && !isLoading) ||
+          addingMoreModelLocal ? (
             <DropzoneFormcontainer {...getRootProps()}>
               <DropzoneContainer>
                 <input {...getInputProps()} />

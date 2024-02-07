@@ -246,14 +246,16 @@ const IndividualProduct = ({
         },
         materialSettings
       );
-      console.log(material,
+      console.log(
+        material,
         color,
         {
           width,
           height,
           depth,
         },
-        materialSettings)
+        materialSettings
+      );
       dispatch(updatePrice({ ProductId: tempID, newPrice }));
       // setPrice(newPrice);
     }
@@ -350,188 +352,173 @@ const IndividualProduct = ({
         <RotatingLoader />
       ) : (
         // <div className="ITEM-wrapper">
-          // {/* <div className="ITEM"> */}
-          <div className="overlap">
-            <div className="vertical-Division1">
-              <div className="ezgif-wrapper">
-                <Canvas>
-                  <Grid cellSize={3} infiniteGrid={true} />
-                  <OrbitControls />
-                  <ambientLight />
-                  <pointLight position={[10, 10, 10]} />
-                  <ModelSizeChecker model={model} />
-                  {/* {model && (
+        // {/* <div className="ITEM"> */}
+        <div className="overlap">
+          <div className="vertical-Division1">
+            <div className="ezgif-wrapper">
+              <Canvas>
+                <Grid cellSize={3} infiniteGrid={true} />
+                <OrbitControls />
+                <ambientLight />
+                <pointLight position={[10, 10, 10]} />
+                <ModelSizeChecker model={model} />
+                {/* {model && (
                     <primitive
                       object={model}
                       position={[0, 0, 0]}
                       scale={[0.1, 0.1, 0.1]}
                     />
                   )} */}
-                  <CameraControls cameraPosition={cameraPosition} />
-                </Canvas>
-              </div>
+                <CameraControls cameraPosition={cameraPosition} />
+              </Canvas>
             </div>
+          </div>
 
-            <div className="vertical-Division1">
-              <h1 className="text-wrapper">ITEM {index}</h1>
+          <div className="vertical-Division1">
+            <h1 className="text-wrapper">ITEM {index}</h1>
 
-              <div className="group-2">
-                <div className="overlap-group-wrapper">
-                  <div
-                    className="overlap-group-3"
-                    onClick={() => increaseQuantityAction(tempID)}
-                  >
-                    <div className="rectangle-2">
-                      <div className="text-wrapper-7">+</div>
-                    </div>
-                  </div>
-                  <div className="text-wrapper-6">{quantity}</div>
-
-                  <div
-                    className="overlap-2"
-                    onClick={() => decreaseQuantityAction(tempID)}
-                  >
-                    <div className="rectangle-3">
-                      <div className="text-wrapper-8">-</div>
-                    </div>
+            <div className="group-2">
+              <div className="overlap-group-wrapper">
+                <div
+                  className="overlap-group-3"
+                  onClick={() => increaseQuantityAction(tempID)}
+                >
+                  <div className="rectangle-2">
+                    <div className="text-wrapper-7">+</div>
                   </div>
                 </div>
-              </div>
-            </div>
+                <div className="text-wrapper-6">{quantity}</div>
 
-            <div className="vertical-Division2">
-              <Mdropdownlabel htmlFor="material">Materials</Mdropdownlabel>
-              <MOdropdown value={material} onChange={handleMaterialChange}>
-                <Moption value="">Please Select a Material</Moption>
-                <Moption value="ABS">
-                  Acrylonitrile Butadiene Styrene (ABS)
-                </Moption>
-                <Moption value="PLA">Polylactic Acid (PLA)</Moption>
-                <Moption value="TPU">Thermoplastic Polyurethane (TPU)</Moption>
-                <Moption value="Nylon">Nylon</Moption>
-                <Moption value="PETG">
-                  Polyethylene Terephthalate Glycol (PETG)
-                </Moption>
-                <Moption value="Resin">Resins</Moption>
-              </MOdropdown>
-
-              <Mdropdownlabel htmlFor="color">Finshing & Color</Mdropdownlabel>
-              <MOdropdown value={color} onChange={handleColorChange}>
-                <Moption value="">Please Select a Color</Moption>
-                <Moption value="white">White</Moption>
-                <Moption value="black">Black</Moption>
-                <Moption value="transparent">Transparent</Moption>
-              </MOdropdown>
-
-              <Mdropdownlabel htmlFor="width">
-                Dimension ( Width x Height x Depth )
-              </Mdropdownlabel>
-
-              <div
-                style={{
-                  display: "flex",
-                }}
-              >
-                <input
-                  type="number"
-                  placeholder="Width"
-                  value={width}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value >= 10) {
-                      dispatch(
-                        updateDimensions({
-                          ProductId: tempID,
-                          width: value,
-                          height,
-                          depth,
-                        })
-                      );
-                    }
-                  }}
-                  style={{
-                    width: "28%",
-                    background: "rgba(87, 87, 87, 0.43)",
-                    border: "1px solid #D5D5D5",
-                    borderRadius: "10px",
-                    color: "white",
-                    margin: "0px auto 15px",
-                    padding: "8px",
-                    textAlign: "center",
-                    height: "40px",
-                    fontSize: "1.1rem",
-                  }}
-                />
-
-                <input
-                  type="number"
-                  placeholder="Height"
-                  value={height}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value >= 10) {
-                      handleDimensionsChange(width, value, depth);
-                    }
-                  }}
-                  style={{
-                    width: "28%",
-                    background: "rgba(87, 87, 87, 0.43)",
-                    border: "1px solid #D5D5D5",
-                    borderRadius: "10px",
-                    color: "white",
-                    margin: "0px auto 15px",
-                    padding: "8px",
-                    textAlign: "center",
-                    height: "40px",
-                    fontSize: "1.1rem",
-                  }}
-                />
-
-                <input
-                  type="number"
-                  placeholder="Depth"
-                  value={depth}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value >= 10) {
-                      handleDimensionsChange(width, height, value);
-                    }
-                  }}
-                  style={{
-                    width: "28%",
-                    background: "rgba(87, 87, 87, 0.43)",
-                    border: "1px solid #D5D5D5",
-                    borderRadius: "10px",
-                    color: "white",
-                    margin: "0px auto 15px",
-                    padding: "8px",
-                    textAlign: "center",
-                    height: "40px",
-                    fontSize: "1.1rem",
-                  }}
-                />
-              </div>
-            </div>
-            {isFetchingMSetting ? (
-              <RotatingLoader />
-            ) : (
-              <div className="vertical-Division3">
-                <div className="div">Total :</div>
-                <div className="overlap-group">
-                  <div className="text-wrapper-3">SGD</div>
-                  <div className="text-wrapper-2">{totalPrice}</div>
-                </div>
-              </div>
-            )}
-            <div className="text-wrapper-4"> ID : {tempID}</div>
-            <div className="group" onClick={handleDelete}>
-              <div className="overlap-group-2">
-                <div className="rectangle">
-                  <div className="text-wrapper-5">x</div>
+                <div
+                  className="overlap-2"
+                  onClick={() => decreaseQuantityAction(tempID)}
+                >
+                  <div className="rectangle-3">
+                    <div className="text-wrapper-8">-</div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          <div className="vertical-Division2">
+            <Mdropdownlabel htmlFor="material">Materials</Mdropdownlabel>
+            <MOdropdown value={material} onChange={handleMaterialChange}>
+              <Moption value="">Please Select a Material</Moption>
+              <Moption value="ABS">
+                Acrylonitrile Butadiene Styrene (ABS)
+              </Moption>
+              <Moption value="PLA">Polylactic Acid (PLA)</Moption>
+              <Moption value="TPU">Thermoplastic Polyurethane (TPU)</Moption>
+              <Moption value="Nylon">Nylon</Moption>
+              <Moption value="PETG">
+                Polyethylene Terephthalate Glycol (PETG)
+              </Moption>
+              <Moption value="Resin">Resins</Moption>
+            </MOdropdown>
+
+            <Mdropdownlabel htmlFor="color">Finshing & Color</Mdropdownlabel>
+            <MOdropdown value={color} onChange={handleColorChange}>
+              <Moption value="">Please Select a Color</Moption>
+              <Moption value="white">White</Moption>
+              <Moption value="black">Black</Moption>
+              <Moption value="transparent">Transparent</Moption>
+            </MOdropdown>
+
+            <Mdropdownlabel htmlFor="width">
+              Dimension ( Width x Height x Depth )
+            </Mdropdownlabel>
+
+            <div
+              style={{
+                display: "flex",
+              }}
+            >
+              <input
+                type="number"
+                placeholder="Width"
+                value={width.toFixed(2)}
+                readOnly // Make the input field uneditable
+                step="1" // Allow only whole numbers
+                style={{
+                  width: "28%",
+                  background: "rgba(38, 38, 38, 0.43)",
+                  border: "1px solid #4a4a4a",
+                  borderRadius: "10px",
+                  color: "white",
+                  margin: "0px auto 15px",
+                  padding: "8px",
+                  textAlign: "center",
+                  height: "40px",
+                  fontSize: "1.1rem",
+                  pointerEvents: "none", // Make it unclickable
+                }}
+              />
+
+              <input
+                type="number"
+                placeholder="Height"
+                value={height.toFixed(2)}
+                readOnly // Make the input field uneditable
+                step="1" // Allow only whole numbers
+                style={{
+                  width: "28%",
+                  background: "rgba(38, 38, 38, 0.43)",
+                  border: "1px solid #4a4a4a",
+                  borderRadius: "10px",
+                  color: "white",
+                  margin: "0px auto 15px",
+                  padding: "8px",
+                  textAlign: "center",
+                  height: "40px",
+                  fontSize: "1.1rem",
+                  pointerEvents: "none", // Make it unclickable
+                }}
+              />
+
+              <input
+                type="number"
+                placeholder="Depth"
+                value={depth.toFixed(2)}
+                readOnly // Make the input field uneditable
+                step="1" // Allow only whole numbers
+                style={{
+                  width: "28%",
+                  background: "rgba(38, 38, 38, 0.43)",
+                  border: "1px solid #4a4a4a",
+                  borderRadius: "10px",
+                  color: "white",
+                  margin: "0px auto 15px",
+                  padding: "8px",
+                  textAlign: "center",
+                  height: "40px",
+                  fontSize: "1.1rem",
+                  pointerEvents: "none", // Make it unclickable
+                }}
+              />
+              
+            </div>
+          </div>
+          {isFetchingMSetting ? (
+            <RotatingLoader />
+          ) : (
+            <div className="vertical-Division3">
+              <div className="div">Total :</div>
+              <div className="overlap-group">
+                <div className="text-wrapper-3">SGD</div>
+                <div className="text-wrapper-2">{totalPrice}</div>
+              </div>
+            </div>
+          )}
+          <div className="text-wrapper-4"> ID : {tempID}</div>
+          <div className="group" onClick={handleDelete}>
+            <div className="overlap-group-2">
+              <div className="rectangle">
+                <div className="text-wrapper-5">x</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         //   {/* </div> */}
         // {/* </div> */}

@@ -101,6 +101,7 @@ const Cartpage = () => {
   const navigate = useNavigate();
   const [endCoordinates, setEndCoordinates] = useState("");
   const cartItemsDetails = useSelector((state) => state.cartItems.cartItems);
+  const cart = useSelector((state) => state.cartItems);
   const userUID = useSelector((state) => state.userDetails.userUID);
   const [userConfirmationPrompt, setuserConfirmationPrompt] = useState(false);
   const [renderedObjects, setRenderedObjects] = useState([]);
@@ -238,27 +239,27 @@ const Cartpage = () => {
 
   useEffect(() => {
     const totalPrice = cartItemsDetails.reduce(
-      (total, item) => total + item.options.price * item.options.quantity,
+      (total, item) => total + item.pricePerUnit * item.options.quantity,
       0
     );
-
+      console.log(cartItemsDetails)
     setTTLPriceBeforeRouting(totalPrice);
     console.log("totalPrice:", TTLPriceBeforeRouting);
   }, [cartItemsDetails]);
 
-  useEffect(() => {
-    if (endCoordinates) {
-      const [endLat, endLon] = endCoordinates.split(",");
-      try {
-        const distance = calculateDistance(lat1, lon1, endLat, endLon);
-        console.log("Distance between the addresses:", distance, "km");
-      } catch (error) {
-        console.error(error.message);
-      }
-    } else {
-      console.log("endCoordinates not ready");
-    }
-  }, [endCoordinates]);
+  // useEffect(() => {
+  //   if (endCoordinates) {
+  //     const [endLat, endLon] = endCoordinates.split(",");
+  //     try {
+  //       const distance = calculateDistance(lat1, lon1, endLat, endLon);
+  //       console.log("Distance between the addresses:", distance, "km");
+  //     } catch (error) {
+  //       console.error(error.message);
+  //     }
+  //   } else {
+  //     console.log("endCoordinates not ready");
+  //   }
+  // }, [endCoordinates]);
   const fetchConfigSettings = async () => {
     setIsFetchingMSetting(true);
     try {
@@ -285,9 +286,25 @@ const Cartpage = () => {
   }, [AddressDetails]);
   const handleRemoveItem = (modelIdToDelete) => {
     dispatch(deleteModel(modelIdToDelete));
+    dispatch(decrementCartCount());
     deleteFileFromDB(modelIdToDelete);
   };
-
+  const handleDelete = (tempModelId) => {
+    const updatedCarouselItems = carouselItems.filter(
+      (item) => item.id !== tempModelId
+    );
+    // Assuming setModel is the useState setter for your model state
+    setModel((prevModels) =>
+      prevModels.filter((model) => model.LocalID !== tempModelId)
+    );
+    setIsLoading(false);
+    setProgress(0);
+    dispatch(deleteModel(tempModelId));
+    dispatch(decrementCartCount());
+    deleteFileFromDB(tempModelId);
+    // deleteAllRecordsFromDB();
+    // console.log(model.length);
+  };
   const getStripeKey = async () => {
     try {
       const response = await fetch(
@@ -381,7 +398,8 @@ const Cartpage = () => {
 
     // Add each item from cartItemsDetails to the validation array
     cartItemsDetails.forEach((item) => {
-      const { material, color, dimensions, price, quantity } = item.options;
+      const { material, color, quantity } = item.options;
+      const { dimensions, pricePerUnit} = item;
       const itemId = item.id;
       const fileName = item.fileName;
       itemsForValidation.push({
@@ -391,7 +409,7 @@ const Cartpage = () => {
         color,
         dimensions,
         quantity, // Adjust the expected price based on quantity
-        price,
+        pricePerUnit,
         userUID:userUIDInLocalStorage,
         materialSettings,
       });
@@ -542,14 +560,14 @@ const Cartpage = () => {
               key={index}
               index={index + 1}
               model={item.model}
-              tempID={item.options.ProductId}
+              tempID={item.id}
               material={item.options.material}
               color={item.options.color}
-              width={item.options.dimensions.width}
-              height={item.options.dimensions.height}
-              depth={item.options.dimensions.depth}
+              width={item.dimensions.width}
+              height={item.dimensions.height}
+              depth={item.dimensions.depth}
               quantity={item.options.quantity}
-              price={item.options.price}
+              price={item.pricePerUnit}
               onDelete={handleRemoveItem}
               setuserConfirmationPrompt={setuserConfirmationPrompt}
             />

@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { MdCheck } from "react-icons/md";
-import { useSelector } from "react-redux";
+import { MdAdd, MdCheck } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
 import {
   TocartCTABtn,
   Tocartflexdiv,
 } from "../../Pages/StartPrinting/StartPrintingComponents/MaterialsOptions/MaterialsOptionselements";
+import { useNavigate } from "react-router-dom";
+import { addingMoreModels } from "../../ReduxStore/actions/addingModel";
+const StyledOuterDiv = styled.div`
+  width: 100vw;
+  padding: 30px 0;
+  position: relative;
+  right: ${({ addingMoreModel }) => (addingMoreModel ? '100vw' : '0')};
+  transition: all 0.2s ease-in;
+`;
 const CarouselContainer = styled.div`
   display: flex;
   overflow: hidden;
@@ -16,6 +25,7 @@ const CarouselContainer = styled.div`
   height: auto; /* Set the desired height of your carousel */
   //   border: 1px solid #ccc;
   // padding-bottom: 40px;
+  padding: 20px 0;
   position: relative;
   @media screen and (max-width: 800px) {
     width: 95%;
@@ -62,7 +72,23 @@ const PageIndicator = styled.div`
     display: ${(props) => (props.priceNotZero ? "block" : "none")};
   }
 `;
-
+const PageIndicatorplus = styled.div`
+  width: 20px;
+  height: 20px;
+  background-color:rgba(255, 255, 255, 0.25);
+  border: 1px solid #636363;
+  border-radius: 50%;
+  margin: 0 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  svg {
+    color: lightblue;
+    display: "block";
+  }
+`;
 const NavigationButton = styled.button`
   //   background: rgba(0, 0, 0, 0.5);
   background: none;
@@ -109,19 +135,22 @@ export const TocartCTABtn1 = styled.div`
 const Carousel = ({ items }) => {
   const [currentItem, setCurrentItem] = useState(0);
   const cart = useSelector((state) => state.cartItems);
-
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const addingMoreModelLocal = useSelector((state) => state.addingMoreModel.isAdding);
   useEffect(() => {
     // Check if the currentItem is still valid after deletion
     if (currentItem >= items.length) {
       setCurrentItem(items.length - 1);
     }
+    console.log(addingMoreModelLocal);
   }, [currentItem, items.length]);
+
   const scrollLeft = () => {
     if (currentItem > 0) {
       setCurrentItem(currentItem - 1);
     }
   };
-
   const scrollRight = () => {
     if (currentItem < items.length - 1) {
       setCurrentItem(currentItem + 1);
@@ -131,28 +160,44 @@ const Carousel = ({ items }) => {
   const goToPage = (pageIndex) => {
     setCurrentItem(pageIndex);
   };
+  const handleToCart = () => {
+    navigate(`/cart?cart=${cart.cartItems.length}`);
+  };
   return (
-    <>
+    <StyledOuterDiv addingMoreModel={addingMoreModelLocal}>
+      {cart.cartItems.every(
+        (item) =>
+          item.pricePerUnit !== 0 &&
+          item.options.material !== "" &&
+          item.options.color !== ""
+      ) && (
+        <Tocartflexdiv>
+          <TocartCTABtn onClick={handleToCart}>TO CART</TocartCTABtn>
+        </Tocartflexdiv>
+      )}
+
       <CarouselContainer>
         <ButtonContainer>
-          {/* <NavigationButton onClick={scrollLeft}>
-              <FaChevronLeft />
-            </NavigationButton> */}
-
           {cart.cartItems.map((item, index) => (
             <PageIndicator
               key={index}
               active={index === currentItem}
               onClick={() => goToPage(index)}
-              priceNotZero={item.pricePerUnit !== 0}
+              priceNotZero={
+                item.pricePerUnit !== 0 &&
+                item.options.material !== "" &&
+                item.options.color !== ""
+              }
             >
               <MdCheck />
             </PageIndicator>
           ))}
-
-          {/* <NavigationButton onClick={scrollRight}>
-              <FaChevronRight />{" "}
-            </NavigationButton> */}
+          <PageIndicatorplus
+            onClick={() => dispatch(addingMoreModels(true))}
+            style={{ cursor: "pointer" }}
+          >
+            <MdAdd />
+          </PageIndicatorplus>
         </ButtonContainer>
         <div
           style={{
@@ -166,7 +211,7 @@ const Carousel = ({ items }) => {
           ))}
         </div>
       </CarouselContainer>
-    </>
+    </StyledOuterDiv>
   );
 };
 

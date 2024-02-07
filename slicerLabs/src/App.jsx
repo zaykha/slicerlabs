@@ -125,7 +125,7 @@ function App() {
         // Handle the result here, you can set it in your component's state or do something else
         if (calculatePriceFunction) {
           // Do something with calculatePriceFunction
-          console.log('fetch cal func successful')
+          console.log('fetch cal func successful', calculatePriceFunction)
         } else {
           // Handle the case where fetching failed
           console.log('fetch cal func failed')
