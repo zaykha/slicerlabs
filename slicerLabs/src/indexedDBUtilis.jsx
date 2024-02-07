@@ -48,24 +48,54 @@ export const base64ToFile = (base64String, fileName, mimeType) => {
 };
 
 // Function to store a 3D file in IndexedDB
+// export const storeFileInDB = async (file, modelId) => {
+//   const db = await openDB();
+//   const transaction = db.transaction(STORE_NAME, "readwrite");
+//   const store = transaction.objectStore(STORE_NAME);
+//   console.log(file);
+//   const fileWithModelId = {
+//     id: modelId,
+//     file,
+//   };
+//   return new Promise((resolve, reject) => {
+//     // Make sure the modelId is present and set it as the key path
+//     if (!modelId) {
+//       reject(new Error("ModelId is required."));
+//       return;
+//     }
+
+//     // Modify the file object to include the modelId
+
+//     const request = store.add(fileWithModelId);
+
+//     request.onsuccess = () => {
+//       console.log("File stored in IndexedDB:", fileWithModelId);
+//       resolve();
+//     };
+
+//     request.onerror = () => {
+//       console.error("Error storing file in IndexedDB:", request.error);
+//       reject(request.error);
+//     };
+//   });
+// };
 export const storeFileInDB = async (file, modelId) => {
   const db = await openDB();
   const transaction = db.transaction(STORE_NAME, "readwrite");
   const store = transaction.objectStore(STORE_NAME);
-  console.log(file);
+
+  // Make sure the modelId is present
+  if (!modelId) {
+    throw new Error("ModelId is required.");
+  }
+
   const fileWithModelId = {
-    id: modelId,
+    id: modelId, // Use the model ID as the file ID
+    modelId, // Include the model ID in the file entry
     file,
   };
+
   return new Promise((resolve, reject) => {
-    // Make sure the modelId is present and set it as the key path
-    if (!modelId) {
-      reject(new Error("ModelId is required."));
-      return;
-    }
-
-    // Modify the file object to include the modelId
-
     const request = store.add(fileWithModelId);
 
     request.onsuccess = () => {

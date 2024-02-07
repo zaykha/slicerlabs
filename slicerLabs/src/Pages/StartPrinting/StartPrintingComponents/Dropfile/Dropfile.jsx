@@ -362,6 +362,8 @@ const Dropfile = ({}) => {
           )
         );
         await storeFileInDB(uploadedFile, modelId);
+        const itemCountInIndexedDB = await countItemsInDB();
+        console.log(itemCountInIndexedDB);
         setFiletype(fileExtension);
 
         const reader = new FileReader();
