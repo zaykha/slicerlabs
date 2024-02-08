@@ -79,7 +79,7 @@ export const DashBoard = () => {
   // const userDetails = JSON.parse(userDetailsUnparsed);
   const [localUser, setLocalUser] = useState(userDetails);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
-  const userUIDInLocalStorage = localStorage.getItem("uid");
+  const userUIDInLocalStorage = userDetails.userUID;
   // const postalCode = userDetails?.userDetails.postalCode
   // useEffect(() => {
   //   console.log(userDetails.userDetails);

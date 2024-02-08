@@ -102,7 +102,8 @@ const STLModelSizeChecker = ({ model }) => {
 const Dropfile = ({}) => {
   const [files, setFiles] = useState([]);
   const [filetype, setFiletype] = useState("");
-
+  const userDetails =
+  useSelector((state) => state?.userDetails) ;
   const [model, setModel] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSupportedFileType, setIsSupportedFileType] = useState(true);
@@ -152,7 +153,7 @@ const Dropfile = ({}) => {
   const ProductId = useSelector((state) => state.cartItems.tempModelId);
   const [cartCount, setCartCount] = useState(cart.length > 0 ? cart.length : 0);
   const idToken = localStorage.getItem("idToken");
-  const userUIDInLocalStorage = localStorage.getItem("uid");
+  const userUIDInLocalStorage = userDetails.userUID;;
   const [ErrorHandling, setErrorHandling] = useState({
     state: false,
     header: "",

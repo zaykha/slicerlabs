@@ -108,7 +108,9 @@ const ConfigPage = () => {
     laborCost: 25,
     overheadCost: 5,
   });
-  const userUIDInLocalStorage = localStorage.getItem("uid");
+  const userDetails =
+    useSelector((state) => state?.userDetails) ;
+  const userUIDInLocalStorage = userDetails.userUID;
   const [isEditing, setIsEditing] = useState(false);
   const [editedSettings, setEditedSettings] = useState({ ...configSettings });
   const [isFetching, setIsFetching] = useState(false);

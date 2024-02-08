@@ -38,7 +38,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
   const [isValidatingEmail, setIsValidatingEmail] = useState(false);
   const [fetchingAddress, setFetchingAddress] = useState(false);
   const auth = getAuth();
-  const userUIDInLocalStorage = localStorage.getItem("uid");
+  const userUIDInLocalStorage = userDetails.userUID;
   const [formValues, setFormValues] = useState({
     userName: userDetails.userName || "",
     phone: userDetails.phone || "",
