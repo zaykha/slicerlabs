@@ -1,29 +1,42 @@
-import React from 'react';
-import styled from 'styled-components';
-import { UPHeaderFullline1 } from '../../Pages/UserProfile/UserProfileElement';
-import { LoginFromcontainer } from '../../Pages/Login/LoginComponents/LoginForm/LoginFormelements';
+import React from "react";
+import styled from "styled-components";
+import { UPHeaderFullline1 } from "../../Pages/UserProfile/UserProfileElement";
+import { LoginFromcontainer } from "../../Pages/Login/LoginComponents/LoginForm/LoginFormelements";
 
-const PromptOverlay = styled.div`
+export const PromptOverlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
 `;
 
-const ContentContainer = styled.div`
+export const ContentContainer = styled.div`
   box-sizing: border-box;
-  width: 400px;
-  padding: 20px;
-  background-color: white;
-  border-radius: 5px;
+
+  width: 773px;
+  padding: 40px;
+  margin: 40px auto;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 51, 71, 0.83) 0%,
+    rgba(0, 80, 118, 0.83) 100%
+  );
+  border: 1px solid rgba(201, 201, 201, 0.41);
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  text-align: center;
+  backdrop-filter: blur(2px);
+  /* Note: backdrop-filter has minimal browser support */
+
+  border-radius: 10px;
+
+  @media screen and (max-width: 800px) {
+    width: 95%;
+  }
 `;
 
 const Message = styled.p`
@@ -95,11 +108,11 @@ const AddButtonDelete = styled(Button)`
   }
 `;
 const ConfirmationPrompt = ({ header, message, onConfirm, onCancel }) => {
-    // console.log(header, message);
+  // console.log(header, message);
   return (
     <PromptOverlay>
       <LoginFromcontainer>
-      <UPHeaderFullline1>{header}</UPHeaderFullline1>
+        <UPHeaderFullline1>{header}</UPHeaderFullline1>
         <ConfigSubHeader>{message}</ConfigSubHeader>
         <ButtonContainer>
           <AddButton onClick={onConfirm}>Confirm</AddButton>

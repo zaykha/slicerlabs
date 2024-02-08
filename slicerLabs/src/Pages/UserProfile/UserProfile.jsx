@@ -72,10 +72,10 @@ export const DashBoard = () => {
   const [Loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetails = useSelector((state) => state?.userDetails)||
-  JSON.parse(userDetailsUnparsed);
+  const userDetails =
+    useSelector((state) => state?.userDetails) ;
   // const userDetails = JSON.parse(userDetailsUnparsed);
   const [localUser, setLocalUser] = useState(userDetails);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
@@ -205,15 +205,11 @@ export const DashBoard = () => {
       const user = auth.currentUser;
       // console.log(user)
       if (user !== null) {
-        user.providerData.forEach((profile) => {
-          // console.log(profile)
-          dispatch(updateUserEmail(profile.email));
+        user.providerData.forEach(async (profile) => {
+          const newEmail = profile.email;
+          dispatch({ type: "UPDATE_EMAIL", payload: newEmail });
           setLoading(false);
-          // console.log("Sign-in provider: " + profile.providerId);
-          // console.log("  Provider-specific UID: " + profile.uid);
-          // console.log("  Name: " + profile.displayName);
-          // console.log("  Email: " + profile.email);
-          // console.log("  Photo URL: " + profile.photoURL);
+         
         });
       }
     } catch {
@@ -349,18 +345,36 @@ export const DashBoard = () => {
                       </InnerHeader>
                       <InnerHeader>
                         <InnerLayerP>FDM Printing ({item.color})</InnerLayerP>
-                        <InnerLayersP>with </InnerLayersP>
-                        <InnerLayerP>{item.material}</InnerLayerP>
-                        <InnerLayerP>
-                          {item.dimensions.depth.toFixed(2)} x{" "}
-                          {item.dimensions.width.toFixed(2)} x{" "}
-                          {item.dimensions.height.toFixed(2)}
-                        </InnerLayerP>
                         <div
                           style={{
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-evenly",
+                            margin: "5px 0",
+                          }}
+                        >
+                          <InnerLayersP>with </InnerLayersP>
+                          <InnerLayerP>{item.material}</InnerLayerP>
+                        </div>
+
+                        <InnerLayerP>
+                          {item.dimensions.depth.toFixed(2)}mm Depth
+                        </InnerLayerP>
+                        <InnerLayerP>
+                          {" "}
+                          {item.dimensions.width.toFixed(2)}mm Width
+                        </InnerLayerP>
+                        <InnerLayerP>
+                          {" "}
+                          {item.dimensions.height.toFixed(2)}mm Height
+                        </InnerLayerP>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-evenly",
+                            margin: "5px 0",
                           }}
                         >
                           <InnerLayersP>Quantity of </InnerLayersP>
@@ -385,7 +399,7 @@ export const DashBoard = () => {
       </LoginFromcontainer>
 
       <LoginFromcontainer>
-        <ItemHeaderprofile>Purchase History</ItemHeaderprofile>
+        <ItemHeaderprofile>Delivered Products</ItemHeaderprofile>
         {purchaseInstances.length > 0 &&
         purchaseInstances.map((purchaseInstance) => {
           purchaseInstance.purchasedItems.filter(
@@ -415,18 +429,36 @@ export const DashBoard = () => {
                       </InnerHeader>
                       <InnerHeader>
                         <InnerLayerP>FDM Printing({item.color})</InnerLayerP>
-                        <InnerLayersP>with</InnerLayersP>
-                        <InnerLayerP>{item.material}</InnerLayerP>
-                        <InnerLayerP>
-                          {item.dimensions.depth.toFixed(2)} x{" "}
-                          {item.dimensions.width.toFixed(2)} x{" "}
-                          {item.dimensions.height.toFixed(2)}
-                        </InnerLayerP>
                         <div
                           style={{
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-evenly",
+                            margin: "5px 0",
+                          }}
+                        >
+                          <InnerLayersP>with </InnerLayersP>
+                          <InnerLayerP>{item.material}</InnerLayerP>
+                        </div>
+
+                        <InnerLayerP>
+                          {item.dimensions.depth.toFixed(2)}mm Depth
+                        </InnerLayerP>
+                        <InnerLayerP>
+                          {" "}
+                          {item.dimensions.width.toFixed(2)}mm Width
+                        </InnerLayerP>
+                        <InnerLayerP>
+                          {" "}
+                          {item.dimensions.height.toFixed(2)}mm Height
+                        </InnerLayerP>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-evenly",
+                            margin: "5px 0",
                           }}
                         >
                           <InnerLayersP>Quantity of </InnerLayersP>
@@ -481,15 +513,41 @@ export const DashBoard = () => {
                                 <InnerLayerP>
                                   FDM Printing({item.color})
                                 </InnerLayerP>
-                                <InnerLayersP>with</InnerLayersP>
-                                <InnerLayerP>{item.material}</InnerLayerP>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-evenly",
+                                    margin: "5px 0",
+                                  }}
+                                >
+                                  <InnerLayersP>with </InnerLayersP>
+                                  <InnerLayerP>{item.material}</InnerLayerP>
+                                </div>
+
                                 <InnerLayerP>
-                                  {item.dimensions.depth.toFixed(2)} x{" "}
-                                  {item.dimensions.width.toFixed(2)} x{" "}
-                                  {item.dimensions.height.toFixed(2)}
+                                  {item.dimensions.depth.toFixed(2)}mm Depth
                                 </InnerLayerP>
-                                <InnerLayersP>Quantity of </InnerLayersP>
-                                <InnerLayerP>{item.quantity}</InnerLayerP>
+                                <InnerLayerP>
+                                  {" "}
+                                  {item.dimensions.width.toFixed(2)}mm Width
+                                </InnerLayerP>
+                                <InnerLayerP>
+                                  {" "}
+                                  {item.dimensions.height.toFixed(2)}mm Height
+                                </InnerLayerP>
+
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-evenly",
+                                    margin: "5px 0",
+                                  }}
+                                >
+                                  <InnerLayersP>Quantity of </InnerLayersP>
+                                  <InnerLayerP>x {item.quantity}</InnerLayerP>
+                                </div>
                               </InnerHeader>
                               <InnerHeader>
                                 {issue.status || "pending"}
@@ -526,22 +584,21 @@ export const DashBoard = () => {
           <InnerHeaderWrapper>
             <DisplayHeader>Name</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.userName || userDetails?.userDetails?.userName}
+              {userDetails?.userName}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
           <InnerHeaderWrapper>
             <DisplayHeader>Shipping Address</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.displayFullAddress ||
-                userDetails?.userDetails?.displayFullAddress}
+              {userDetails?.displayFullAddress}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
 
           <InnerHeaderWrapper>
             <DisplayHeader>Contact</DisplayHeader>
             <InnerHeaderpersonalize>
-              {userDetails?.phone || userDetails?.userDetails?.phone}
+              {userDetails?.phone}
             </InnerHeaderpersonalize>
           </InnerHeaderWrapper>
         </LoginFromcontainer>
@@ -553,7 +610,7 @@ export const DashBoard = () => {
         <InnerHeaderWrapper>
           <DisplayHeader>Email</DisplayHeader>
           <InnerHeaderpersonalize>
-            {userDetails?.email || userDetails?.userDetails?.email}
+            {userDetails?.email }
           </InnerHeaderpersonalize>
           <EditIconLoginDetails1 onClick={handleEditLoginDetailsClick}>
             Change Login Email

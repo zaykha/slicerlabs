@@ -46,6 +46,11 @@ const Registerform = () => {
   const dispatch = useDispatch();
   const timeoutIdRef = useRef(null);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
+  // const userDetailsInReg = useSelector((state) => state.userDetails);
+  const userDetailsUnparsed = localStorage.getItem("userDetails");
+  const userDetailsInReg =
+  useSelector((state) => state?.userDetails) ||
+  JSON.parse(userDetailsUnparsed);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isEmailValidating, setIsEmailValidating] = useState(false);
@@ -55,7 +60,7 @@ const Registerform = () => {
   const [passwordRepeatVisible, setPasswordRepeatVisible] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [formValues, setFormValues] = useState({
-    userName: "",
+    userName: "" ,
     password: "",
     passwordConfirm: "",
     occupation: "",
@@ -82,6 +87,10 @@ const Registerform = () => {
     header: "",
     message: "",
   });
+  // useEffect(()=>{
+  //   console.log(userDetailsInReg)
+
+  // },[])
   useEffect(() => {
     if (formValues.postalCode.length === 6) {
       // console.log(formValues.postalCode);
@@ -156,7 +165,7 @@ const Registerform = () => {
       const singaporeMobileRegex = /^(\+65\s?)?[89]\d{3}\s?\d{4}$/;
 
       const isValidPhone = singaporeMobileRegex.test(value);
-      console.log(isValidPhone);
+      // console.log(isValidPhone);
       if (!isValidPhone) {
         // Handle the case when the phone number is not valid
         return "Please enter a valid Singaporean mobile number";
@@ -261,7 +270,7 @@ const Registerform = () => {
     } else if (name === "email") {
       formattedValue = value.trim(); // Trim any leading/trailing spaces
     }
-    console.log(formattedValue);
+    // console.log(formattedValue);
     setFormValues((prevValues) => ({
       ...prevValues,
       [name]: formattedValue,
@@ -309,6 +318,7 @@ const Registerform = () => {
         header: "An Error Occured",
         message: "Please agree to the terms and policies.",
       });
+      setIsRegistering(false);
       return;
     }
     if (
@@ -345,6 +355,7 @@ const Registerform = () => {
           ? "Flat number is required"
           : "",
       }));
+      setIsRegistering(false);
       return;
     }
 
@@ -360,7 +371,7 @@ const Registerform = () => {
       const user = userCredentials.user;
       const USERUID = user.uid;
       // Store additional user information to Firestore
-      const userDetails = {
+      const userDetailsToUpload = {
         userUID: USERUID,
         userName: formValues.userName,
         occupation: formValues.occupation,
@@ -369,11 +380,13 @@ const Registerform = () => {
         postalCode: formValues.postalCode,
         blkNumber: formValues.blkNumber,
         flatNumber: formValues.flatNumber,
+        displayFullAddress:formValues.displayFullAddress,
+        adminPrivileges:false
       };
 
       // Add the userDetails to the "users" collection in Firestore
       await setDoc(doc(usersCollection, user.uid), {
-        userDetails,
+        userDetailsToUpload,
       });
       // Generate JWT token
       const token = await user.getIdToken();
@@ -381,19 +394,11 @@ const Registerform = () => {
       // Store token in local storage
       localStorage.setItem("idToken", token);
       localStorage.setItem("uid", USERUID);
-      localStorage.setItem("userDetails", JSON.stringify(formValues));
+      localStorage.setItem("userDetails", JSON.stringify(userDetailsToUpload));
       dispatch(setAuthenticationStatus(true));
       // Update user details in Redux
-      dispatch(setUserDetails(formValues));
+      dispatch(setUserDetails(userDetailsToUpload));
       // Redirect to desired page
-      // Return a promise after dispatching user details and authentication status
-      const navigationPromise = new Promise((resolve) => {
-        resolve();
-      });
-      // Use the returned promise to navigate after data is set
-      // navigationPromise.then(() => {
-      //   cartItems.length > 0 ? navigate("/cart") : navigate("/");
-      // });
       cartItems.length > 0 ? navigate("/cart") : navigate("/");
     } catch (error) {
       console.log(error.message);

@@ -33,7 +33,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
   const dispatch = useDispatch();
  
   const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetails = JSON.parse(userDetailsUnparsed);
+  const userDetails = useSelector((state) => state?.userDetails) ;;
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [isValidatingEmail, setIsValidatingEmail] = useState(false);
   const [fetchingAddress, setFetchingAddress] = useState(false);
@@ -273,7 +273,7 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
           getDoc(userDetailsRef)
             .then((docSnap) => {
               if (docSnap.exists()) {
-                const existingUserDetails = docSnap.data();
+                const existingUserDetails = docSnap.data().userDetailsToUpload;
                 const updatedUserDetails = { ...existingUserDetails };
                 
                 // Loop through the keys of the existingUserDetails object
@@ -298,13 +298,13 @@ const EditProfileForm = ({ user, onClose, onSave }) => {
                 try {
                   // const updatedData = { updatedUserDetails };
                   // console.log('updatedData',updatedData);
-                  console.log('updatedUserDetails',{userDetails:  updatedUserDetails});
-                  dispatch(setUserDetails({userDetails:  updatedUserDetails}));
-                  setDoc(userDetailsRef, {userDetails:  updatedUserDetails});
+                  console.log('updatedUserDetails',{updatedUserDetails});
+                  dispatch(setUserDetails(updatedUserDetails));
+                  setDoc(userDetailsRef, {userDetailsToUpload:  updatedUserDetails});
                   // console.log("User information updated in Firestore.");
                   localStorage.setItem(
                     "userDetails",
-                    JSON.stringify({userDetails:  updatedUserDetails})
+                    JSON.stringify(updatedUserDetails)
                   );
                 } catch (error) {
                   console.error(

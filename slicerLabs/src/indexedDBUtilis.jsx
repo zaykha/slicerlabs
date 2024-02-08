@@ -99,7 +99,7 @@ export const storeFileInDB = async (file, modelId) => {
     const request = store.add(fileWithModelId);
 
     request.onsuccess = () => {
-      console.log("File stored in IndexedDB:", fileWithModelId);
+      // console.log("File stored in IndexedDB:", fileWithModelId);
       resolve();
     };
 
@@ -121,7 +121,7 @@ export const deleteFileFromDB = async (fileId) => {
     const request = store.delete(fileId);
 
     request.onsuccess = () => {
-      console.log("File deleted from IndexedDB:", fileId);
+      // console.log("File deleted from IndexedDB:", fileId);
       resolve();
     };
 
@@ -168,7 +168,7 @@ export const deleteAllRecordsFromDB = async () => {
     const request = store.clear();
 
     request.onsuccess = () => {
-      console.log("All records deleted from IndexedDB.");
+      // console.log("All records deleted from IndexedDB.");
       resolve();
     };
 

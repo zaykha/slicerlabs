@@ -1,6 +1,6 @@
 // components/EditLoginDetailForm.js
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setUserDetails,
   updateUserEmail,
@@ -36,7 +36,7 @@ const EditLoginDetailForm = ({ onClose }) => {
   const dispatch = useDispatch();
   const auth = getAuth();
   const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetails = JSON.parse(userDetailsUnparsed);
+  const userDetails = useSelector((state) => state?.userDetails);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [formValues, setFormValues] = useState({
     userName: userDetails.userName || "",
@@ -348,7 +348,7 @@ const PopupContainer = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
   display: flex;
   align-items: center;
   justify-content: center;

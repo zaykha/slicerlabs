@@ -81,8 +81,8 @@ const LearnMaterials = () => {
         <LMNAV>
           {materialsData.map((material) => (
             <LMlist
-              data-aos="fade-right"
-              data-aos-delay={material.id*100}
+              // data-aos="fade-right"
+              // data-aos-delay={material.id*100}
               key={material.id}
               onClick={() => handleItemClick(material.id)}
               className={selectedItem === material.id ? "selected" : ""}

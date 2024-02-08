@@ -78,7 +78,7 @@ function App() {
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetails =
     useSelector((state) => state.userDetails) ||
-    JSON.parse(userDetailsUnparsed)?.userDetails;
+    JSON.parse(userDetailsUnparsed);
   const [isAdmin, setIsAdmin] = useState(userDetails?.adminPrivileges || false);
   const cartItems = useSelector((state) => state?.cartItems?.cartItems);
   const hasMountedRef = useRef(false);
@@ -129,14 +129,14 @@ function App() {
         // Handle the result here, you can set it in your component's state or do something else
         if (calculatePriceFunction) {
           // Do something with calculatePriceFunction
-          console.log("fetch cal func successful", calculatePriceFunction);
+          console.log("fetch cal func successful");
         } else {
           // Handle the case where fetching failed
           console.log("fetch cal func failed");
         }
       });
-
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      // const unsubscribe =
+       onAuthStateChanged(auth, async (user) => {
         if (user) {
           // If the user is logged in, get the ID token
           const idToken = await user.getIdToken();
@@ -146,56 +146,21 @@ function App() {
           // Now you can make the fetch request to retrieve the calculatePrice function
           // and store it in local storage.
           try {
-            // const response = await fetch(
-            //   // "http://localhost:3000/calculate-function",
-            //   // "https://cerulean-hermit-crab-robe.cyclic.cloud/calculate-function",
-            //     `${ServerConfig}/calculate-function`,
-            //   {
-            //     method: "GET",
-            //     headers: {
-            //       Authorization: idToken,
-            //     },
-            //   }
-            // );
-
-            // if (!response.ok) {
-            //   // Handle the response error, if any
-            //   console.error("Error fetching calculatePrice function");
-            //   return;
-            // }
-
-            // const data = await response.json();
-            // // Assuming data contains all three functions: calculatePrice, calculateMassAndPrintTime, and calculatePostProcessingTime
-            // const { calculatePrice } = data;
-
-            // // Serialize the functions to JSON strings
-            // const calculatePriceString = JSON.stringify(calculatePrice);
-
-            // // Store the functions in local storage
-            // localStorage.setItem(
-            //   "calculatePriceFunction",
-            //   calculatePriceString
-            // );
-            // console.log("useeffect triggered");
-            // Continue with your other logic
             const USERUID = user.uid;
             const userDetailsRef = doc(usersCollection, USERUID);
             const docSnap = await getDoc(userDetailsRef);
             if (docSnap.exists()) {
-              const userDetailsData = docSnap.data().userDetails;
-              const userDetailsWithUid = {
-                ...userDetailsData,
-                // userUID: docSnap.id,
-              };
-              dispatch(setUserDetails(userDetailsData));
+              const userDetailsData = docSnap.data();
+            
+              dispatch(setUserDetails(userDetailsData.userDetailsToUpload));
               localStorage.setItem(
                 "userDetails",
                 JSON.stringify(userDetailsData)
               );
-              console.log("Document data in APP.jsx:", userDetailsData);
+              console.log("Document data in APP.jsx:", userDetailsData.userDetailsToUpload);
               const userDetails = userDetailsData;
               const AdminCheck = userDetailsData?.adminPrivileges;
-              setIsAdmin(AdminCheck);
+              setIsAdmin(AdminCheck || false);
               // console.log(AdminCheck);
               // Check if the payment was successful
               if (successParam === "true") {
@@ -239,10 +204,10 @@ function App() {
       });
       hasMountedRef.current = true;
 
-      return () => {
-        // Unsubscribe from the onAuthStateChanged listener when the component unmounts
-        unsubscribe();
-      };
+      // return () => {
+      //   // Unsubscribe from the onAuthStateChanged listener when the component unmounts
+      //   unsubscribe();
+      // };
     }
   }, []);
 
@@ -367,10 +332,11 @@ function App() {
       element: (
         <>
           <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
-          <NavbarForChecks
+          {/* <NavbarForChecks
             togglesidebar={togglesidebar}
             OKtoRoute={OKtoRoute}
-          />
+          /> */}
+          <Navbar togglesidebar={togglesidebar} />
           <StartPrinting setOKtoRoute={setOKtoRoute} />
           <Footer />
         </>
@@ -387,7 +353,23 @@ function App() {
             cartItems={cartItems}
             isAuthenticated={isAuthenticated}
           />
-          {isAdmin ? <TaskPage /> : <DashBoard />}
+         <DashBoard />
+          <Footer />
+        </>
+      ),
+    },
+    {
+      path: "/adminDashboard",
+      element: (
+        <>
+          <Sidebar isOpen={isOpen} togglesidebar={togglesidebar} />
+          <Navbar
+            togglesidebar={togglesidebar}
+            userDetails={userDetails}
+            cartItems={cartItems}
+            isAuthenticated={isAuthenticated}
+          />
+          <TaskPage /> 
           <Footer />
         </>
       ),

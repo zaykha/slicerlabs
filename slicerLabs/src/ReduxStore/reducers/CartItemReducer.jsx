@@ -40,7 +40,7 @@ const cartSlice = createSlice({
         console.log("not found")
         return item;
       });
-      console.log(updatedCartItems)
+      // console.log(updatedCartItems)
       state.cartItems = updatedCartItems;
       state.tempModelId = null; // Reset the tempModelId
     },
@@ -52,7 +52,7 @@ const cartSlice = createSlice({
       if (itemIndex !== -1) {
         state.cartItems[itemIndex].options.quantity++;
       }
-      console.log(ProductId, itemIndex, state.cartItems)
+      // console.log(ProductId, itemIndex, state.cartItems)
     },
     decreaseQuantity(state, action) {
       const { ProductId } = action.payload;
@@ -94,7 +94,7 @@ const cartSlice = createSlice({
     },
     updatePrice(state, action) {
       const { ProductId, newPrice } = action.payload;
-      console.log(ProductId, newPrice)
+      // console.log(ProductId, newPrice)
       const itemIndex = state.cartItems.findIndex(
         (item) => item.id === ProductId
       );

@@ -468,7 +468,6 @@ const TaskPage = () => {
                             </InnerLayersP>
                             <InnerLayersP>
                               {item.fileName.substring(6)}
-
                             </InnerLayersP>
                           </InnerHeader>
                           <InnerHeaderClickable
@@ -479,18 +478,36 @@ const TaskPage = () => {
                             <InnerLayerP>
                               FDM Printing({item.color})
                             </InnerLayerP>
-                            <InnerLayersP>with</InnerLayersP>
-                            <InnerLayerP>{item.material}</InnerLayerP>
-                            <InnerLayerP>
-                              {item.dimensions.depth.toFixed(2)} x{" "}
-                              {item.dimensions.width.toFixed(2)} x{" "}
-                              {item.dimensions.height.toFixed(2)}
-                            </InnerLayerP>
                             <div
                               style={{
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "space-evenly",
+                                margin: "5px 0",
+                              }}
+                            >
+                              <InnerLayersP>with </InnerLayersP>
+                              <InnerLayerP>{item.material}</InnerLayerP>
+                            </div>
+
+                            <InnerLayerP>
+                              {item.dimensions.depth.toFixed(2)}mm Depth
+                            </InnerLayerP>
+                            <InnerLayerP>
+                              {" "}
+                              {item.dimensions.width.toFixed(2)}mm Width
+                            </InnerLayerP>
+                            <InnerLayerP>
+                              {" "}
+                              {item.dimensions.height.toFixed(2)}mm Height
+                            </InnerLayerP>
+
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-evenly",
+                                margin: "5px 0",
                               }}
                             >
                               <InnerLayersP>Quantity of </InnerLayersP>
@@ -587,18 +604,36 @@ const TaskPage = () => {
                             <InnerLayerP>
                               FDM Printing({item.color})
                             </InnerLayerP>
-                            <InnerLayersP>with</InnerLayersP>
-                            <InnerLayerP>{item.material}</InnerLayerP>
-                            <InnerLayerP>
-                              {item.dimensions.depth.toFixed(2)} x{" "}
-                              {item.dimensions.width.toFixed(2)} x{" "}
-                              {item.dimensions.height.toFixed(2)}
-                            </InnerLayerP>
                             <div
                               style={{
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "space-evenly",
+                                margin: "5px 0",
+                              }}
+                            >
+                              <InnerLayersP>with </InnerLayersP>
+                              <InnerLayerP>{item.material}</InnerLayerP>
+                            </div>
+
+                            <InnerLayerP>
+                              {item.dimensions.depth.toFixed(2)}mm Depth
+                            </InnerLayerP>
+                            <InnerLayerP>
+                              {" "}
+                              {item.dimensions.width.toFixed(2)}mm Width
+                            </InnerLayerP>
+                            <InnerLayerP>
+                              {" "}
+                              {item.dimensions.height.toFixed(2)}mm Height
+                            </InnerLayerP>
+
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-evenly",
+                                margin: "5px 0",
                               }}
                             >
                               <InnerLayersP>Quantity of </InnerLayersP>
@@ -667,21 +702,39 @@ const TaskPage = () => {
                             <InnerLayerP> {item.fileName}</InnerLayerP>
                           </InnerHeader>
                           <InnerHeader>
-                          <InnerLayerP>
-                              FDM Printing({item.color})
-                            </InnerLayerP>
-                            <InnerLayersP>with</InnerLayersP>
-                            <InnerLayerP>{item.material}</InnerLayerP>
                             <InnerLayerP>
-                              {item.dimensions.depth.toFixed(2)} x{" "}
-                              {item.dimensions.width.toFixed(2)} x{" "}
-                              {item.dimensions.height.toFixed(2)}
+                              FDM Printing({item.color})
                             </InnerLayerP>
                             <div
                               style={{
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "space-evenly",
+                                margin: "5px 0",
+                              }}
+                            >
+                              <InnerLayersP>with </InnerLayersP>
+                              <InnerLayerP>{item.material}</InnerLayerP>
+                            </div>
+
+                            <InnerLayerP>
+                              {item.dimensions.depth.toFixed(2)}mm Depth
+                            </InnerLayerP>
+                            <InnerLayerP>
+                              {" "}
+                              {item.dimensions.width.toFixed(2)}mm Width
+                            </InnerLayerP>
+                            <InnerLayerP>
+                              {" "}
+                              {item.dimensions.height.toFixed(2)}mm Height
+                            </InnerLayerP>
+
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-evenly",
+                                margin: "5px 0",
                               }}
                             >
                               <InnerLayersP>Quantity of </InnerLayersP>

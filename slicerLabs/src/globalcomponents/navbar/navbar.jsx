@@ -55,10 +55,12 @@ const Navbar = ({ togglesidebar, OKtoRoute }) => {
   const { isAuthenticated } = useSelector((state) => state.authentication);
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetails =
-    // useSelector((state) => state.userDetails) ||
-    JSON.parse(userDetailsUnparsed)?.userDetails;
+    useSelector((state) => state.userDetails) ||
+    JSON.parse(userDetailsUnparsed);
 
-  const isAdmin = userDetails?.adminPrivileges;
+  const isAdmin =
+    // useSelector((state) => state.userDetails).adminPrivileges ||
+    userDetails?.adminPrivileges;
   const userName = userDetails?.userName;
   const cartItems = useSelector((state) => state.cartItems?.cartItems);
   const cartRedux = useSelector((state) => state.cartItems);
@@ -74,17 +76,18 @@ const Navbar = ({ togglesidebar, OKtoRoute }) => {
     message: "",
   });
   const handleLinkClick = (link) => {
-    if (!OKtoRoute) {
-      setErrorHandling({
-        state: true,
-        header: "An Error Occured",
-        message:
-          "Please Delete the current Item in the cart or Add to cart before routing to other page",
-      });
-      console.log("Not OK to route");
-    } else {
-      console.log("OK to route");
-    }
+    // if (!OKtoRoute) {
+    //   setErrorHandling({
+    //     state: true,
+    //     header: "An Error Occured",
+    //     message:
+    //       "Please Delete the current Item in the cart or Add to cart before routing to other page",
+    //   });
+    //  
+    // } else {
+    //   console.log("OK to route");
+    // }
+    console.log(isAdmin);
   };
   useEffect(() => {
     setIsLoading(true);
@@ -127,7 +130,7 @@ const Navbar = ({ togglesidebar, OKtoRoute }) => {
                   <NavLinks
                     to={link.path}
                     className={pathname === link.path ? "active" : ""}
-                    // isactive={pathname === link.path}
+                    onClick={() => handleLinkClick()}
                   >
                     {link.title}
                   </NavLinks>
@@ -138,15 +141,19 @@ const Navbar = ({ togglesidebar, OKtoRoute }) => {
                   <NavItem>
                     <DropdownContainer>
                       <NavLinks
-                        to="/dashboard"
-                        className={pathname === "/dashboard" ? "active" : ""}
+                        to="/adminDashboard"
+                        className={
+                          pathname === "/adminDashboard" ? "active" : ""
+                        }
                         onClick={() => handleLinkClick()}
                       >
                         {"Admin"}
                       </NavLinks>
 
                       <DropdownContent>
-                        <NavLinksAdmin to="/dashBoard">Task Page</NavLinksAdmin>
+                        <NavLinksAdmin to="/adminDashBoard">
+                          Task Page
+                        </NavLinksAdmin>
                         <NavLinksAdmin to="/config">Config Page</NavLinksAdmin>
                         <NavLinksAdmin to="/blog">Blog Page</NavLinksAdmin>
                         {/* <NavLinksAdminLogout to="/" onClick={handleLogout}>
