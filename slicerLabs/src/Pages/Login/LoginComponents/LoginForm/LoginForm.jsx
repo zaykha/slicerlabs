@@ -511,7 +511,7 @@ const LoginForm = () => {
 
               // console.log("Document data in Login:", docSnap.data());
               const AdminCheck = docSnap.data().adminPrivileges;
-              setIsAdmin(docSnap.data().adminPrivileges);
+              setIsAdmin(docSnap.data().userDetailsToUpload.adminPrivileges);
               // console.log(isAdmin, docSnap.data().userDetails?.adminPrivileges )
               setIsLoginComplete(true);
               setIsLoggingIn(false);
@@ -581,13 +581,13 @@ const LoginForm = () => {
           const userDetailsRef = doc(usersCollection, uid);
           const docSnap = await getDoc(userDetailsRef);
           if (docSnap.exists()) {
-            console.log(docSnap.data());
+            console.log(docSnap.data().userDetailsToUpload);
             dispatch(setUserDetails(docSnap.data()));
             dispatch(setAuthenticationStatus(true));
-            localStorage.setItem("userDetails", JSON.stringify(docSnap.data()));
+            localStorage.setItem("userDetails", JSON.stringify(docSnap.data().userDetailsToUpload));
 
             console.log("Document data in SSO:", docSnap.data());
-            setIsAdmin(docSnap.data().adminPrivileges || false);
+            setIsAdmin(docSnap.data().userDetailsToUpload.adminPrivileges || false);
             // Navigate to the desired page after successful sign-in
             // cartItems.length > 0
             // ? navigate("/cart")

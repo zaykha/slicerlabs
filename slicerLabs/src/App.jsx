@@ -155,10 +155,10 @@ function App() {
               dispatch(setUserDetails(userDetailsData.userDetailsToUpload));
               localStorage.setItem(
                 "userDetails",
-                JSON.stringify(userDetailsData)
+                JSON.stringify(userDetailsData.userDetailsToUpload)
               );
               console.log("Document data in APP.jsx:", userDetailsData.userDetailsToUpload);
-              const userDetails = userDetailsData;
+              const userDetails = userDetailsData.userDetailsToUpload;
               const AdminCheck = userDetailsData?.adminPrivileges;
               setIsAdmin(AdminCheck || false);
               // console.log(AdminCheck);
