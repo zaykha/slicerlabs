@@ -59,7 +59,8 @@ import FAQ from "./Pages/FAQ/FAQ";
 
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
-
+  const queryParams = new URLSearchParams(window.location.search);
+  const successParam = queryParams.get("success");
   const dispatch = useDispatch();
   const [OKtoRoute, setOKtoRoute] = useState(true);
 
@@ -196,21 +197,24 @@ function App() {
               const AdminCheck = userDetailsData?.adminPrivileges;
               setIsAdmin(AdminCheck);
               // console.log(AdminCheck);
-              if (unparsedStoreditems && unparsedStoreditems.length > 0) {
-                const { error } = usePaymentSuccessHandler(
-                  user.uid,
-                  userPurchasedItems,
-                  userDetails,
-                  dispatch,
-                  successPaymentState
-                );
-                console.log(
-                  "localstorage has purchased item and purchase is success"
-                );
-              } else {
-                console.log(
-                  "localstorage has no purchased item and no purchase is made"
-                );
+              // Check if the payment was successful
+              if (successParam === "true") {
+                if (unparsedStoreditems && unparsedStoreditems.length > 0) {
+                  const { error } = usePaymentSuccessHandler(
+                    user.uid,
+                    userPurchasedItems,
+                    userDetails,
+                    dispatch,
+                    successPaymentState
+                  );
+                  console.log(
+                    "localstorage has purchased item and purchase is success"
+                  );
+                } else {
+                  console.log(
+                    "localstorage has no purchased item and no purchase is made"
+                  );
+                }
               }
             } else {
               console.log("No such document!");

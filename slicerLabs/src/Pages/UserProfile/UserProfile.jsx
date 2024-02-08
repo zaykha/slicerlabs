@@ -72,9 +72,11 @@ export const DashBoard = () => {
   const [Loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // const userDetails = useSelector((state) => state?.userDetails);
+  
   const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetails = JSON.parse(userDetailsUnparsed);
+  const userDetails = useSelector((state) => state?.userDetails)||
+  JSON.parse(userDetailsUnparsed);
+  // const userDetails = JSON.parse(userDetailsUnparsed);
   const [localUser, setLocalUser] = useState(userDetails);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
   const userUIDInLocalStorage = localStorage.getItem("uid");
@@ -316,7 +318,7 @@ export const DashBoard = () => {
       {FetchingData ? (
         <RotatingLoader />
       ) : (
-        <UPHeaderFullline1>Welcome {userDetails.userName}</UPHeaderFullline1>
+        <UPHeaderFullline1>Welcome {userDetails?.userName}</UPHeaderFullline1>
       )}
 
       <LoginFromcontainer>

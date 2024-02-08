@@ -1066,7 +1066,7 @@ const Dropfile = ({}) => {
                 </DropzoneContainer>
               </DropzoneFormcontainer>
               <Tocartflexdiv>
-                <TocartCTABtn onClick={()=>dispatch(addingMoreModels(false))}>Left</TocartCTABtn>
+                <TocartCTABtn onClick={()=>dispatch(addingMoreModels(false))}>Back</TocartCTABtn>
               </Tocartflexdiv>
             </div>
           )}
