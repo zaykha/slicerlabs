@@ -165,6 +165,7 @@ function App() {
               // Check if the payment was successful
               if (successParam === "true") {
                 if (unparsedStoreditems && unparsedStoreditems.length > 0) {
+                  console.log("payment success")
                   const { error } = usePaymentSuccessHandler(
                     user.uid,
                     userPurchasedItems,

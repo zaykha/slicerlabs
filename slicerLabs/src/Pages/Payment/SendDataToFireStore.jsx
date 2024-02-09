@@ -87,9 +87,10 @@ const usePaymentSuccessHandler = async (
   currentDate.setDate(currentDate.getDate() + 2);
   const storeDataInFirestore = async (Purchased3dData, userUID) => {
     try {
+      console.log("sending data to firestore")
       // Upload files to Cloud Firestore Storage
       const storage = getStorage();
-
+      console.log(Purchased3dData,userUID)
       // Loop through each file in Purchased3dData and upload it to Storage
       await Promise.all(
         Purchased3dData.map(async (fileData) => {

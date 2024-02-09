@@ -200,7 +200,7 @@ const Dropfile = ({}) => {
   };
   useEffect(() => {
     fetchConfigSettings();
-    console.log(cart.cartItems[0]?.dimensions);
+    // console.log(cart.cartItems[0]?.dimensions);
   }, []);
   const parseStoredFunction = (functionName, storedFunction) => {
     try {

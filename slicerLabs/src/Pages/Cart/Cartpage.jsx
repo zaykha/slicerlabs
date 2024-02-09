@@ -549,36 +549,6 @@ const Cartpage = () => {
       <Step1Container>
         {/* {cartItemsDetails.length === 0 ? <></> : <ProgressBar step={step} />} */}
         {cartItemsDetails.length === 0 ? (
-          // renderedObjects.length > 0 && storedItems.length>0 ? (
-          //   renderedObjects.map((objData) => {
-          //     // Find the corresponding item in storedItems based on itemId
-          //     const item = storedItems.find((storedItem) => storedItem.itemId === objData.id);
-
-          //     // Check if the item is found
-          //     if (item) {
-          //       return (
-          //         <IndividualProduct
-          //           key={item.itemId} // Use the itemId as the key instead of index
-          //           index={1} // You can remove index from here since it's not being used
-          //           model={objData.objData}
-          //           tempID={item.itemId}
-          //           material={item.material}
-          //           color={item.color}
-          //           width={item.dimensions.width}
-          //           height={item.dimensions.height}
-          //           depth={item.dimensions.depth}
-          //           quantity={item.quantity}
-          //           price={item.price}
-          //           onDelete={handleRemoveItem}
-          //         />
-          //       );
-          //     } else {
-          //       // Handle the case when the corresponding item in storedItems is not found
-          //       // For example, you can return a placeholder or null
-          //       return null;
-          //     }
-          //   })
-          // ) : (
           <NoitemCart>
             <CUheader>No Items In Cart</CUheader>
           </NoitemCart>
