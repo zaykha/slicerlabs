@@ -63,6 +63,15 @@ const cartSlice = createSlice({
         state.cartItems[itemIndex].options.quantity--;
       }
     },
+    updateQuantity(state, action) {
+      const { ProductId, newQuantity } = action.payload;
+      const itemIndex = state.cartItems.findIndex(
+        (item) => item.id === ProductId
+      );
+      if (itemIndex !== -1 && newQuantity > 0) {
+        state.cartItems[itemIndex].options.quantity = newQuantity;
+      }
+    },
     updateMaterial(state, action) {
       const { ProductId, newMaterial } = action.payload;
       const itemIndex = state.cartItems.findIndex(
@@ -131,6 +140,7 @@ export const {
   addMaterialOptions,
   increaseQuantity,
   decreaseQuantity,
+  updateQuantity,
   updateMaterial,
   updateColor,
   updateDimensions,

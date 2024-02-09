@@ -16,7 +16,12 @@ import { useDropzone } from "react-dropzone";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { MeshBasicMaterial, PerspectiveCamera } from "three";
-import { Grid, OrbitControls } from "@react-three/drei";
+import {
+  Grid,
+  OrbitControls,
+  PresentationControls,
+  Stage,
+} from "@react-three/drei";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addModel,
@@ -65,6 +70,7 @@ import { decrementCartCount } from "../../../../ReduxStore/actions/cartCountActi
 import { addingMoreModels } from "../../../../ReduxStore/actions/addingModel";
 import { doc, getDoc } from "firebase/firestore";
 import { ConfigCollection } from "../../../../firebase";
+import PriceTable from "../../../../globalcomponents/PriceTable/priceTable";
 
 const STLModelSizeChecker = ({ model }) => {
   const { camera } = useThree();
@@ -102,8 +108,7 @@ const STLModelSizeChecker = ({ model }) => {
 const Dropfile = ({}) => {
   const [files, setFiles] = useState([]);
   const [filetype, setFiletype] = useState("");
-  const userDetails =
-  useSelector((state) => state?.userDetails) ;
+  const userDetails = useSelector((state) => state?.userDetails);
   const [model, setModel] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSupportedFileType, setIsSupportedFileType] = useState(true);
@@ -153,7 +158,7 @@ const Dropfile = ({}) => {
   const ProductId = useSelector((state) => state.cartItems.tempModelId);
   const [cartCount, setCartCount] = useState(cart.length > 0 ? cart.length : 0);
   const idToken = localStorage.getItem("idToken");
-  const userUIDInLocalStorage = userDetails.userUID;;
+  const userUIDInLocalStorage = userDetails.userUID;
   const [ErrorHandling, setErrorHandling] = useState({
     state: false,
     header: "",
@@ -186,7 +191,10 @@ const Dropfile = ({}) => {
   }, [cart]);
   const fetchConfigSettings = async () => {
     try {
-      const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
+      const configDocRef = doc(
+        ConfigCollection,
+        "irr8pVIaN4S4JjkMlEreZi8wC7G2"
+      ); // Replace with your collection and document IDs
       const configDocSnapshot = await getDoc(configDocRef);
 
       if (configDocSnapshot.exists()) {
@@ -365,7 +373,7 @@ const Dropfile = ({}) => {
         );
         await storeFileInDB(uploadedFile, modelId);
         const itemCountInIndexedDB = await countItemsInDB();
-        console.log('itemcount',itemCountInIndexedDB);
+        console.log("itemcount", itemCountInIndexedDB);
         setFiletype(fileExtension);
 
         const reader = new FileReader();
@@ -792,16 +800,21 @@ const Dropfile = ({}) => {
                 height: "100%",
                 position: "absolute",
               }}
+              dpr={[1, 2]}
+              camera={{ fov: 45 }}
             >
-              <Grid cellSize={3} infiniteGrid={true} />
-              <OrbitControls />
-              <ambientLight />
-              <pointLight position={[10, 10, 10]} />
-
-              {/* Render the individual model with ModelSizeChecker */}
-              <ModelSizeChecker model={individualModel.model} />
-
-              <CameraControls cameraPosition={cameraPosition} />
+              <PresentationControls>
+                <Stage environment={null}>
+                  {/* <Grid cellSize={3} infiniteGrid={true} /> */}
+                  <OrbitControls />
+                  <ambientLight />
+                  <pointLight position={[10, 10, 10]} />
+                  {/* <ModelSizeChecker model={individualModel.model} /> */}
+                  <meshBasicMaterial color="rgb(10, 20, 30)" />
+                  <primitive object={individualModel.model} scale={0.01}/>
+                  {/* <CameraControls cameraPosition={cameraPosition} /> */}
+                </Stage>
+              </PresentationControls>
             </Canvas>
 
             <button
@@ -851,7 +864,7 @@ const Dropfile = ({}) => {
               <Moption value="PETG">
                 Polyethylene Terephthalate Glycol (PETG)
               </Moption>
-              <Moption value="Resin">Resins</Moption>
+              <Moption value="RESIN">Resins</Moption>
             </MOdropdown>
 
             <Mdropdownlabel htmlFor={`color_${index}`}>
@@ -986,10 +999,15 @@ const Dropfile = ({}) => {
                     <MinP>$ {(price * parseInt(quantity)).toFixed(2)}</MinP>
                   </QtyDiv2>
                 </QtyFlexDiv>
+                {/* <PriceTable
+                  initialPrice={price}
+                  individualModel={individualModel}
+                /> */}
               </div>
             ) : (
               <></>
             )}
+
             {price !== 0 ? (
               <Mdropdownlabel>
                 Costs (Price-Match Guarantee): We will ensure that our quotes
@@ -1067,7 +1085,9 @@ const Dropfile = ({}) => {
                 </DropzoneContainer>
               </DropzoneFormcontainer>
               <Tocartflexdiv>
-                <TocartCTABtn onClick={()=>dispatch(addingMoreModels(false))}>Back</TocartCTABtn>
+                <TocartCTABtn onClick={() => dispatch(addingMoreModels(false))}>
+                  Back
+                </TocartCTABtn>
               </Tocartflexdiv>
             </div>
           )}

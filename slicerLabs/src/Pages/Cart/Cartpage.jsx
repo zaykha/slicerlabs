@@ -627,7 +627,7 @@ const Cartpage = () => {
           onClose={() => setErrorHandling({ ...ErrorHandling, state: false })}
         />
       )}
-      {/* <NextBtn onClick={handleDeleteAllRecords}>deleteAllFromIDB</NextBtn> */}
+      <NextBtn onClick={handleDeleteAllRecords}>deleteAllFromIDB</NextBtn>
       {confirmationHandling.state && (
         <ConfirmationPrompt
           header={confirmationHandling.header}

@@ -16,7 +16,7 @@ import {
   updatePrice,
 } from "../../../../ReduxStore/reducers/CartItemReducer";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Grid, OrbitControls } from "@react-three/drei";
+import { Grid, OrbitControls, PresentationControls, Stage } from "@react-three/drei";
 
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
@@ -149,6 +149,8 @@ const IndividualProduct = ({
     -7.726866370752757, 7.241928986275022, -8.091348270643504,
   ]);
   const userUIDInLocalStorage = localStorage.getItem("uid");
+  const userDetails =
+  useSelector((state) => state?.userDetails) ;
   const [materialSettings, setMaterialSettings] = useState({
     printTimePerUnitVolume: {
       ABS: 0.05, // minutes/cm^3
@@ -193,14 +195,23 @@ const IndividualProduct = ({
   const fetchConfigSettings = async () => {
     setIsFetchingMSetting(true);
     try {
-      const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
+      const configDocRef = doc(ConfigCollection,"irr8pVIaN4S4JjkMlEreZi8wC7G2"); // Replace with your collection and document IDs
       const configDocSnapshot = await getDoc(configDocRef);
 
       if (configDocSnapshot.exists()) {
-        const data = configDocSnapshot.data();
-        setMaterialSettings(data);
+        const ConfigData = configDocSnapshot.data();
+        // configDocSnapshot.forEach(doc => {
+        //   const data = doc.data();
+        // console.log(data);
+         
+        // });
+        setMaterialSettings(ConfigData);
+        console.log(ConfigData);
+      }else{
+        console.log('fail to fetch calc func from firebase');
+        console.log(configDocSnapshot);
       }
-      // console.log(materialSettings);
+     
     } catch (error) {
       console.error("Error fetching configuration settings:", error);
     }
@@ -356,21 +367,28 @@ const IndividualProduct = ({
         <div className="overlap">
           <div className="vertical-Division1">
             <div className="ezgif-wrapper">
-              <Canvas>
-                <Grid cellSize={3} infiniteGrid={true} />
-                <OrbitControls />
-                <ambientLight />
-                <pointLight position={[10, 10, 10]} />
-                <ModelSizeChecker model={model} />
-                {/* {model && (
-                    <primitive
-                      object={model}
-                      position={[0, 0, 0]}
-                      scale={[0.1, 0.1, 0.1]}
-                    />
-                  )} */}
-                <CameraControls cameraPosition={cameraPosition} />
-              </Canvas>
+            <Canvas
+              style={{
+                width: "100%",
+                height: "100%",
+                position: "absolute",
+              }}
+              dpr={[1, 2]}
+              camera={{ fov: 45 }}
+            >
+              <PresentationControls>
+                <Stage environment={null}>
+                  {/* <Grid cellSize={3} infiniteGrid={true} /> */}
+                  <OrbitControls />
+                  <ambientLight />
+                  <pointLight position={[10, 10, 10]} />
+                  {/* <ModelSizeChecker model={individualModel.model} /> */}
+                  <meshBasicMaterial color="rgb(10, 20, 30)" />
+                  <primitive object={model} scale={0.01}/>
+                  {/* <CameraControls cameraPosition={cameraPosition} /> */}
+                </Stage>
+              </PresentationControls>
+            </Canvas>
             </div>
           </div>
 
@@ -414,7 +432,7 @@ const IndividualProduct = ({
               <Moption value="PETG">
                 Polyethylene Terephthalate Glycol (PETG)
               </Moption>
-              <Moption value="Resin">Resins</Moption>
+              <Moption value="RESIN">Resins</Moption>
             </MOdropdown>
 
             <Mdropdownlabel htmlFor="color">Finshing & Color</Mdropdownlabel>

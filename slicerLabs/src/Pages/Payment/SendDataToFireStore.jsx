@@ -168,7 +168,7 @@ const usePaymentSuccessHandler = async (
             userPhone: userDetails.phone,
             purchasedItems,
             purchasedAt: formatDateTime(Date.now()),
-            approxDeliDate: formatDateTime(currentDate),
+            approxDeliDate: 'TBD',
           };
           try {
             const documentId = `${userUID}`;

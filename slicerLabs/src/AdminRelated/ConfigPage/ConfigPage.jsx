@@ -120,7 +120,7 @@ const ConfigPage = () => {
     // Fetch configuration settings from Firestore
     const fetchConfigSettings = async () => {
       try {
-        const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
+        const configDocRef = doc(ConfigCollection, 'irr8pVIaN4S4JjkMlEreZi8wC7G2'); // Replace with your collection and document IDs
         const configDocSnapshot = await getDoc(configDocRef);
 
         if (configDocSnapshot.exists()) {
@@ -145,7 +145,7 @@ const ConfigPage = () => {
     try {
       // Update configuration settings in Firestore
 
-      const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
+      const configDocRef = doc(ConfigCollection, 'irr8pVIaN4S4JjkMlEreZi8wC7G2'); // Replace with your collection and document IDs
       await setDoc(configDocRef, editedSettings);
 
       setConfigSettings(editedSettings);
