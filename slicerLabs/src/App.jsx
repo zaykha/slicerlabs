@@ -157,7 +157,7 @@ function App() {
               const AdminCheck = userDetails?.adminPrivileges;
               setIsAdmin(AdminCheck || false);
               // Check if the payment was successful
-              console.log(unparsedStoreditems)
+              console.log(unparsedStoreditems, successParam, queryParams);
               if (successParam === "true") {
                 if (unparsedStoreditems && unparsedStoreditems.length > 0) {
                   const { error } = usePaymentSuccessHandler(
