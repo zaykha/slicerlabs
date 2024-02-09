@@ -135,37 +135,31 @@ function App() {
           console.log("fetch cal func failed");
         }
       });
-      // const unsubscribe =
+      const unsubscribe =
        onAuthStateChanged(auth, async (user) => {
         if (user) {
           // If the user is logged in, get the ID token
           const idToken = await user.getIdToken();
           // Store the ID token in local storage
           localStorage.setItem("idToken", idToken);
-
-          // Now you can make the fetch request to retrieve the calculatePrice function
-          // and store it in local storage.
           try {
             const USERUID = user.uid;
             const userDetailsRef = doc(usersCollection, USERUID);
             const docSnap = await getDoc(userDetailsRef);
             if (docSnap.exists()) {
               const userDetailsData = docSnap.data();
-            
               dispatch(setUserDetails(userDetailsData.userDetailsToUpload));
               localStorage.setItem(
                 "userDetails",
                 JSON.stringify(userDetailsData.userDetailsToUpload)
               );
-              console.log("Document data in APP.jsx:", userDetailsData.userDetailsToUpload);
               const userDetails = userDetailsData.userDetailsToUpload;
-              const AdminCheck = userDetailsData?.adminPrivileges;
+              const AdminCheck = userDetails?.adminPrivileges;
               setIsAdmin(AdminCheck || false);
-              // console.log(AdminCheck);
               // Check if the payment was successful
+              console.log(unparsedStoreditems)
               if (successParam === "true") {
                 if (unparsedStoreditems && unparsedStoreditems.length > 0) {
-                  console.log("payment success")
                   const { error } = usePaymentSuccessHandler(
                     user.uid,
                     userPurchasedItems,
@@ -181,6 +175,8 @@ function App() {
                     "localstorage has no purchased item and no purchase is made"
                   );
                 }
+              }else{
+                console.log('successParam', successParam)
               }
             } else {
               console.log("No such document!");
@@ -204,11 +200,10 @@ function App() {
         setIsLoading(false);
       });
       hasMountedRef.current = true;
-
-      // return () => {
-      //   // Unsubscribe from the onAuthStateChanged listener when the component unmounts
-      //   unsubscribe();
-      // };
+      return () => {
+        // Unsubscribe from the onAuthStateChanged listener when the component unmounts
+        unsubscribe();
+      };
     }
   }, []);
 
