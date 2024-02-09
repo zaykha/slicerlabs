@@ -59,8 +59,7 @@ import FAQ from "./Pages/FAQ/FAQ";
 
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
-  const queryParams = new URLSearchParams(window.location.search);
-  const successParam = queryParams.get("success");
+
   const dispatch = useDispatch();
   const [OKtoRoute, setOKtoRoute] = useState(true);
 
@@ -135,8 +134,9 @@ function App() {
           console.log("fetch cal func failed");
         }
       });
-      const unsubscribe =
-       onAuthStateChanged(auth, async (user) => {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const queryParams = new URLSearchParams(window.location.search);
+        const successParam = queryParams.get("success");
         if (user) {
           // If the user is logged in, get the ID token
           const idToken = await user.getIdToken();
@@ -175,8 +175,8 @@ function App() {
                     "localstorage has no purchased item and no purchase is made"
                   );
                 }
-              }else{
-                console.log('successParam', successParam)
+              } else {
+                console.log("successParam", successParam);
               }
             } else {
               console.log("No such document!");
@@ -349,7 +349,7 @@ function App() {
             cartItems={cartItems}
             isAuthenticated={isAuthenticated}
           />
-         <DashBoard />
+          <DashBoard />
           <Footer />
         </>
       ),
@@ -365,7 +365,7 @@ function App() {
             cartItems={cartItems}
             isAuthenticated={isAuthenticated}
           />
-          <TaskPage /> 
+          <TaskPage />
           <Footer />
         </>
       ),
