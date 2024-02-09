@@ -121,8 +121,11 @@ function App() {
     }
   }
   useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const successParam = queryParams.get("success");
     if (!hasMountedRef.current) {
       const auth = getAuth();
+
       // startAuthListener();
       fetchCalculatePriceFunction().then((calculatePriceFunction) => {
         // Handle the result here, you can set it in your component's state or do something else
@@ -135,8 +138,6 @@ function App() {
         }
       });
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        const queryParams = new URLSearchParams(window.location.search);
-        const successParam = queryParams.get("success");
         if (user) {
           // If the user is logged in, get the ID token
           const idToken = await user.getIdToken();
@@ -157,7 +158,11 @@ function App() {
               const AdminCheck = userDetails?.adminPrivileges;
               setIsAdmin(AdminCheck || false);
               // Check if the payment was successful
-              console.log(unparsedStoreditems, successParam, queryParams);
+              console.log(
+                unparsedStoreditems,
+                successParam,
+                window.location.search
+              );
               if (successParam === "true") {
                 if (unparsedStoreditems && unparsedStoreditems.length > 0) {
                   const { error } = usePaymentSuccessHandler(
