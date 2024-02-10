@@ -502,7 +502,7 @@ const LoginForm = () => {
           const docSnap = await getDoc(userDetailsRef);
           if (docSnap.exists()) {
             try {
-              dispatch(setUserDetails(docSnap.data()));
+              dispatch(setUserDetails(docSnap.data().userDetailsToUpload));
               dispatch(setAuthenticationStatus(true));
               localStorage.setItem(
                 "userDetails",
@@ -582,7 +582,7 @@ const LoginForm = () => {
           const docSnap = await getDoc(userDetailsRef);
           if (docSnap.exists()) {
             console.log(docSnap.data().userDetailsToUpload);
-            dispatch(setUserDetails(docSnap.data()));
+            dispatch(setUserDetails(docSnap.data().userDetailsToUpload));
             dispatch(setAuthenticationStatus(true));
             localStorage.setItem("userDetails", JSON.stringify(docSnap.data().userDetailsToUpload));
 
