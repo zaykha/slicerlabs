@@ -903,7 +903,7 @@ const Dropfile = ({}) => {
               <input
                 type="number"
                 placeholder="Width"
-                value={Math.round(individualModel.dimensions.width)}
+                value={individualModel.dimensions.width.toFixed(2)}
                 readOnly // Make the input field uneditable
                 step="1" // Allow only whole numbers
                 style={{
@@ -924,7 +924,7 @@ const Dropfile = ({}) => {
               <input
                 type="number"
                 placeholder="Height"
-                value={Math.round(individualModel.dimensions.height)}
+                value={individualModel.dimensions.height.toFixed(2)}
                 readOnly // Make the input field uneditable
                 step="1" // Allow only whole numbers
                 style={{
@@ -945,7 +945,7 @@ const Dropfile = ({}) => {
               <input
                 type="number"
                 placeholder="Depth"
-                value={Math.round(individualModel.dimensions.depth)}
+                value={individualModel.dimensions.depth.toFixed(2)}
                 readOnly // Make the input field uneditable
                 step="1" // Allow only whole numbers
                 style={{
