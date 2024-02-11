@@ -16,6 +16,7 @@ import { useDropzone } from "react-dropzone";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { MeshBasicMaterial, PerspectiveCamera } from "three";
+
 import {
   Grid,
   OrbitControls,
@@ -71,40 +72,7 @@ import { addingMoreModels } from "../../../../ReduxStore/actions/addingModel";
 import { doc, getDoc } from "firebase/firestore";
 import { ConfigCollection } from "../../../../firebase";
 import PriceTable from "../../../../globalcomponents/PriceTable/priceTable";
-
-const STLModelSizeChecker = ({ model }) => {
-  const { camera } = useThree();
-  const boundingBoxRef = useRef();
-
-  if (model && boundingBoxRef.current) {
-    // Calculate the size of the model's bounding box
-    const boundingBox = new Box3().setFromObject(model);
-    const size = new Vector3();
-    boundingBox.getSize(size);
-
-    // Get the size of the camera frustum
-    const frustumSize =
-      Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
-
-    // Calculate the scale factor based on the size of the model and the frustum size
-    const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
-
-    // Apply the scale factor to the model
-    model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-    // Set the camera position based on the model's size
-    const cameraPosition = {
-      x: camera.position.x,
-      y: camera.position.y,
-      z: camera.position.z,
-    };
-    camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-    model.rotation.x = Math.PI;
-  }
-
-  return <primitive object={model} ref={boundingBoxRef} />;
-};
-
+import html2canvas from 'html2canvas';
 const Dropfile = ({}) => {
   const [files, setFiles] = useState([]);
   const [filetype, setFiletype] = useState("");
@@ -115,6 +83,7 @@ const Dropfile = ({}) => {
   const [LoadProgress, setProgress] = useState(0);
   const [error, setError] = useState(null);
   const cameraRef = useRef();
+  const primitiveRef = useRef();
   const meshRef = useRef();
   const dispatch = useDispatch();
   const addingMoreModelLocal = useSelector(
@@ -189,6 +158,18 @@ const Dropfile = ({}) => {
     setCartCount(cart.length);
     // console.log(cart);
   }, [cart]);
+  useEffect( () => {
+    const captureScreenshot = async () => {
+      if (primitiveRef.current) {
+        console.log("Primitive component is rendered properly.");
+        const canvas = await html2canvas(primitiveRef.current);
+        const screenshotUrl = canvas.toDataURL();
+        console.log("Primitive component is rendered properly.");
+      }
+    };
+
+    captureScreenshot();
+  }, [primitiveRef]);
   const fetchConfigSettings = async () => {
     try {
       const configDocRef = doc(
@@ -486,32 +467,6 @@ const Dropfile = ({}) => {
                     dispatch(addingMoreModels(false));
                     return;
                   }
-                  // console.log("Dimensions in millimeters:", dimensionsInMM);
-                  // const serializedModel = JSON.stringify(objData);
-                  // dispatch(
-                  //   addModel({
-                  //     id: modelId,
-                  //     fileName: uploadedFile.name,
-                  //     model: objData,
-                  //     dimensions: dimensionsInMM,
-                  //     options: {
-                  //       material: "",
-                  //       color: "",
-                  //       quantity: 1,
-                  //     },
-                  //     pricePerUnit: 0,
-                  //   })
-                  // );
-                  // setModel((prevModels) => [
-                  //   ...prevModels,
-                  //   { LocalID: modelId, localModel: objData },
-                  // ]);
-                  // setCameraPosition([
-                  //   -7.726866370752757, 7.241928986275022, -8.091348270643504,
-                  // ]);
-                  // setIsLoading(false);
-                  // setIsModelLoaded(true);
-                  // setIsAddedToCart(false);
                 },
                 // undefined,
                 function (xhr) {
@@ -535,7 +490,7 @@ const Dropfile = ({}) => {
               stlLoader.load(
                 fileContent,
                 (stlGeometry) => {
-                  console.log(stlGeometry);
+                  // console.log(stlGeometry);
                   if (stlGeometry) {
                     // Create a mesh using the loaded geometry and a material
                     const material = new THREE.MeshNormalMaterial();
@@ -793,7 +748,8 @@ const Dropfile = ({}) => {
       <div key={index} style={{ width: "100%", height: "auto" }}>
         {/* Your existing code for DropzoneFormcontainer */}
         <DropzoneFormcontainer style={{ width: "100%" }}>
-          <DropzoneContainer>
+          <DropzoneContainer ref={primitiveRef}>
+        
             <Canvas
               style={{
                 width: "100%",
@@ -811,12 +767,18 @@ const Dropfile = ({}) => {
                   <pointLight position={[10, 10, 10]} />
                   {/* <ModelSizeChecker model={individualModel.model} /> */}
                   <meshBasicMaterial color="rgb(10, 20, 30)" />
-                  <primitive object={individualModel.model} scale={0.01}/>
+
+                  <primitive
+                    object={individualModel.model}
+                    scale={0.01}
+                  />
                   {/* <CameraControls cameraPosition={cameraPosition} /> */}
                 </Stage>
               </PresentationControls>
             </Canvas>
 
+           
+            
             <button
               style={{
                 width: "50px",
