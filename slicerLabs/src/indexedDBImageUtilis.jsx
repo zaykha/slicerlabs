@@ -29,7 +29,7 @@ const openDatabase = () => {
 };
 
 // Store image in IndexedDB
-export const storeImage = async (id, imageUrl) => {
+export const storeImage = async (id, imagefile) => {
   const db = await openDatabase();
   const transaction = db.transaction(STORE_NAME, "readwrite");
   const store = transaction.objectStore(STORE_NAME);
@@ -39,13 +39,13 @@ export const storeImage = async (id, imageUrl) => {
     throw new Error("ModelId is required.");
   }
 
-  const imageObject = { id, imageUrl };
+  const imageObject = { id, imagefile };
 
   return new Promise((resolve, reject) => {
     const request = store.add(imageObject);
 
     request.onsuccess = () => {
-      console.log("File stored in IndexedDB:", id);
+      // console.log("File stored in IndexedDB:", id, imageUrl);
       resolve();
     };
 
@@ -67,7 +67,7 @@ export const deleteImageFromIndexDB = async (id) => {
     const request = store.delete(`image${id}`);
 
     request.onsuccess = () => {
-      console.log("File deleted from IndexedDB:", id);
+      console.log("File deleted from IndexedDB:", `image${id}`);
       resolve();
     };
 

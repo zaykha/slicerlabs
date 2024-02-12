@@ -24,6 +24,7 @@ import {
   TocartCTABtn,
   Tocartflexdiv,
 } from "../StartPrinting/StartPrintingComponents/MaterialsOptions/MaterialsOptionselements";
+import { getAllImages } from "../../indexedDBImageUtilis";
 const PaymentSuccess = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -196,7 +197,7 @@ const PaymentSuccess = () => {
   useEffect(() => {
     if (userUID) {
       setsuccessPaymentState(true);
-      console.log(userDetails)
+      console.log(userDetails);
     } else {
       console.log("userUID params is not in");
     }
@@ -232,6 +233,9 @@ const PaymentSuccess = () => {
             </TocartCTABtn>
             <TocartCTABtn onClick={() => handleRoute("DashBoard")}>
               Track Product
+            </TocartCTABtn>
+            <TocartCTABtn onClick={() => getAllImages()}>
+              show all images
             </TocartCTABtn>
           </Tocartflexdiv>
         </>

@@ -594,38 +594,53 @@ const Dropfile = ({}) => {
       }
     },
   });
-  const captureScreenshot = async () => {
-    const originalCanvas = canvasRef.current;
-
-    if (!originalCanvas) {
-      console.error("Canvas ref is not set.");
-      return;
-    }
-
-    // Create a new canvas element
-    const newCanvas = document.createElement("canvas");
-    newCanvas.width = originalCanvas.width;
-    newCanvas.height = originalCanvas.height;
-
-    const ctx = newCanvas.getContext("2d");
-
-    // Draw the contents of the original canvas onto the new canvas
-    ctx.drawImage(originalCanvas, 0, 0);
-    // Capture the screenshot from the new canvas
-    const screenshotUrl = newCanvas.toDataURL("image/png");
-    // storeImage(`image${imageId}`, screenshotUrl)
-
-    // Do something with the screenshot URL
-    // console.log("Screenshot URL:", screenshotUrl);
-    return screenshotUrl;
+  const captureScreenshot = (imageId) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const originalCanvas = canvasRef.current;
+        if (!originalCanvas) {
+          console.error("Canvas ref is not set.");
+          return;
+        }
+  
+        // Create a new canvas element
+        const newCanvas = document.createElement("canvas");
+        newCanvas.width = originalCanvas.width;
+        newCanvas.height = originalCanvas.height;
+  
+        const ctx = newCanvas.getContext("2d");
+  
+        // Draw the contents of the original canvas onto the new canvas
+        ctx.drawImage(originalCanvas, 0, 0);
+  
+        // Capture the screenshot from the new canvas
+        const screenshotUrl = newCanvas.toDataURL("image/png");
+  
+        if (screenshotUrl) {
+          const parts = screenshotUrl.split(";base64,");
+          const contentType = parts[0].split(":")[1];
+          const raw = window.atob(parts[1]);
+          const rawLength = raw.length;
+          const uInt8Array = new Uint8Array(rawLength);
+          for (let i = 0; i < rawLength; ++i) {
+            uInt8Array[i] = raw.charCodeAt(i);
+          }
+          const blob = new Blob([uInt8Array], { type: contentType });
+          resolve(blob);
+        }
+      }, 2000);
+    });
   };
-  const handleMainScreenShot = (imageId) => {
-    storeImage(`image${imageId}`, setTimeout(captureScreenshot, 2000));
+  
+  // const handleMainScreenShot = (imageId) => {
+  //   storeImage(`image${imageId}`, setTimeout(captureScreenshot, 2000));
+  // };
+  const handleMainScreenShot = async (imageId) => {
+    const screenshotUrl = await captureScreenshot(imageId);
+    await storeImage(`image${imageId}`, screenshotUrl);
   };
   const handleDelete = (tempModelId) => {
-     carouselItems.filter(
-      (item) => item.id !== tempModelId
-    );
+    carouselItems.filter((item) => item.id !== tempModelId);
     // Assuming setModel is the useState setter for your model state
     setModel((prevModels) =>
       prevModels.filter((model) => model.LocalID !== tempModelId)
@@ -1070,6 +1085,9 @@ const Dropfile = ({}) => {
       {/* <TocartCTABtn onClick={captureScreenshot}>
         Capture Screenshot
       </TocartCTABtn> */}
+      <TocartCTABtn onClick={() => getAllImages()}>
+        show all images
+      </TocartCTABtn>
     </>
   );
 };
