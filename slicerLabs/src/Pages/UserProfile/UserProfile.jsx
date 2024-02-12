@@ -111,6 +111,7 @@ export const DashBoard = () => {
         return []; // Return an empty array if an error occurs
       }
     }
+
     async function getProductIssueForUser(userId) {
       try {
         // const q = query(
@@ -139,6 +140,9 @@ export const DashBoard = () => {
       }
     }
 
+    async function getProductImages(userId){
+      
+    }
     // Call the function and use async/await to handle the asynchronous nature
     const fetchData = async () => {
       const purchaseInstancesData = await getPurchaseInstancesForUser(

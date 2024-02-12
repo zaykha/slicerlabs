@@ -14,7 +14,6 @@ const unparsedStoreditems = localStorage.getItem("TTLprice");
 const TTLprice = JSON.parse(unparsedStoreditems);
 // Function to convert Blob to Uint8Array
 const blobToUint8Array = (blob) => {
-  console.log(blob)
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -26,6 +25,12 @@ const blobToUint8Array = (blob) => {
     reader.readAsArrayBuffer(blob);
   });
 };
+async function blobToImageFile(blob, fileName) {
+  // Create a new File object from the Blob
+  const imageFile = new File([blob], fileName, { type: blob.type });
+
+  return imageFile;
+}
 // Handle success payment response from Stripe
 const usePaymentSuccessHandler = async (
   userUID,
@@ -134,22 +139,18 @@ const usePaymentSuccessHandler = async (
     try {
       // Initialize Firestore storage
       const storage = getStorage();
-      console.log("purchaseImageData", PurchasedImageData)
       // Loop through each image data object in PurchasedImageData
       await Promise.all(
         PurchasedImageData.map(async (imageData) => {
           const { id, imagefile } = imageData;
-          // const fileName = imageData.fileName;
-          console.log(imagefile);
-          // Convert Blob to Uint8Array
-          const uint8Array = await blobToUint8Array(imagefile);
 
+          // // Convert Blob to Uint8Array
+          // const uint8Array = await blobToUint8Array(imagefile);
+          // Convert Blob to image File
+          const file = await blobToImageFile(imagefile, id);
           // Upload Uint8Array to Firestore
-          const storageRef = ref(
-            storage,
-            `PurchasedImages/${userUID}&${id}`
-          );
-          await uploadBytes(storageRef, uint8Array);
+          const storageRef = ref(storage, `PurchasedImages/image${userUID}`);
+          await uploadBytes(storageRef, file);
         })
       );
 
@@ -201,7 +202,7 @@ const usePaymentSuccessHandler = async (
       console.log("all images retrieved", imgFiles);
       // Send data to Firestore and perform additional functionalities here
       const success = await storeDataInFirestore(files, userUID);
-      const imageSuccess= await storeImageInFirestore(imgFiles, userUID);
+      const imageSuccess = await storeImageInFirestore(imgFiles, userUID);
       if (success && imageSuccess) {
         // Handle successful storage, e.g., show success message to the user
         // Add user details to Firestore
