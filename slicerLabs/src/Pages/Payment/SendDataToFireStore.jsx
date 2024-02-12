@@ -134,7 +134,7 @@ const usePaymentSuccessHandler = async (
     try {
       // Initialize Firestore storage
       const storage = getStorage();
-
+      console.log("purchaseImageData", PurchasedImageData)
       // Loop through each image data object in PurchasedImageData
       await Promise.all(
         PurchasedImageData.map(async (imageData) => {
