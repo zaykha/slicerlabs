@@ -174,7 +174,7 @@ const IndividualProduct = ({
     laborCost: 25,
     overheadCost: 5,
   });
-
+  // const [materialSettings, setMaterialSettings] = useState();
   const parseStoredFunction = (functionName, storedFunction) => {
     try {
       const Unstring = JSON.parse(storedFunction);
@@ -230,12 +230,7 @@ const IndividualProduct = ({
         "calculatePrice",
         calculatePriceString
       );
-
-      // console.log(
-      //   "Parsed calculatePriceFunction:",
-      //   calculatePriceFunctionToStore
-      // );
-
+        console.log(materialSettings)
       // Now you have the parsed functions, you can use them as needed
       // For example, you can store them in state or use them directly.
       // setCalculatePriceFunction(

@@ -133,27 +133,28 @@ const Dropfile = ({}) => {
     header: "",
     message: "",
   });
-  const [materialSettings, setMaterialSettings] = useState({
-    printTimePerUnitVolume: {
-      ABS: 0.06, // minutes/mm^3
-      PLA: 0.04, // minutes/mm^3
-      TPU: 0.06, // minutes/mm^3
-      NYLON: 0.07, // minutes/mm^3
-      PETG: 0.05, // minutes/mm^3
-      RESIN: 0.03, // minutes/mm^3
-    },
-    materialCosts: {
-      ABS: 0.06, // SGD per gram
-      PLA: 0.04, // SGD per gram
-      TPU: 0.06, // SGD per gram
-      NYLON: 0.07, // SGD per gram
-      PETG: 0.05, // SGD per gram
-      RESIN: 0.1, // SGD per gram
-    },
-    hourlyRate: 24,
-    laborCost: 20,
-    overheadCost: 4,
-  });
+  // const [materialSettings, setMaterialSettings] = useState({
+  //   printTimePerUnitVolume: {
+  //     ABS: 0.05, // minutes/mm^3
+  //     PLA: 0.04, // minutes/mm^3
+  //     TPU: 0.06, // minutes/mm^3
+  //     NYLON: 0.07, // minutes/mm^3
+  //     PETG: 0.05, // minutes/mm^3
+  //     RESIN: 0.03, // minutes/mm^3
+  //   },
+  //   materialCosts: {
+  //     ABS: 0.05, // SGD per gram
+  //     PLA: 0.04, // SGD per gram
+  //     TPU: 0.06, // SGD per gram
+  //     NYLON: 0.07, // SGD per gram
+  //     PETG: 0.05, // SGD per gram
+  //     RESIN: 0.1, // SGD per gram
+  //   },
+  //   hourlyRate: 20,
+  //   laborCost: 25,
+  //   overheadCost: 5,
+  // });
+  const [materialSettings, setMaterialSettings] = useState();
   useEffect(() => {
     setCartCount(cart.length);
     // console.log(cart);

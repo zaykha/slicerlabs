@@ -65,7 +65,7 @@ import { doc, getDoc } from "firebase/firestore";
 import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
 import { decrementCartCount } from "../../ReduxStore/actions/cartCountActions";
 import ConfirmationPrompt from "../../globalcomponents/prompt/ConfirmPrompt";
-import { deleteAllImages } from "../../indexedDBImageUtilis";
+import { deleteAllImages, deleteImageFromIndexDB } from "../../indexedDBImageUtilis";
 
 const ProgressBar = ({ step }) => {
   return (
@@ -120,27 +120,28 @@ const Cartpage = () => {
     message: "",
   });
   const [isFetchingMSetting, setIsFetchingMSetting] = useState(false);
-  const [materialSettings, setMaterialSettings] = useState({
-    printTimePerUnitVolume: {
-      ABS: 0.05, // minutes/cm^3
-      PLA: 0.04, // minutes/cm^3
-      TPU: 0.06, // minutes/cm^3
-      NYLON: 0.07, // minutes/cm^3
-      PETG: 0.05, // minutes/cm^3
-      RESIN: 0.03, // minutes/cm^3
-    },
-    materialCosts: {
-      ABS: 0.05, // SGD per gram
-      PLA: 0.04, // SGD per gram
-      TPU: 0.06, // SGD per gram
-      NYLON: 0.07, // SGD per gram
-      PETG: 0.05, // SGD per gram
-      RESIN: 0.1, // SGD per gram
-    },
-    hourlyRate: 20,
-    laborCost: 25,
-    overheadCost: 5,
-  });
+  const [materialSettings, setMaterialSettings] = useState();
+  // const [materialSettings, setMaterialSettings] = useState({
+  //   printTimePerUnitVolume: {
+  //     ABS: 0.05, // minutes/cm^3
+  //     PLA: 0.04, // minutes/cm^3
+  //     TPU: 0.06, // minutes/cm^3
+  //     NYLON: 0.07, // minutes/cm^3
+  //     PETG: 0.05, // minutes/cm^3
+  //     RESIN: 0.03, // minutes/cm^3
+  //   },
+  //   materialCosts: {
+  //     ABS: 0.05, // SGD per gram
+  //     PLA: 0.04, // SGD per gram
+  //     TPU: 0.06, // SGD per gram
+  //     NYLON: 0.07, // SGD per gram
+  //     PETG: 0.05, // SGD per gram
+  //     RESIN: 0.1, // SGD per gram
+  //   },
+  //   hourlyRate: 20,
+  //   laborCost: 25,
+  //   overheadCost: 5,
+  // });
   // const postalCode = useSelector((state) => state.userDetails.postalCode);
   const AddressDetails = useSelector(
     (state) => state.LocationStorage.endCoordinates
@@ -263,50 +264,50 @@ const Cartpage = () => {
   //     console.log("endCoordinates not ready");
   //   }
   // }, [endCoordinates]);
-  const fetchConfigSettings = async () => {
-    setIsFetchingMSetting(true);
-    try {
-      const auth = getAuth();
-      const user = auth.currentUser;
-      // Check if the user is logged in
-      if (!user) {
-        // User is not logged in, prompt them to log in and redirect to the login page
-        // const confirmLogin = window.confirm(
-        //   "Please log in or create an account to proceed to payment."
-        // );
-        setErrorHandling({
-          state: true,
-          header: "Confirmation Needed",
-          message:
-            "Please log in or create an account to proceed to payment.",
-        });
+  // const fetchConfigSettings = async () => {
+  //   setIsFetchingMSetting(true);
+  //   try {
+  //     const auth = getAuth();
+  //     const user = auth.currentUser;
+  //     // Check if the user is logged in
+  //     if (!user) {
+  //       // User is not logged in, prompt them to log in and redirect to the login page
+  //       // const confirmLogin = window.confirm(
+  //       //   "Please log in or create an account to proceed to payment."
+  //       // );
+  //       setErrorHandling({
+  //         state: true,
+  //         header: "Confirmation Needed",
+  //         message:
+  //           "Please log in or create an account to proceed to payment.",
+  //       });
 
-        // if (confirmLogin) {
-        //   navigate("/login"); // Redirect to the login page
-        // }
-        return; // Stop the function if the user is not logged in
-      }
-      const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
-      const configDocSnapshot = await getDoc(configDocRef);
+  //       // if (confirmLogin) {
+  //       //   navigate("/login"); // Redirect to the login page
+  //       // }
+  //       return; // Stop the function if the user is not logged in
+  //     }
+  //     const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
+  //     const configDocSnapshot = await getDoc(configDocRef);
 
-      if (configDocSnapshot.exists()) {
-        const data = configDocSnapshot.data();
-        setMaterialSettings(data);
-      }
-      console.log(materialSettings);
-    } catch (error) {
-      console.error("Error fetching configuration settings:", error);
-    }
-    setIsFetchingMSetting(false);
-  };
-  useEffect(() => {
-    fetchConfigSettings();
-  }, []);
-  useEffect(() => {
-    if (AddressDetails) {
-      setEndCoordinates(AddressDetails);
-    }
-  }, [AddressDetails]);
+  //     if (configDocSnapshot.exists()) {
+  //       const data = configDocSnapshot.data();
+  //       setMaterialSettings(data);
+  //     }
+  //     console.log(materialSettings);
+  //   } catch (error) {
+  //     console.error("Error fetching configuration settings:", error);
+  //   }
+  //   setIsFetchingMSetting(false);
+  // };
+  // useEffect(() => {
+  //   fetchConfigSettings();
+  // }, []);
+  // useEffect(() => {
+  //   if (AddressDetails) {
+  //     setEndCoordinates(AddressDetails);
+  //   }
+  // }, [AddressDetails]);
   const handleRemoveItem = (modelIdToDelete) => {
     dispatch(deleteModel(modelIdToDelete));
     dispatch(decrementCartCount());
@@ -444,11 +445,11 @@ const Cartpage = () => {
         materialSettings,
       });
     });
-    console.log("itemsForValidation", itemsForValidation);
-    localStorage.setItem(
-      "TTLprice",
-      JSON.stringify({ totalPrice: TTLPriceBeforeRouting.toFixed(2) })
-    );
+    // console.log("itemsForValidation", itemsForValidation);
+    // localStorage.setItem(
+    //   "TTLprice",
+    //   JSON.stringify({ totalPrice: TTLPriceBeforeRouting.toFixed(2) })
+    // );
     localStorage.setItem(
       "TempItemsDetailsStorage",
       JSON.stringify(itemsForValidation)
@@ -466,73 +467,113 @@ const Cartpage = () => {
     //   // Handle the case when the data is not present in localStorage
     //   console.log("No data found in localStorage.");
     // }
-    try {
-      // Perform the final check by calling the API endpoint to validate prices
-      const response = await validatePricesWithMicroservice(itemsForValidation);
+    // try {
+    //   // Perform the final check by calling the API endpoint to validate prices
+    //   const response = await validatePricesWithMicroservice(itemsForValidation);
 
-      if (response.valid) {
-        // If prices are valid, proceed to Stripe.js for payment
-        const checkoutSessionResponse = await fetch(
-          // "https://cerulean-hermit-crab-robe.cyclic.cloud/create-checkout-session",
-          `${ServerConfig}/create-checkout-session`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: storedIdToken,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(itemsForValidation),
-          }
-        );
+    //   if (response.valid) {
+    //     // If prices are valid, proceed to Stripe.js for payment
+    //     const checkoutSessionResponse = await fetch(
+    //       // "https://cerulean-hermit-crab-robe.cyclic.cloud/create-checkout-session",
+    //       `${ServerConfig}/create-checkout-session`,
+    //       {
+    //         method: "POST",
+    //         headers: {
+    //           Authorization: storedIdToken,
+    //           "Content-Type": "application/json",
+    //         },
+    //         body: JSON.stringify(itemsForValidation),
+    //       }
+    //     );
 
-        if (checkoutSessionResponse.ok) {
-          const checkoutSessionData = await checkoutSessionResponse.json();
+    //     if (checkoutSessionResponse.ok) {
+    //       const checkoutSessionData = await checkoutSessionResponse.json();
 
-          // Redirect the user to the Stripe Checkout page
-          window.location.href = checkoutSessionData.url;
-          //  stripe.redirectToCheckout({
-          //   sessionId: checkoutSessionData.id
-          //  }).then((result) => {
-          //   // Handle any errors during the redirect, if necessary
-          //   if (result.error) {
-          //     console.error(result.error);
-          //     alert('Error redirecting to Stripe Checkout. Please try again.');
-          //   }
-          // });
-        } else {
-          // Handle error response from the server
-          console.error(
-            "Error creating checkout session:",
-            checkoutSessionResponse
-          );
-          setErrorHandling({
-            state: true,
-            header: "Error",
-            message: "Error creating checkout session. Please try again later.",
-          });
-          // alert("Error creating checkout session. Please try again later.");
-        }
-      } else {
-        // If prices are not valid, show an error message to the user
-        setErrorHandling({
-          state: true,
-          header: "Error",
-          message:
-            "There was an issue with the prices. Please review your cart.",
-        });
-        // alert("There was an issue with the prices. Please review your cart.");
+    //       // Redirect the user to the Stripe Checkout page
+    //       window.location.href = checkoutSessionData.url;
+    //       //  stripe.redirectToCheckout({
+    //       //   sessionId: checkoutSessionData.id
+    //       //  }).then((result) => {
+    //       //   // Handle any errors during the redirect, if necessary
+    //       //   if (result.error) {
+    //       //     console.error(result.error);
+    //       //     alert('Error redirecting to Stripe Checkout. Please try again.');
+    //       //   }
+    //       // });
+    //     } else {
+    //       // Handle error response from the server
+    //       console.error(
+    //         "Error creating checkout session:",
+    //         checkoutSessionResponse
+    //       );
+    //       setErrorHandling({
+    //         state: true,
+    //         header: "Error",
+    //         message: "Error creating checkout session. Please try again later.",
+    //       });
+    //       // alert("Error creating checkout session. Please try again later.");
+    //     }
+    //   } else {
+    //     // If prices are not valid, show an error message to the user
+    //     setErrorHandling({
+    //       state: true,
+    //       header: "Error",
+    //       message:
+    //         "There was an issue with the prices. Please review your cart.",
+    //     });
+    //     // alert("There was an issue with the prices. Please review your cart.");
+    //   }
+    //   setIsProceedingToPayment(false);
+    // } catch (error) {
+    //   // Handle any error that occurred during the validation or payment process
+    //   console.error("Error processing payment:", error);
+    //   // alert("Error processing payment. Please try again later.");
+    //   setErrorHandling({
+    //     state: true,
+    //     header: "Error",
+    //     message: "Error processing payment. Please try again later.",
+    //   });
+    //   setIsProceedingToPayment(false);
+    // }
+    const checkoutSessionResponse = await fetch(
+      // "https://cerulean-hermit-crab-robe.cyclic.cloud/create-checkout-session",
+      `${ServerConfig}/create-checkout-session`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: storedIdToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(itemsForValidation),
       }
-      setIsProceedingToPayment(false);
-    } catch (error) {
-      // Handle any error that occurred during the validation or payment process
-      console.error("Error processing payment:", error);
-      // alert("Error processing payment. Please try again later.");
+    );
+
+    if (checkoutSessionResponse.ok) {
+      const checkoutSessionData = await checkoutSessionResponse.json();
+
+      // Redirect the user to the Stripe Checkout page
+      window.location.href = checkoutSessionData.url;
+      //  stripe.redirectToCheckout({
+      //   sessionId: checkoutSessionData.id
+      //  }).then((result) => {
+      //   // Handle any errors during the redirect, if necessary
+      //   if (result.error) {
+      //     console.error(result.error);
+      //     alert('Error redirecting to Stripe Checkout. Please try again.');
+      //   }
+      // });
+    } else {
+      // Handle error response from the server
+      console.error(
+        "Error creating checkout session:",
+        checkoutSessionResponse
+      );
       setErrorHandling({
         state: true,
         header: "Error",
-        message: "Error processing payment. Please try again later.",
+        message: "Error creating checkout session. Please try again later.",
       });
-      setIsProceedingToPayment(false);
+      // alert("Error creating checkout session. Please try again later.");
     }
     setIsProceedingToPayment(false);
   };
