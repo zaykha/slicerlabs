@@ -139,15 +139,15 @@ const usePaymentSuccessHandler = async (
       await Promise.all(
         PurchasedImageData.map(async (imageData) => {
           const { id, imageFile } = imageData;
-          const fileName = imageData.fileName;
-
+          // const fileName = imageData.fileName;
+          console.log(imageFile);
           // Convert Blob to Uint8Array
           const uint8Array = await blobToUint8Array(imageFile);
 
           // Upload Uint8Array to Firestore
           const storageRef = ref(
             storage,
-            `PurchasedImages/${userUID}&${id}&${fileName}`
+            `PurchasedImages/${userUID}&${id}`
           );
           await uploadBytes(storageRef, uint8Array);
         })
