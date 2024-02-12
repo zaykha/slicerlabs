@@ -14,6 +14,7 @@ const unparsedStoreditems = localStorage.getItem("TTLprice");
 const TTLprice = JSON.parse(unparsedStoreditems);
 // Function to convert Blob to Uint8Array
 const blobToUint8Array = (blob) => {
+  console.log(blob)
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
