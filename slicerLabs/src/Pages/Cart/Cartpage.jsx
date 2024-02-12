@@ -65,6 +65,7 @@ import { doc, getDoc } from "firebase/firestore";
 import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
 import { decrementCartCount } from "../../ReduxStore/actions/cartCountActions";
 import ConfirmationPrompt from "../../globalcomponents/prompt/ConfirmPrompt";
+import { deleteAllImages } from "../../indexedDBImageUtilis";
 
 const ProgressBar = ({ step }) => {
   return (
@@ -310,6 +311,7 @@ const Cartpage = () => {
     dispatch(deleteModel(modelIdToDelete));
     dispatch(decrementCartCount());
     deleteFileFromDB(modelIdToDelete);
+    deleteImageFromIndexDB(modelIdToDelete);
   };
   const handleDelete = (tempModelId) => {
     const updatedCarouselItems = carouselItems.filter(
@@ -537,6 +539,7 @@ const Cartpage = () => {
 
   const handleDeleteAllRecords = () => {
     deleteAllRecordsFromDB();
+    deleteAllImages();
     localStorage.removeItem("TempItemsDetailsStorage");
   };
   return (
@@ -627,7 +630,7 @@ const Cartpage = () => {
           onClose={() => setErrorHandling({ ...ErrorHandling, state: false })}
         />
       )}
-      <NextBtn onClick={handleDeleteAllRecords}>deleteAllFromIDB</NextBtn>
+      {/* <NextBtn onClick={handleDeleteAllRecords}>deleteAllFromIDB</NextBtn> */}
       {confirmationHandling.state && (
         <ConfirmationPrompt
           header={confirmationHandling.header}

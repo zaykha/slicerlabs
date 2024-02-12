@@ -28,6 +28,7 @@ import RotatingLoader from "../../../../globalcomponents/DropDown/RotatingLoader
 import ConfirmationPrompt from "../../../../globalcomponents/prompt/ConfirmationPrompt";
 import styled from "styled-components";
 import ModelSizeChecker from "../../../StartPrinting/StartPrintingComponents/Dropfile/ModelSizeChecker";
+import html2canvas from "html2canvas";
 const Box = styled.div`
   background-color: transparent;
   display: flex;
@@ -148,6 +149,7 @@ const IndividualProduct = ({
   const [cameraPosition, setCameraPosition] = useState([
     -7.726866370752757, 7.241928986275022, -8.091348270643504,
   ]);
+  const canvasRef = useRef();
   const userUIDInLocalStorage = localStorage.getItem("uid");
   const userDetails =
   useSelector((state) => state?.userDetails) ;
@@ -257,16 +259,16 @@ const IndividualProduct = ({
         },
         materialSettings
       );
-      console.log(
-        material,
-        color,
-        {
-          width,
-          height,
-          depth,
-        },
-        materialSettings
-      );
+      // console.log(
+      //   material,
+      //   color,
+      //   {
+      //     width,
+      //     height,
+      //     depth,
+      //   },
+      //   materialSettings
+      // );
       dispatch(updatePrice({ ProductId: tempID, newPrice }));
       // setPrice(newPrice);
     }
@@ -306,55 +308,18 @@ const IndividualProduct = ({
       onDelete(tempID);
     }
   };
-
-  const CameraControls = ({ cameraPosition }) => {
-    const { camera } = useThree();
-    useEffect(() => {
-      if (camera && cameraPosition) {
-        camera.position.set(...cameraPosition);
-        camera.lookAt(0, 0, 0);
-        camera.updateProjectionMatrix();
-      }
-    }, [camera, cameraPosition]);
-
-    // useFrame(() => {
-    //   console.log('Camera Position:', camera.position.toArray());
-    // });
-
-    return null;
-  };
-  // const ModelSizeChecker = ({ model }) => {
-  //   const { camera } = useThree();
-  //   const boundingBoxRef = useRef();
-
-  //   if (model && boundingBoxRef.current) {
-  //     // Calculate the size of the model's bounding box
-  //     const boundingBox = new Box3().setFromObject(model);
-  //     const size = new Vector3();
-  //     boundingBox.getSize(size);
-
-  //     // Get the size of the camera frustum
-  //     const frustumSize =
-  //       Math.tan((camera.fov * Math.PI) / 180 / 2) * camera.position.z * 2;
-
-  //     // Calculate the scale factor based on the size of the model and the frustum size
-  //     const scaleFactor = frustumSize / Math.max(size.x, size.y, size.z);
-
-  //     // Apply the scale factor to the model
-  //     model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-  //     // Set the camera position based on the model's size
-  //     const cameraPosition = {
-  //       x: camera.position.x,
-  //       y: camera.position.y,
-  //       z: camera.position.z,
-  //     };
-  //     camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-  //     model.rotation.x = Math.PI;
-  //   }
-
-  //   return <primitive object={model} ref={boundingBoxRef} />;
-  // };
+  // useEffect(() => {
+  //   const captureScreenshot = async () => {
+  //     if (canvasRef.current) {
+  //       console.log("Canvas component is rendered properly.");
+  //       const canvas = await html2canvas(canvasRef.current);
+  //       const screenshotUrl = canvas.toDataURL();
+  //       console.log("Screenshot taken:", screenshotUrl);
+  //     }
+  //   };
+  
+  //   captureScreenshot();
+  // }, [canvasRef.current]);
 
   const totalPrice = (price * quantity).toFixed(2);
   return (
@@ -373,9 +338,11 @@ const IndividualProduct = ({
                 height: "100%",
                 position: "absolute",
               }}
+              linear={"true"}
               dpr={[1, 2]}
               camera={{ fov: 45 }}
             >
+             <color attach="background" args={["rgba(2, 65, 94)"]} />
               <PresentationControls>
                 <Stage environment={null}>
                   {/* <Grid cellSize={3} infiniteGrid={true} /> */}
@@ -384,7 +351,8 @@ const IndividualProduct = ({
                   <pointLight position={[10, 10, 10]} />
                   {/* <ModelSizeChecker model={individualModel.model} /> */}
                   <meshBasicMaterial color="rgb(10, 20, 30)" />
-                  <primitive object={model} scale={0.01}/>
+
+                  <primitive object={model} scale={0.01} />
                   {/* <CameraControls cameraPosition={cameraPosition} /> */}
                 </Stage>
               </PresentationControls>

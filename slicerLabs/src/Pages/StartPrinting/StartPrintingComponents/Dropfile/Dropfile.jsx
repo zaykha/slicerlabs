@@ -72,7 +72,14 @@ import { addingMoreModels } from "../../../../ReduxStore/actions/addingModel";
 import { doc, getDoc } from "firebase/firestore";
 import { ConfigCollection } from "../../../../firebase";
 import PriceTable from "../../../../globalcomponents/PriceTable/priceTable";
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
+import { useScreenshot } from "use-react-screenshot";
+import {
+  deleteImageFromIndexDB,
+  getAllImages,
+  getImageById,
+  storeImage,
+} from "../../../../indexedDBImageUtilis";
 const Dropfile = ({}) => {
   const [files, setFiles] = useState([]);
   const [filetype, setFiletype] = useState("");
@@ -89,21 +96,14 @@ const Dropfile = ({}) => {
   const addingMoreModelLocal = useSelector(
     (state) => state.addingMoreModel.isAdding
   );
+  // const [canvasRef, setCanvasRef] = useState(null);
+  const canvasRef = useRef();
+  const [image, takeScreenshot] = useScreenshot();
   // const ProductId = useSelector((state) => state.cartItems.tempModelId);
   const [cameraPosition, setCameraPosition] = useState([
     -7.726866370752757, 7.241928986275022, -8.091348270643504,
   ]); // Initial camera position
-  const CameraControls = ({ cameraPosition }) => {
-    const { camera } = useThree();
-    useEffect(() => {
-      if (camera && cameraPosition) {
-        camera.position.set(...cameraPosition);
-        camera.lookAt(0, 0, 0);
-        camera.updateProjectionMatrix();
-      }
-    }, [camera, cameraPosition]);
-    return null;
-  };
+
   const printBedWidth = 235; // mm
   const printBedDepth = 235; // mm
   const printVolumeWidth = 220; // mm
@@ -158,18 +158,19 @@ const Dropfile = ({}) => {
     setCartCount(cart.length);
     // console.log(cart);
   }, [cart]);
-  useEffect( () => {
-    const captureScreenshot = async () => {
-      if (primitiveRef.current) {
-        console.log("Primitive component is rendered properly.");
-        const canvas = await html2canvas(primitiveRef.current);
-        const screenshotUrl = canvas.toDataURL();
-        console.log("Primitive component is rendered properly.");
+  useLayoutEffect(() => {
+    if (canvasRef.current) {
+      const { current: canvas } = canvasRef;
+      const gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
+      // Check if the WebGL context is successfully obtained
+      if (gl) {
+        console.log("WebGL context obtained successfully.");
+        // Additional WebGL context configuration can be done here
+      } else {
+        console.error("Failed to obtain WebGL context.");
       }
-    };
-
-    captureScreenshot();
-  }, [primitiveRef]);
+    }
+  }, []);
   const fetchConfigSettings = async () => {
     try {
       const configDocRef = doc(
@@ -182,7 +183,7 @@ const Dropfile = ({}) => {
         const data = configDocSnapshot.data();
         setMaterialSettings(data);
       }
-      console.log(materialSettings);
+      // console.log(materialSettings);
     } catch (error) {
       console.error("Error fetching configuration settings:", error);
     }
@@ -210,19 +211,7 @@ const Dropfile = ({}) => {
     }
   };
   const calculatePriceString = localStorage.getItem("calculatePriceFunction");
-  // useEffect(() => {
-  //   if (material && color && width && height && depth) {
-  //     setisFormFilled(true);
-  //   }
-  //   if (calculatePriceString) {
-  //     const calculatePriceFunctionToStore = parseStoredFunction(
-  //       "calculatePrice",
-  //       calculatePriceString
-  //     );
 
-  //     updatePrice(calculatePriceFunctionToStore);
-  //   }
-  // }, [material, color, width, height, depth, cart]);
   const updatePriceLocal = (
     anotherFunction,
     material,
@@ -265,59 +254,9 @@ const Dropfile = ({}) => {
     dispatch(updateColor({ ProductId: id, newColor }));
   };
 
-  const handleAddToCart = () => {
-    if (!material || !color || !width || !height || !depth || !quantity) {
-      // alert("please fill in empty fields");
-      setErrorHandling({
-        state: true,
-        header: "An Error Occured",
-        message: "please fill in empty fields",
-      });
-    } else {
-      setMaterial("");
-      setColor("");
-      setWidth(10);
-      setHeight(10);
-      setDepth(10);
-      setQuantity(1);
-      setPrice(0);
-      const finalItem = {
-        ProductId, // generate a unique ID for the item
-        material,
-        color,
-        dimensions: {
-          width,
-          height,
-          depth,
-        },
-        quantity,
-        price,
-      };
-      // handleCheckOutInChild();
-      dispatch(
-        addMaterialOptions({ checkID: tempModelId, options: finalItem })
-      );
-      // setIsAddedToCart(true);
-      // setIsModelLoaded(false);
-      // setisFormFilled(false);
-      // setIsCheckedOut(true);
-      console.log(cart);
-    }
-  };
-
   const generateUniqueId = () => {
     return uuidv4();
   };
-
-  // useEffect(() => {
-  //   if (isCheckedOut || isAddedToCart) {
-  //     setModel([]);
-  //     // setIsModelLoaded(false);
-  //     setFiles(null);
-  //   }
-  // }, [isCheckedOut, isAddedToCart]);
-
-  // const modelId = generateUniqueId();
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: ".stl,.obj",
@@ -370,7 +309,7 @@ const Dropfile = ({}) => {
               const totalSize = uploadedFile.size;
 
               manager.onLoad = function () {
-                console.log("Loading complete!");
+                // console.log("Loading complete!");
                 setIsLoading(false);
                 dispatch(addingMoreModels(false));
                 // setIsModelLoaded(true);
@@ -446,6 +385,7 @@ const Dropfile = ({}) => {
                         -7.726866370752757, 7.241928986275022,
                         -8.091348270643504,
                       ]);
+
                       setIsLoading(false);
                       dispatch(addingMoreModels(false));
                       return true;
@@ -653,9 +593,36 @@ const Dropfile = ({}) => {
       }
     },
   });
+  const captureScreenshot = async () => {
+    const originalCanvas = canvasRef.current;
 
+    if (!originalCanvas) {
+      console.error("Canvas ref is not set.");
+      return;
+    }
+
+    // Create a new canvas element
+    const newCanvas = document.createElement("canvas");
+    newCanvas.width = originalCanvas.width;
+    newCanvas.height = originalCanvas.height;
+
+    const ctx = newCanvas.getContext("2d");
+
+    // Draw the contents of the original canvas onto the new canvas
+    ctx.drawImage(originalCanvas, 0, 0);
+    // Capture the screenshot from the new canvas
+    const screenshotUrl = newCanvas.toDataURL("image/png");
+    // storeImage(`image${imageId}`, screenshotUrl)
+
+    // Do something with the screenshot URL
+    // console.log("Screenshot URL:", screenshotUrl);
+    return screenshotUrl;
+  };
+  const handleMainScreenShot = (imageId) => {
+    storeImage(`image${imageId}`, setTimeout(captureScreenshot, 2000));
+  };
   const handleDelete = (tempModelId) => {
-    const updatedCarouselItems = carouselItems.filter(
+     carouselItems.filter(
       (item) => item.id !== tempModelId
     );
     // Assuming setModel is the useState setter for your model state
@@ -667,6 +634,7 @@ const Dropfile = ({}) => {
     dispatch(deleteModel(tempModelId));
     dispatch(decrementCartCount());
     deleteFileFromDB(tempModelId);
+    deleteImageFromIndexDB(tempModelId);
     // deleteAllRecordsFromDB();
     // console.log(model.length);
   };
@@ -743,14 +711,21 @@ const Dropfile = ({}) => {
     const { material, color, quantity } = individualModel.options || {};
     const { width, height, depth } = individualModel.dimensions || {};
     const price = individualModel.pricePerUnit || 0;
+
     // console.log(`Item ${index}, Price: ${price}`);
     return (
       <div key={index} style={{ width: "100%", height: "auto" }}>
         {/* Your existing code for DropzoneFormcontainer */}
         <DropzoneFormcontainer style={{ width: "100%" }}>
-          <DropzoneContainer ref={primitiveRef}>
-        
+          <DropzoneContainer>
             <Canvas
+              ref={canvasRef}
+              width={"100%"}
+              height={"100%"}
+              linear={"true"}
+              // onCreated={() => setTimeout(captureScreenshot, 2000)}
+              onCreated={() => handleMainScreenShot(individualModel.id)}
+              gl={{ preserveDrawingBuffer: true }}
               style={{
                 width: "100%",
                 height: "100%",
@@ -759,6 +734,7 @@ const Dropfile = ({}) => {
               dpr={[1, 2]}
               camera={{ fov: 45 }}
             >
+              <color attach="background" args={["rgba(2, 65, 94)"]} />
               <PresentationControls>
                 <Stage environment={null}>
                   {/* <Grid cellSize={3} infiniteGrid={true} /> */}
@@ -768,17 +744,12 @@ const Dropfile = ({}) => {
                   {/* <ModelSizeChecker model={individualModel.model} /> */}
                   <meshBasicMaterial color="rgb(10, 20, 30)" />
 
-                  <primitive
-                    object={individualModel.model}
-                    scale={0.01}
-                  />
+                  <primitive object={individualModel.model} scale={0.01} />
                   {/* <CameraControls cameraPosition={cameraPosition} /> */}
                 </Stage>
               </PresentationControls>
             </Canvas>
 
-           
-            
             <button
               style={{
                 width: "50px",
@@ -989,6 +960,10 @@ const Dropfile = ({}) => {
             <TocartCTABtn>ADD TO CART</TocartCTABtn>
           </Tocartflexdiv>
         )} */}
+        {/* <TocartCTABtn onClick={()=>getImageById(individualModel.id)}> */}
+        {/* <TocartCTABtn onClick={() => getAllImages()}>
+          Capture Screenshot
+        </TocartCTABtn> */}
       </div>
     );
   });
@@ -1032,6 +1007,7 @@ const Dropfile = ({}) => {
       {cart.cartItems.length > 0 && !isLoading ? (
         <div style={{ display: "flex" }}>
           <Carousel items={carouselItems} />
+
           {addingMoreModelLocal && (
             <div style={{ position: "absolute" }}>
               <DropzoneFormcontainer {...getRootProps()}>
@@ -1090,6 +1066,9 @@ const Dropfile = ({}) => {
         </DropzoneFormcontainer>
       )}
       {/* <TocartCTABtn onClick={deleteAllRecordsFromDB}>Delete all in indexDB</TocartCTABtn> */}
+      {/* <TocartCTABtn onClick={captureScreenshot}>
+        Capture Screenshot
+      </TocartCTABtn> */}
     </>
   );
 };

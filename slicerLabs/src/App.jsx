@@ -56,6 +56,7 @@ import SplashScreen from "./globalcomponents/DropDown/SplashScreen";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import FAQ from "./Pages/FAQ/FAQ";
+import { getAllImages } from "./indexedDBImageUtilis";
 
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
@@ -180,6 +181,7 @@ function App() {
                     "localstorage has no purchased item and no purchase is made"
                   );
                 }
+                getAllImages();
               } else {
                 console.log("successParam", successParam);
               }
