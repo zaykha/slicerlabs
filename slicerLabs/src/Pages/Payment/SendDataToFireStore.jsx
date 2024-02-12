@@ -8,10 +8,23 @@ import { collection, addDoc } from "firebase/firestore";
 import { PurchasedItemsCollection, ServerConfig } from "../../firebase";
 import { setSuccessPaymentState } from "../../ReduxStore/actions/Authentication";
 import { useDispatch, useSelector } from "react-redux";
+import { getAllImages } from "../../indexedDBImageUtilis";
 
 const unparsedStoreditems = localStorage.getItem("TTLprice");
 const TTLprice = JSON.parse(unparsedStoreditems);
-
+// Function to convert Blob to Uint8Array
+const blobToUint8Array = (blob) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const arrayBuffer = reader.result;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      resolve(uint8Array);
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(blob);
+  });
+};
 // Handle success payment response from Stripe
 const usePaymentSuccessHandler = async (
   userUID,
@@ -53,7 +66,7 @@ const usePaymentSuccessHandler = async (
       //   idempotencyKey: "abc-123",
       // },
       templateId: 1,
-      params: { TTLprice:TTLprice },
+      params: { TTLprice: TTLprice },
       // messageVersions: [
       //   {
       //     to: [{ email: "zzaayykkhhaa@gmail.com", name: "Jimmy" }],
@@ -87,10 +100,10 @@ const usePaymentSuccessHandler = async (
   currentDate.setDate(currentDate.getDate() + 2);
   const storeDataInFirestore = async (Purchased3dData, userUID) => {
     try {
-      console.log("sending data to firestore")
+      console.log("sending data to firestore");
       // Upload files to Cloud Firestore Storage
       const storage = getStorage();
-      console.log(Purchased3dData,userUID)
+      console.log(Purchased3dData, userUID);
       // Loop through each file in Purchased3dData and upload it to Storage
       await Promise.all(
         Purchased3dData.map(async (fileData) => {
@@ -115,12 +128,53 @@ const usePaymentSuccessHandler = async (
       return false;
     }
   };
+  // Function to store data in Firestore
+  const storeImageInFirestore = async (PurchasedImageData, userUID) => {
+    try {
+      // Initialize Firestore storage
+      const storage = getStorage();
+
+      // Loop through each image data object in PurchasedImageData
+      await Promise.all(
+        PurchasedImageData.map(async (imageData) => {
+          const { imageFile, id } = imageData;
+          const fileName = imageData.fileName;
+
+          // Convert Blob to Uint8Array
+          const uint8Array = await blobToUint8Array(imageFile);
+
+          // Upload Uint8Array to Firestore
+          const storageRef = ref(
+            storage,
+            `PurchasedImages/${userUID}&${imageFile}&${fileName}`
+          );
+          await uploadBytes(storageRef, uint8Array);
+        })
+      );
+
+      // Return true to indicate success
+      return true;
+    } catch (error) {
+      // Log and handle the error
+      console.error("Error storing data in Firestore:", error);
+
+      // Return false to indicate failure
+      return false;
+    }
+  };
   let purchasedItems = [];
 
   if (userPurchasedItems?.length > 0) {
     purchasedItems = userPurchasedItems.map((item) => {
-      const { fileName, pricePerUnit, quantity, material, color, dimensions, itemId } =
-        item;
+      const {
+        fileName,
+        pricePerUnit,
+        quantity,
+        material,
+        color,
+        dimensions,
+        itemId,
+      } = item;
       return {
         itemId,
         fileName,
@@ -141,11 +195,12 @@ const usePaymentSuccessHandler = async (
     try {
       // Get all files from IndexedDB
       const files = await getAllFilesFromDB();
-      console.log('all files retrieved',files);
+      const imgFiles = await getAllImages();
+      console.log("all files retrieved", files);
       // Send data to Firestore and perform additional functionalities here
       const success = await storeDataInFirestore(files, userUID);
-
-      if (success) {
+      const imageSuccess= await storeImageInFirestore(imgFiles, userUID);
+      if (success && imageSuccess) {
         // Handle successful storage, e.g., show success message to the user
         // Add user details to Firestore
         if (
@@ -168,33 +223,32 @@ const usePaymentSuccessHandler = async (
             userPhone: userDetails.phone,
             purchasedItems,
             purchasedAt: formatDateTime(Date.now()),
-            approxDeliDate: 'TBD',
+            approxDeliDate: "TBD",
           };
           try {
             const documentId = `${userUID}`;
             // Add the data to Firestore
-            console.log(PurchasedItemsCollection, dataToAdd)
+            console.log(PurchasedItemsCollection, dataToAdd);
             await addDoc(PurchasedItemsCollection, dataToAdd);
             console.log("data sent to firebase");
 
-            fetch(`${ServerConfig}/send-email`,
-            {
-              method: 'POST',
+            fetch(`${ServerConfig}/send-email`, {
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               },
               body: JSON.stringify(emailData),
             })
-            // fetch('https://api.brevo.com/v3/smtp/email', BrevoOptions)
-            .then(response => response.json())
-            .then(response => {
-              console.log("Email sent:", response);
-              // Rest of your code after successful API call
-            })
-            .catch(err => {
-              console.error("Error sending email:", err);
-              // Handle the error, e.g., show an error message to the user
-            });
+              // fetch('https://api.brevo.com/v3/smtp/email', BrevoOptions)
+              .then((response) => response.json())
+              .then((response) => {
+                console.log("Email sent:", response);
+                // Rest of your code after successful API call
+              })
+              .catch((err) => {
+                console.error("Error sending email:", err);
+                // Handle the error, e.g., show an error message to the user
+              });
             // Rest of your code after successful addition to Firestore
           } catch (error) {
             console.error("Error adding document to Firestore:", error);
