@@ -8,7 +8,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { PurchasedItemsCollection, ServerConfig } from "../../firebase";
 import { setSuccessPaymentState } from "../../ReduxStore/actions/Authentication";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllImages } from "../../indexedDBImageUtilis";
+import { deleteAllImages, getAllImages } from "../../indexedDBImageUtilis";
 
 const unparsedStoreditems = localStorage.getItem("TTLprice");
 const TTLprice = JSON.parse(unparsedStoreditems);
@@ -265,6 +265,7 @@ const usePaymentSuccessHandler = async (
         }
         dispatch(setSuccessPaymentState(true));
         deleteAllRecordsFromDB();
+        deleteAllImages();
         localStorage.removeItem("TempItemsDetailsStorage");
         console.log(successPaymentState);
       } else {

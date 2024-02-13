@@ -26,6 +26,7 @@ import {
 } from "./UserProfileElement";
 import { LoginFromcontainer } from "../Login/LoginComponents/LoginForm/LoginFormelements";
 import {
+  BlogStorage,
   ProductConcernCollection,
   PurchasedItemsCollection,
   db,
@@ -56,12 +57,15 @@ import EditPasswordForm from "./EditPasswordForm";
 import ProductConcernPrompt from "../../globalcomponents/ProductConcern/ProductConcernPrompt";
 import SpinningLoader from "../../globalcomponents/DropDown/SpinningLoader";
 import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
+import { getDownloadURL, getStorage, listAll, ref } from "firebase/storage";
 
 export const DashBoard = () => {
   const [FetchingData, setFetchingData] = useState(true);
   // Initialize an array to store the retrieved documents
   const [purchaseInstances, setPurchaseInstances] = useState([]);
   const [productIssue, setProductIssue] = useState([]);
+  const [productImages, setProductImages] = useState([]);
+
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [isEditLoginDetailsFormOpen, setIsEditLoginDetailsFormOpen] =
     useState(false);
@@ -74,8 +78,7 @@ export const DashBoard = () => {
   const dispatch = useDispatch();
 
   const userDetailsUnparsed = localStorage.getItem("userDetails");
-  const userDetails =
-    useSelector((state) => state?.userDetails) ;
+  const userDetails = useSelector((state) => state?.userDetails);
   // const userDetails = JSON.parse(userDetailsUnparsed);
   const [localUser, setLocalUser] = useState(userDetails);
   const cartItems = useSelector((state) => state.cartItems.cartItems);
@@ -140,8 +143,41 @@ export const DashBoard = () => {
       }
     }
 
-    async function getProductImages(userId){
-      
+    async function getProductImages(userId) {
+      try {
+        // Initialize Firestore storage
+        const storage = getStorage();
+
+        // Reference to the folder where images are stored
+        const imagesRef = ref(storage, `PurchasedImages/${userId}`);
+
+        // List all items in the folder
+        const { items } = await listAll(imagesRef);
+
+        // Array to store image download URLs
+        const imageUrls = [];
+
+        // Iterate through each item and get download URL
+        await Promise.all(
+          items.map(async (itemRef) => {
+            // Get download URL for the image
+            const fileName = itemRef.name
+              .split("/")
+              .pop()
+              .replace(/^image/, "");
+            // console.log(fileName);
+            const imageUrl = await getDownloadURL(itemRef);
+            imageUrls.push({ fileName: fileName, imageUrl: imageUrl });
+          })
+        );
+        // console.log(imageUrls);
+        // Return array of image URLs
+        setProductImages(imageUrls);
+        return imageUrls;
+      } catch (error) {
+        console.error("Error retrieving product images:", error);
+        throw error;
+      }
     }
     // Call the function and use async/await to handle the asynchronous nature
     const fetchData = async () => {
@@ -149,6 +185,7 @@ export const DashBoard = () => {
         userUIDInLocalStorage
       );
       const productIDData = await getProductIssueForUser(userUIDInLocalStorage);
+      await getProductImages(userUIDInLocalStorage);
       // fetchAddress(postalCode);
       // Handle the fetched data here if needed
       // console.log("fetched data:", purchaseInstancesData);
@@ -213,7 +250,6 @@ export const DashBoard = () => {
           const newEmail = profile.email;
           dispatch({ type: "UPDATE_EMAIL", payload: newEmail });
           setLoading(false);
-         
         });
       }
     } catch {
@@ -342,10 +378,20 @@ export const DashBoard = () => {
               {purchaseInstance.purchasedItems
                 .filter((item) => item.status !== "Delivered")
                 .map((item, index) => {
+                  const matchingImage = productImages.find(
+                    (Pimage) => Pimage.fileName === item.itemId
+                  );
                   return (
                     <InnerHeaderWrapper key={item.itemId}>
                       <InnerHeader>
                         <InnerLayerP> {item.fileName}</InnerLayerP>
+                        {matchingImage && (
+                          <img
+                            style={{marginTop:'10px'}}
+                            src={matchingImage.imageUrl}
+                            alt={matchingImage.fileName}
+                          />
+                        )}
                       </InnerHeader>
                       <InnerHeader>
                         <InnerLayerP>FDM Printing ({item.color})</InnerLayerP>
@@ -613,9 +659,7 @@ export const DashBoard = () => {
 
         <InnerHeaderWrapper>
           <DisplayHeader>Email</DisplayHeader>
-          <InnerHeaderpersonalize>
-            {userDetails?.email }
-          </InnerHeaderpersonalize>
+          <InnerHeaderpersonalize>{userDetails?.email}</InnerHeaderpersonalize>
           <EditIconLoginDetails1 onClick={handleEditLoginDetailsClick}>
             Change Login Email
           </EditIconLoginDetails1>

@@ -80,6 +80,31 @@ import {
   getImageById,
   storeImage,
 } from "../../../../indexedDBImageUtilis";
+// async function blobToImageFile(blob, fileName) {
+//   // Create a new File object from the Blob
+//   const imageFile = new File([blob], fileName, { type: blob.type });
+//   const imageUrl = URL.createObjectURL(imageFile);
+//   console.log(imageUrl)
+//   return imageFile;
+// }
+async function blobToImageFile(blob, fileName) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      // Resolve with the data URL when reading is complete
+      resolve(reader.result);
+    };
+
+    reader.onerror = (error) => {
+      // Reject with the error if there is an issue
+      reject(error);
+    };
+
+    // Read the blob as a data URL
+    reader.readAsDataURL(blob);
+  });
+}
 const Dropfile = ({}) => {
   const [files, setFiles] = useState([]);
   const [filetype, setFiletype] = useState("");
@@ -103,7 +128,7 @@ const Dropfile = ({}) => {
   const [cameraPosition, setCameraPosition] = useState([
     -7.726866370752757, 7.241928986275022, -8.091348270643504,
   ]); // Initial camera position
-
+  const [imageUrls, setImageUrls] = useState([]);
   const printBedWidth = 235; // mm
   const printBedDepth = 235; // mm
   const printVolumeWidth = 220; // mm
@@ -602,36 +627,50 @@ const Dropfile = ({}) => {
           console.error("Canvas ref is not set.");
           return;
         }
-  
+
         // Create a new canvas element
         const newCanvas = document.createElement("canvas");
         newCanvas.width = originalCanvas.width;
         newCanvas.height = originalCanvas.height;
-  
+
         const ctx = newCanvas.getContext("2d");
-  
+
         // Draw the contents of the original canvas onto the new canvas
         ctx.drawImage(originalCanvas, 0, 0);
-  
+
         // Capture the screenshot from the new canvas
         const screenshotUrl = newCanvas.toDataURL("image/png");
-  
+
         if (screenshotUrl) {
           const parts = screenshotUrl.split(";base64,");
           const contentType = parts[0].split(":")[1];
           const raw = window.atob(parts[1]);
           const rawLength = raw.length;
           const uInt8Array = new Uint8Array(rawLength);
+          //test snippet
+          // const urls = [];
+
           for (let i = 0; i < rawLength; ++i) {
             uInt8Array[i] = raw.charCodeAt(i);
           }
           const blob = new Blob([uInt8Array], { type: contentType });
-          resolve(blob);
+          const file = blobToImageFile(blob, imageId)
+            .then((dataUrl) => {
+              // urls.push(dataUrl);
+              // console.log("Data URL:", dataUrl);
+            })
+            .catch((error) => {
+              console.error("Error converting blob to data URL:", error);
+            });
+          // setImageUrls(urls);
+          // console.log(file)
+          resolve(file);
         }
+        // console.log(imageUrls)
       }, 2000);
     });
   };
-  
+
   // const handleMainScreenShot = (imageId) => {
   //   storeImage(`image${imageId}`, setTimeout(captureScreenshot, 2000));
   // };
@@ -1085,6 +1124,17 @@ const Dropfile = ({}) => {
       {/* <TocartCTABtn onClick={captureScreenshot}>
         Capture Screenshot
       </TocartCTABtn> */}
+      {/* <div style={{ display: "flex", width:"100%"}}>
+        {imageUrls.map((imageUrl, index) => (
+          <img
+            style={{ width: "400px" }}
+            key={index}
+            src={imageUrl}
+            alt={`Image ${index}`}
+          />
+        ))}
+      </div> */}
+
       <TocartCTABtn onClick={() => getAllImages()}>
         show all images
       </TocartCTABtn>
