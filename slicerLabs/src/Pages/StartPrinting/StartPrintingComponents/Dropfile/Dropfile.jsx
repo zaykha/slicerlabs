@@ -87,24 +87,7 @@ async function blobToImageFile(blob, fileName) {
   // console.log(imageUrl)
   return imageFile;
 }
-// async function blobToImageFile(blob, fileName) {
-//   return new Promise((resolve, reject) => {
-//     const reader = new FileReader();
 
-//     reader.onloadend = () => {
-//       // Resolve with the data URL when reading is complete
-//       resolve(reader.result);
-//     };
-
-//     reader.onerror = (error) => {
-//       // Reject with the error if there is an issue
-//       reject(error);
-//     };
-
-//     // Read the blob as a data URL
-//     reader.readAsDataURL(blob);
-//   });
-// }
 const Dropfile = ({}) => {
   const [files, setFiles] = useState([]);
   const [filetype, setFiletype] = useState("");
@@ -158,28 +141,28 @@ const Dropfile = ({}) => {
     header: "",
     message: "",
   });
-  // const [materialSettings, setMaterialSettings] = useState({
-  //   printTimePerUnitVolume: {
-  //     ABS: 0.05, // minutes/mm^3
-  //     PLA: 0.04, // minutes/mm^3
-  //     TPU: 0.06, // minutes/mm^3
-  //     NYLON: 0.07, // minutes/mm^3
-  //     PETG: 0.05, // minutes/mm^3
-  //     RESIN: 0.03, // minutes/mm^3
-  //   },
-  //   materialCosts: {
-  //     ABS: 0.05, // SGD per gram
-  //     PLA: 0.04, // SGD per gram
-  //     TPU: 0.06, // SGD per gram
-  //     NYLON: 0.07, // SGD per gram
-  //     PETG: 0.05, // SGD per gram
-  //     RESIN: 0.1, // SGD per gram
-  //   },
-  //   hourlyRate: 20,
-  //   laborCost: 25,
-  //   overheadCost: 5,
-  // });
-  const [materialSettings, setMaterialSettings] = useState();
+  const [materialSettings, setMaterialSettings] = useState({
+    printTimePerUnitVolume: {
+      ABS: 0.05, // minutes/mm^3
+      PLA: 0.04, // minutes/mm^3
+      TPU: 0.06, // minutes/mm^3
+      NYLON: 0.07, // minutes/mm^3
+      PETG: 0.05, // minutes/mm^3
+      RESIN: 0.03, // minutes/mm^3
+    },
+    materialCosts: {
+      ABS: 0.05, // SGD per gram
+      PLA: 0.04, // SGD per gram
+      TPU: 0.06, // SGD per gram
+      NYLON: 0.07, // SGD per gram
+      PETG: 0.05, // SGD per gram
+      RESIN: 0.1, // SGD per gram
+    },
+    hourlyRate: 20,
+    laborCost: 25,
+    overheadCost: 5,
+  });
+  // const [materialSettings, setMaterialSettings] = useState();
   useEffect(() => {
     setCartCount(cart.length);
     // console.log(cart);
@@ -655,13 +638,7 @@ const Dropfile = ({}) => {
           }
           const blob = new Blob([uInt8Array], { type: contentType });
           const file = blobToImageFile(blob, imageId)
-            .then((dataUrl) => {
-              // urls.push(dataUrl);
-              // console.log("Data URL:", dataUrl);
-            })
-            .catch((error) => {
-              console.error("Error converting blob to data URL:", error);
-            });
+            
           // setImageUrls(urls);
           // console.log(file)
           resolve(file);
