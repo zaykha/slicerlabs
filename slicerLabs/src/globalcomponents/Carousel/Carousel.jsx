@@ -1,18 +1,48 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { MdAdd, MdCheck } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  MOdropdown,
+  Mdropdownlabel,
+  MinP,
+  Minputqtt,
+  Moption,
   TocartCTABtn,
   Tocartflexdiv,
 } from "../../Pages/StartPrinting/StartPrintingComponents/MaterialsOptions/MaterialsOptionselements";
 import { useNavigate } from "react-router-dom";
 import { addingMoreModels } from "../../ReduxStore/actions/addingModel";
+import {
+  DropzoneContainer,
+  DropzoneFormcontainer,
+  QtyDiv,
+  QtyDiv2,
+  QtyFlexDiv,
+  QuantityButton,
+} from "../../Pages/StartPrinting/StartPrintingComponents/Dropfile/Dropfileelements";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, PresentationControls, Stage } from "@react-three/drei";
+import {
+  LoginContainer,
+  LoginFromcontainer,
+} from "../../Pages/Login/LoginComponents/LoginForm/LoginFormelements";
+import {
+  deleteModel,
+  updateColor,
+  updateMaterial,
+  updatePrice,
+} from "../../ReduxStore/reducers/CartItemReducer";
+import { decrementCartCount } from "../../ReduxStore/actions/cartCountActions";
+import { deleteFileFromDB } from "../../indexedDBUtilis";
+import { deleteImageFromIndexDB, storeImage } from "../../indexedDBImageUtilis";
+import { doc, getDoc } from "firebase/firestore";
+import { ConfigCollection } from "../../firebase";
 const StyledOuterDiv = styled.div`
   width: 100vw;
   padding: 30px 0;
   position: relative;
-  right: ${({ addingMoreModel }) => (addingMoreModel ? '100vw' : '0')};
+  right: ${({ addingMoreModel }) => (addingMoreModel ? "100vw" : "0")};
   transition: all 0.2s ease-in;
 `;
 const CarouselContainer = styled.div`
@@ -75,7 +105,7 @@ const PageIndicator = styled.div`
 const PageIndicatorplus = styled.div`
   width: 20px;
   height: 20px;
-  background-color:rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.25);
   border: 1px solid #636363;
   border-radius: 50%;
   margin: 0 5px;
@@ -132,20 +162,62 @@ export const TocartCTABtn1 = styled.div`
     border: 1px solid white;
   }
 `;
-const Carousel = ({ items }) => {
+const Carousel = ({ setModel }) => {
   const [currentItem, setCurrentItem] = useState(0);
   const cart = useSelector((state) => state.cartItems);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const addingMoreModelLocal = useSelector((state) => state.addingMoreModel.isAdding);
+  const addingMoreModelLocal = useSelector(
+    (state) => state.addingMoreModel.isAdding
+  );
+  const [materialSettings, setMaterialSettings] = useState({
+    printTimePerUnitVolume: {
+      ABS: 0.05, // minutes/mm^3
+      PLA: 0.04, // minutes/mm^3
+      TPU: 0.06, // minutes/mm^3
+      NYLON: 0.07, // minutes/mm^3
+      PETG: 0.05, // minutes/mm^3
+      RESIN: 0.03, // minutes/mm^3
+    },
+    materialCosts: {
+      ABS: 0.05, // SGD per gram
+      PLA: 0.04, // SGD per gram
+      TPU: 0.06, // SGD per gram
+      NYLON: 0.07, // SGD per gram
+      PETG: 0.05, // SGD per gram
+      RESIN: 0.1, // SGD per gram
+    },
+    hourlyRate: 20,
+    laborCost: 25,
+    overheadCost: 5,
+  });
+  const calculatePriceString = localStorage.getItem("calculatePriceFunction");
   useEffect(() => {
     // Check if the currentItem is still valid after deletion
-    if (currentItem >= items.length) {
-      setCurrentItem(items.length - 1);
+    if (currentItem >= cart.length) {
+      setCurrentItem(cart.length - 1);
     }
-    console.log(addingMoreModelLocal);
-  }, [currentItem, items.length]);
-
+    // console.log(addingMoreModelLocal);
+  }, [currentItem, cart.length]);
+  const canvasRefs = useRef(cart.cartItems.map(() => React.createRef()));
+  // useEffect for capturing screenshots
+  useEffect(() => {
+    // Access each ref individually and do something with it
+    canvasRefs.current.forEach((ref, index) => {
+      console.log(`Ref for item ${index}:`, ref.current);
+      if (ref.current) {
+        captureScreenshot(cart.cartItems[index].id, index, ref.current).then((blob) => {
+          // Do something with the blob
+          console.log(`Screenshot captured for item ${index}:`, blob);
+          // You can call storeImage here if needed
+        }).catch((error) => {
+          console.error(`Error capturing screenshot for item ${index}:`, error);
+        });
+      } else {
+        console.error(`Canvas ref is not set for item ${index}.`);
+      }
+    });
+  }, [canvasRefs.current, cart.cartItems.length]);
   const scrollLeft = () => {
     if (currentItem > 0) {
       setCurrentItem(currentItem - 1);
@@ -155,6 +227,183 @@ const Carousel = ({ items }) => {
     if (currentItem < items.length - 1) {
       setCurrentItem(currentItem + 1);
     }
+  };
+  const fetchConfigSettings = async () => {
+    try {
+      const configDocRef = doc(
+        ConfigCollection,
+        "irr8pVIaN4S4JjkMlEreZi8wC7G2"
+      ); // Replace with your collection and document IDs
+      const configDocSnapshot = await getDoc(configDocRef);
+
+      if (configDocSnapshot.exists()) {
+        const data = configDocSnapshot.data();
+        setMaterialSettings(data);
+      }
+      // console.log(materialSettings);
+    } catch (error) {
+      console.error("Error fetching configuration settings:", error);
+    }
+  };
+  useEffect(() => {
+    fetchConfigSettings();
+    // console.log(cart.cartItems[0]?.dimensions);
+  }, []);
+  const parseStoredFunction = (functionName, storedFunction) => {
+    try {
+      const Unstring = JSON.parse(storedFunction);
+
+      // Use eval() to convert the object to a function
+      const parsedFunction = eval(`(${Unstring})`);
+      // console.log(parsedFunction)
+      // const parsedFunction = new Function(`return ${functionization}`)
+      if (typeof parsedFunction === "function") {
+        return parsedFunction;
+      } else {
+        throw new Error(`Parsed ${functionName} is not a function`);
+      }
+    } catch (error) {
+      console.error(`Error parsing ${functionName} function:`, error);
+      return null;
+    }
+  };
+
+  const handleMaterialChange = (e, id) => {
+    const newMaterial = e.target.value;
+    dispatch(updateMaterial({ ProductId: id, newMaterial }));
+  };
+
+  const handleColorChange = (e, id) => {
+    const newColor = e.target.value;
+    dispatch(updateColor({ ProductId: id, newColor }));
+  };
+  const handleDelete = (tempModelId) => {
+    cart.cartItems.filter((item) => item.id !== tempModelId);
+    // Assuming setModel is the useState setter for your model state
+    setModel((prevModels) =>
+      prevModels.filter((model) => model.LocalID !== tempModelId)
+    );
+    // setIsLoading(false);
+    // setProgress(0);
+    dispatch(deleteModel(tempModelId));
+    dispatch(decrementCartCount());
+    deleteFileFromDB(tempModelId);
+    deleteImageFromIndexDB(tempModelId);
+    // deleteAllRecordsFromDB();
+    // console.log(model.length);
+  };
+
+  const increaseQuantityAction = (ProductId) => {
+    dispatch(increaseQuantity({ ProductId }));
+  };
+
+  const decreaseQuantityAction = (ProductId) => {
+    dispatch(decreaseQuantity({ ProductId }));
+  };
+  const handleChange = (
+    newMaterial,
+    newColor,
+    newWidth,
+    newHeight,
+    newDepth,
+    ModelId
+  ) => {
+    // Check if both material and color are available
+    if (newMaterial && newColor) {
+      // Calculate price or perform any other action
+      if (calculatePriceString) {
+        const calculatePriceFunctionToStore = parseStoredFunction(
+          "calculatePrice",
+          calculatePriceString
+        );
+
+        updatePriceLocal(
+          calculatePriceFunctionToStore,
+          newMaterial,
+          newColor,
+          newWidth,
+          newHeight,
+          newDepth,
+          ModelId
+        );
+      }
+    }
+  };
+  const updatePriceLocal = (
+    anotherFunction,
+    material,
+    color,
+    width,
+    height,
+    depth,
+    ModelId
+  ) => {
+    // console.log(anotherFunction);
+    if (anotherFunction && material && color && width && height && depth) {
+      const newPrice =
+        anotherFunction(
+          material,
+          color,
+          {
+            width,
+            height,
+            depth,
+          },
+          materialSettings
+        ) || 100;
+      // setPrice(newPrice);
+      // console.log(ModelId, newPrice)
+      dispatch(updatePrice({ ProductId: ModelId, newPrice }));
+    } else {
+      console.log("calc fail");
+    }
+  };
+  const captureScreenshot = (imageId, index, originalCanvas) => {
+    return new Promise((resolve) => {
+        // console.log("Original canvas:", originalCanvas);
+        if (!originalCanvas) {
+          console.error("Canvas ref is not set.");
+          return;
+      }
+        // Create a new canvas element
+        const newCanvas = document.createElement("canvas");
+        newCanvas.width = originalCanvas.width;
+        newCanvas.height = originalCanvas.height;
+
+        const ctx = newCanvas.getContext("2d");
+
+        // Draw the contents of the original canvas onto the new canvas
+        ctx.drawImage(originalCanvas, 0, 0);
+
+        // Capture the screenshot from the new canvas
+        const screenshotUrl = newCanvas.toDataURL("image/png");
+
+        if (screenshotUrl) {
+          const parts = screenshotUrl.split(";base64,");
+          const contentType = parts[0].split(":")[1];
+          const raw = window.atob(parts[1]);
+          const rawLength = raw.length;
+          const uInt8Array = new Uint8Array(rawLength);
+
+          for (let i = 0; i < rawLength; ++i) {
+            uInt8Array[i] = raw.charCodeAt(i);
+          }
+          const blob = new Blob([uInt8Array], { type: contentType });
+          // Store the image directly
+          storeImage(`image${imageId}`, blob)
+          .then((imageUrl) => {
+              resolve(imageUrl);
+          })
+          .catch((error) => {
+              console.error("Error storing image:", error);
+              resolve(null);
+          });
+          resolve(blob);
+        }else {
+          resolve(null);
+        }
+    
+    });
   };
 
   const goToPage = (pageIndex) => {
@@ -206,9 +455,275 @@ const Carousel = ({ items }) => {
             transition: "transform 0.3s",
           }}
         >
-          {items.map((item, index) => (
+          {/* {items.map((item, index) => (
             <CarouselItem key={index}>{item}</CarouselItem>
-          ))}
+          ))} */}
+          {cart.cartItems.map((individualModel, index) => {
+            const { material, color, quantity } = individualModel.options || {};
+            const { width, height, depth } = individualModel.dimensions || {};
+            const price = individualModel.pricePerUnit || 0;
+            // const getCanvasRef = (ref) => {
+            //   canvasRefs[index] = ref;
+            // };
+            // console.log(`Item ${index}, Price: ${price}`);
+            return (
+              <div key={index} style={{ width: "100%", height: "auto" }}>
+                {/* Your existing code for DropzoneFormcontainer */}
+                <DropzoneFormcontainer style={{ width: "100%" }}>
+                  <DropzoneContainer>
+                    <Canvas
+                      ref={canvasRefs.current[index]}
+                      // ref={(ref) => getCanvasRef(ref)}
+                      width={"100%"}
+                      height={"100%"}
+                      linear={"true"}
+                      // onCreated={() => setTimeout(captureScreenshot, 2000)}
+                      // onCreated={() =>
+                      //   handleMainScreenShot(individualModel.id, index)
+                      // }
+                      gl={{ preserveDrawingBuffer: true }}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        position: "absolute",
+                      }}
+                      dpr={[1, 2]}
+                      camera={{ fov: 45 }}
+                    >
+                      <color attach="background" args={["rgba(2, 65, 94)"]} />
+                      <PresentationControls>
+                        <Stage environment={null}>
+                          {/* <Grid cellSize={3} infiniteGrid={true} /> */}
+                          <OrbitControls />
+                          <ambientLight />
+                          <pointLight position={[10, 10, 10]} />
+                          {/* <ModelSizeChecker model={individualModel.model} /> */}
+                          <meshBasicMaterial color="rgb(10, 20, 30)" />
+
+                          <primitive
+                            object={individualModel.model}
+                            scale={0.01}
+                          />
+                          {/* <CameraControls cameraPosition={cameraPosition} /> */}
+                        </Stage>
+                      </PresentationControls>
+                    </Canvas>
+
+                    <button
+                      style={{
+                        width: "50px",
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        borderRadius: 10,
+                      }}
+                      onClick={() => handleDelete(individualModel.id)}
+                    >
+                      X
+                    </button>
+                  </DropzoneContainer>
+                </DropzoneFormcontainer>
+
+                <LoginFromcontainer
+                // ref={aboveDivRef}
+                >
+                  <LoginContainer>
+                    <Mdropdownlabel htmlFor={`material_${index}`}>
+                      Materials
+                    </Mdropdownlabel>
+                    <MOdropdown
+                      value={individualModel.options?.material}
+                      onChange={(e) => {
+                        handleMaterialChange(e, individualModel.id);
+                        handleChange(
+                          e.target.value,
+                          color,
+                          width,
+                          height,
+                          depth,
+                          individualModel.id
+                        );
+                      }}
+                      id={`material_${index}`}
+                    >
+                      <Moption value="">Please Select a Material</Moption>
+                      <Moption value="ABS">
+                        Acrylonitrile Butadiene Styrene (ABS)
+                      </Moption>
+                      <Moption value="PLA">Polylactic Acid (PLA)</Moption>
+                      <Moption value="TPU">
+                        Thermoplastic Polyurethane (TPU)
+                      </Moption>
+                      <Moption value="NYLON">Nylon</Moption>
+                      <Moption value="PETG">
+                        Polyethylene Terephthalate Glycol (PETG)
+                      </Moption>
+                      <Moption value="RESIN">Resins</Moption>
+                    </MOdropdown>
+
+                    <Mdropdownlabel htmlFor={`color_${index}`}>
+                      Finshing & Color
+                    </Mdropdownlabel>
+                    <MOdropdown
+                      value={individualModel.options?.color}
+                      onChange={(e) => {
+                        handleColorChange(e, individualModel.id);
+                        handleChange(
+                          material,
+                          e.target.value,
+                          width,
+                          height,
+                          depth,
+                          individualModel.id
+                        );
+                      }}
+                      id={`color_${index}`}
+                    >
+                      <Moption value="">Please Select a Color</Moption>
+                      <Moption value="white">White</Moption>
+                      <Moption value="black">Black</Moption>
+                      <Moption value="transparent">Transparent</Moption>
+                    </MOdropdown>
+
+                    <Mdropdownlabel htmlFor="width">
+                      Dimension ( Width x Height x Depth ) in mm
+                    </Mdropdownlabel>
+
+                    <div
+                      style={{
+                        display: "flex",
+                      }}
+                    >
+                      <input
+                        type="number"
+                        placeholder="Width"
+                        value={individualModel.dimensions.width.toFixed(2)}
+                        readOnly // Make the input field uneditable
+                        step="1" // Allow only whole numbers
+                        style={{
+                          width: "28%",
+                          background: "rgba(38, 38, 38, 0.43)",
+                          border: "1px solid #4a4a4a",
+                          borderRadius: "10px",
+                          color: "white",
+                          margin: "0px auto 15px",
+                          padding: "8px",
+                          textAlign: "center",
+                          height: "40px",
+                          fontSize: "1.1rem",
+                          pointerEvents: "none", // Make it unclickable
+                        }}
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Height"
+                        value={individualModel.dimensions.height.toFixed(2)}
+                        readOnly // Make the input field uneditable
+                        step="1" // Allow only whole numbers
+                        style={{
+                          width: "28%",
+                          background: "rgba(38, 38, 38, 0.43)",
+                          border: "1px solid #4a4a4a",
+                          borderRadius: "10px",
+                          color: "white",
+                          margin: "0px auto 15px",
+                          padding: "8px",
+                          textAlign: "center",
+                          height: "40px",
+                          fontSize: "1.1rem",
+                          pointerEvents: "none", // Make it unclickable
+                        }}
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Depth"
+                        value={individualModel.dimensions.depth.toFixed(2)}
+                        readOnly // Make the input field uneditable
+                        step="1" // Allow only whole numbers
+                        style={{
+                          width: "28%",
+                          background: "rgba(38, 38, 38, 0.43)",
+                          border: "1px solid #4a4a4a",
+                          borderRadius: "10px",
+                          color: "white",
+                          margin: "0px auto 15px",
+                          padding: "8px",
+                          textAlign: "center",
+                          height: "40px",
+                          fontSize: "1.1rem",
+                          pointerEvents: "none", // Make it unclickable
+                        }}
+                      />
+                    </div>
+                    {material && color && width && height && depth ? (
+                      <div>
+                        <Mdropdownlabel htmlFor={`quantity_${index}`}>
+                          Quantity
+                        </Mdropdownlabel>
+                        <QtyFlexDiv>
+                          <QtyDiv>
+                            <QuantityButton
+                              onClick={() =>
+                                increaseQuantityAction(individualModel.id)
+                              }
+                              customMargin="0 5px 0 0"
+                            >
+                              +
+                            </QuantityButton>
+                            <Minputqtt
+                              type="number"
+                              placeholder="Quantity"
+                              min="1"
+                              value={individualModel.options?.quantity}
+                              onChange={(e) =>
+                                handleQuantityChange(e, individualModel.id)
+                              }
+                            ></Minputqtt>
+                            <QuantityButton
+                              onClick={() =>
+                                decreaseQuantityAction(individualModel.id)
+                              }
+                              customMargin="0 0 0 5px"
+                            >
+                              -
+                            </QuantityButton>
+                          </QtyDiv>
+                          <QtyDiv2>
+                            <MinP>x </MinP>
+                            <MinP>${price} </MinP>
+                            <MinP>= </MinP>
+                            <MinP>
+                              $ {(price * parseInt(quantity)).toFixed(2)}
+                            </MinP>
+                          </QtyDiv2>
+                        </QtyFlexDiv>
+                        {/* <PriceTable
+                  initialPrice={price}
+                  individualModel={individualModel}
+                /> */}
+                      </div>
+                    ) : (
+                      <></>
+                    )}
+                    {price !== 0 ? (
+                      <Mdropdownlabel>
+                        Costs (Price-Match Guarantee): We will ensure that our
+                        quotes are the cheapest in town to make sure that you
+                        get the bang for the buck pricings. Supply an official
+                        invoice from the supplier and a screen shot of our price
+                        page we will match it, should you find one cheaper than
+                        our quote!
+                      </Mdropdownlabel>
+                    ) : (
+                      <></>
+                    )}
+                  </LoginContainer>
+                </LoginFromcontainer>
+              </div>
+            );
+          })}
         </div>
       </CarouselContainer>
     </StyledOuterDiv>

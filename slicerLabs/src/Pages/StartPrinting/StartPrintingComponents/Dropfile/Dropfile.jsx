@@ -105,7 +105,9 @@ const Dropfile = ({}) => {
     (state) => state.addingMoreModel.isAdding
   );
   // const [canvasRef, setCanvasRef] = useState(null);
-  const canvasRef = useRef();
+  // const canvasRef = useRef();
+  // const canvasRefs = {};
+  // const [canvasRefs, setCanvasRefs] = useState([]);
   const [image, takeScreenshot] = useScreenshot();
   // const ProductId = useSelector((state) => state.cartItems.tempModelId);
   const [cameraPosition, setCameraPosition] = useState([
@@ -124,6 +126,8 @@ const Dropfile = ({}) => {
   const rightDivRef = useRef(null);
   const [material, setMaterial] = useState("");
   const cart = useSelector((state) => state.cartItems);
+  const canvasRefs = useRef(cart.cartItems.map(() => React.createRef()));
+
   // const dimensions = cart?.cartItems[0]?.dimensions;
   const [color, setColor] = useState("");
   const [width, setWidth] = useState(10);
@@ -167,19 +171,20 @@ const Dropfile = ({}) => {
     setCartCount(cart.length);
     // console.log(cart);
   }, [cart]);
-  useLayoutEffect(() => {
-    if (canvasRef.current) {
-      const { current: canvas } = canvasRef;
-      const gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
-      // Check if the WebGL context is successfully obtained
-      if (gl) {
-        console.log("WebGL context obtained successfully.");
-        // Additional WebGL context configuration can be done here
-      } else {
-        console.error("Failed to obtain WebGL context.");
-      }
-    }
-  }, []);
+
+  // useLayoutEffect(() => {
+  //   if (canvasRefs.current) {
+  //     const { current: canvas } = canvasRefs;
+  //     const gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
+  //     // Check if the WebGL context is successfully obtained
+  //     if (gl) {
+  //       console.log("WebGL context obtained successfully.");
+  //       // Additional WebGL context configuration can be done here
+  //     } else {
+  //       console.error("Failed to obtain WebGL context.");
+  //     }
+  //   }
+  // }, []);
   const fetchConfigSettings = async () => {
     try {
       const configDocRef = doc(
@@ -602,15 +607,14 @@ const Dropfile = ({}) => {
       }
     },
   });
-  const captureScreenshot = (imageId) => {
+  const captureScreenshot = (imageId, index) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const originalCanvas = canvasRef.current;
+        const originalCanvas = canvasRefs[index].current;
         if (!originalCanvas) {
           console.error("Canvas ref is not set.");
           return;
         }
-
         // Create a new canvas element
         const newCanvas = document.createElement("canvas");
         newCanvas.width = originalCanvas.width;
@@ -630,20 +634,17 @@ const Dropfile = ({}) => {
           const raw = window.atob(parts[1]);
           const rawLength = raw.length;
           const uInt8Array = new Uint8Array(rawLength);
-          //test snippet
-          // const urls = [];
+      
 
           for (let i = 0; i < rawLength; ++i) {
             uInt8Array[i] = raw.charCodeAt(i);
           }
           const blob = new Blob([uInt8Array], { type: contentType });
           // const file = blobToImageFile(blob, imageId)
-            
-          // setImageUrls(urls);
+
           // console.log(file)
           resolve(blob);
         }
-        // console.log(imageUrls)
       }, 2000);
     });
   };
@@ -651,8 +652,8 @@ const Dropfile = ({}) => {
   // const handleMainScreenShot = (imageId) => {
   //   storeImage(`image${imageId}`, setTimeout(captureScreenshot, 2000));
   // };
-  const handleMainScreenShot = async (imageId) => {
-    const screenshotUrl = await captureScreenshot(imageId);
+  const handleMainScreenShot = async (imageId, index) => {
+    const screenshotUrl = await captureScreenshot(imageId, index);
     await storeImage(`image${imageId}`, screenshotUrl);
   };
   const handleDelete = (tempModelId) => {
@@ -743,7 +744,9 @@ const Dropfile = ({}) => {
     const { material, color, quantity } = individualModel.options || {};
     const { width, height, depth } = individualModel.dimensions || {};
     const price = individualModel.pricePerUnit || 0;
-
+    const getCanvasRef = (ref) => {
+      canvasRefs[index] = ref;
+    };
     // console.log(`Item ${index}, Price: ${price}`);
     return (
       <div key={index} style={{ width: "100%", height: "auto" }}>
@@ -751,12 +754,13 @@ const Dropfile = ({}) => {
         <DropzoneFormcontainer style={{ width: "100%" }}>
           <DropzoneContainer>
             <Canvas
-              ref={canvasRef}
+              // ref={canvasRef}
+              ref={(ref) => getCanvasRef(ref)}
               width={"100%"}
               height={"100%"}
               linear={"true"}
               // onCreated={() => setTimeout(captureScreenshot, 2000)}
-              onCreated={() => handleMainScreenShot(individualModel.id)}
+              onCreated={() => handleMainScreenShot(individualModel.id, index)}
               gl={{ preserveDrawingBuffer: true }}
               style={{
                 width: "100%",
@@ -999,6 +1003,7 @@ const Dropfile = ({}) => {
       </div>
     );
   });
+ 
   const ProgressBar = ({ LoadProgress }) => {
     return (
       <div>
@@ -1038,7 +1043,8 @@ const Dropfile = ({}) => {
 
       {cart.cartItems.length > 0 && !isLoading ? (
         <div style={{ display: "flex" }}>
-          <Carousel items={carouselItems} />
+          {/* <Carousel items={carouselItems} /> */}
+          <Carousel cart={cart} models={model} setModel={setModel}/>
 
           {addingMoreModelLocal && (
             <div style={{ position: "absolute" }}>
