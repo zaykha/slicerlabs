@@ -137,13 +137,14 @@ const usePaymentSuccessHandler = async (
   // Function to store data in Firestore
   const storeImageInFirestore = async (PurchasedImageData, userUID) => {
     try {
+      console.log('purchased image data', PurchasedImageData)
       // Initialize Firestore storage
       const storage = getStorage();
       // Loop through each image data object in PurchasedImageData
       await Promise.all(
         PurchasedImageData.map(async (imageData) => {
           const { id, imagefile } = imageData;
-
+          console.log('image file beforesending',imagefile);
           // // Convert Blob to Uint8Array
           // const uint8Array = await blobToUint8Array(imagefile);
           // Convert Blob to image File
