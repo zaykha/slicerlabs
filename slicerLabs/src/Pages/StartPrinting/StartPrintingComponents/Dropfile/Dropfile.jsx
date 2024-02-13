@@ -80,31 +80,31 @@ import {
   getImageById,
   storeImage,
 } from "../../../../indexedDBImageUtilis";
-// async function blobToImageFile(blob, fileName) {
-//   // Create a new File object from the Blob
-//   const imageFile = new File([blob], fileName, { type: blob.type });
-//   const imageUrl = URL.createObjectURL(imageFile);
-//   console.log(imageUrl)
-//   return imageFile;
-// }
 async function blobToImageFile(blob, fileName) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      // Resolve with the data URL when reading is complete
-      resolve(reader.result);
-    };
-
-    reader.onerror = (error) => {
-      // Reject with the error if there is an issue
-      reject(error);
-    };
-
-    // Read the blob as a data URL
-    reader.readAsDataURL(blob);
-  });
+  // Create a new File object from the Blob
+  const imageFile = new File([blob], fileName, { type: blob.type });
+  // const imageUrl = URL.createObjectURL(imageFile);
+  // console.log(imageUrl)
+  return imageFile;
 }
+// async function blobToImageFile(blob, fileName) {
+//   return new Promise((resolve, reject) => {
+//     const reader = new FileReader();
+
+//     reader.onloadend = () => {
+//       // Resolve with the data URL when reading is complete
+//       resolve(reader.result);
+//     };
+
+//     reader.onerror = (error) => {
+//       // Reject with the error if there is an issue
+//       reject(error);
+//     };
+
+//     // Read the blob as a data URL
+//     reader.readAsDataURL(blob);
+//   });
+// }
 const Dropfile = ({}) => {
   const [files, setFiles] = useState([]);
   const [filetype, setFiletype] = useState("");
