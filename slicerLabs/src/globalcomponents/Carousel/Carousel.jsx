@@ -199,20 +199,30 @@ const Carousel = ({ setModel }) => {
     }
     // console.log(addingMoreModelLocal);
   }, [currentItem, cart.length]);
-  const canvasRefs = useRef(cart.cartItems.map(() => React.createRef()));
-  // useEffect for capturing screenshots
+  const canvasRefs = useRef(
+    Array.from({ length: cart.cartItems.length }, () => React.createRef())
+  ); // useEffect for capturing screenshots
   useEffect(() => {
     // Access each ref individually and do something with it
     canvasRefs.current.forEach((ref, index) => {
-      console.log(`Ref for item ${index}:`, ref.current);
-      if (ref.current) {
-        captureScreenshot(cart.cartItems[index].id, index, ref.current).then((blob) => {
-          // Do something with the blob
-          console.log(`Screenshot captured for item ${index}:`, blob);
-          // You can call storeImage here if needed
-        }).catch((error) => {
-          console.error(`Error capturing screenshot for item ${index}:`, error);
-        });
+      console.log(cart.cartItems.length);
+      if (ref && ref.current) {
+        console.log("1");
+        captureScreenshot(cart.cartItems[index].id, index, ref.current)
+          .then((blob) => {
+            // Do something with the blob
+            console.log(
+              `Screenshot captured for item ${cart.cartItems[index].id}:`,
+              blob
+            );
+            // You can call storeImage here if needed
+          })
+          .catch((error) => {
+            console.error(
+              `Error capturing screenshot for item ${index}:`,
+              error
+            );
+          });
       } else {
         console.error(`Canvas ref is not set for item ${index}.`);
       }
@@ -360,49 +370,48 @@ const Carousel = ({ setModel }) => {
   };
   const captureScreenshot = (imageId, index, originalCanvas) => {
     return new Promise((resolve) => {
-        // console.log("Original canvas:", originalCanvas);
-        if (!originalCanvas) {
-          console.error("Canvas ref is not set.");
-          return;
+      // console.log("Original canvas:", originalCanvas);
+      if (!originalCanvas) {
+        console.error("Canvas ref is not set.");
+        return;
       }
-        // Create a new canvas element
-        const newCanvas = document.createElement("canvas");
-        newCanvas.width = originalCanvas.width;
-        newCanvas.height = originalCanvas.height;
+      // Create a new canvas element
+      const newCanvas = document.createElement("canvas");
+      newCanvas.width = originalCanvas.width;
+      newCanvas.height = originalCanvas.height;
 
-        const ctx = newCanvas.getContext("2d");
+      const ctx = newCanvas.getContext("2d");
 
-        // Draw the contents of the original canvas onto the new canvas
-        ctx.drawImage(originalCanvas, 0, 0);
+      // Draw the contents of the original canvas onto the new canvas
+      ctx.drawImage(originalCanvas, 0, 0);
 
-        // Capture the screenshot from the new canvas
-        const screenshotUrl = newCanvas.toDataURL("image/png");
+      // Capture the screenshot from the new canvas
+      const screenshotUrl = newCanvas.toDataURL("image/png");
 
-        if (screenshotUrl) {
-          const parts = screenshotUrl.split(";base64,");
-          const contentType = parts[0].split(":")[1];
-          const raw = window.atob(parts[1]);
-          const rawLength = raw.length;
-          const uInt8Array = new Uint8Array(rawLength);
+      if (screenshotUrl) {
+        const parts = screenshotUrl.split(";base64,");
+        const contentType = parts[0].split(":")[1];
+        const raw = window.atob(parts[1]);
+        const rawLength = raw.length;
+        const uInt8Array = new Uint8Array(rawLength);
 
-          for (let i = 0; i < rawLength; ++i) {
-            uInt8Array[i] = raw.charCodeAt(i);
-          }
-          const blob = new Blob([uInt8Array], { type: contentType });
-          // Store the image directly
-          storeImage(`image${imageId}`, blob)
+        for (let i = 0; i < rawLength; ++i) {
+          uInt8Array[i] = raw.charCodeAt(i);
+        }
+        const blob = new Blob([uInt8Array], { type: contentType });
+        // Store the image directly
+        storeImage(`image${imageId}`, blob)
           .then((imageUrl) => {
-              resolve(imageUrl);
+            resolve(imageUrl);
           })
           .catch((error) => {
-              console.error("Error storing image:", error);
-              resolve(null);
+            console.error("Error storing image:", error);
+            resolve(null);
           });
-          resolve(blob);
-        }else {
-          resolve(null);
-        }
-    
+        resolve(blob);
+      } else {
+        resolve(null);
+      }
     });
   };
 
@@ -473,7 +482,6 @@ const Carousel = ({ setModel }) => {
                   <DropzoneContainer>
                     <Canvas
                       ref={canvasRefs.current[index]}
-                      // ref={(ref) => getCanvasRef(ref)}
                       width={"100%"}
                       height={"100%"}
                       linear={"true"}
