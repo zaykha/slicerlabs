@@ -148,10 +148,10 @@ const usePaymentSuccessHandler = async (
           // // Convert Blob to Uint8Array
           // const uint8Array = await blobToUint8Array(imagefile);
           // Convert Blob to image File
-          // const file = await blobToImageFile(imagefile, id);
+          const file = await blobToImageFile(imagefile, id);
           // Upload Uint8Array to Firestore
           const storageRef = ref(storage, `PurchasedImages/${userUID}/${id}`);
-          await uploadBytes(storageRef, imagefile);
+          await uploadBytes(storageRef, file);
         })
       );
 

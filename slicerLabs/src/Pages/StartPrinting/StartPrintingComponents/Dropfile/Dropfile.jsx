@@ -637,11 +637,11 @@ const Dropfile = ({}) => {
             uInt8Array[i] = raw.charCodeAt(i);
           }
           const blob = new Blob([uInt8Array], { type: contentType });
-          const file = blobToImageFile(blob, imageId)
+          // const file = blobToImageFile(blob, imageId)
             
           // setImageUrls(urls);
           // console.log(file)
-          resolve(file);
+          resolve(blob);
         }
         // console.log(imageUrls)
       }, 2000);
