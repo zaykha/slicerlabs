@@ -40,7 +40,7 @@ const blobToDataURL = (blob) => {
 async function blobToImageFile(blob, fileName) {
   // Create a new File object from the Blob
   const imageFile = new File([blob], fileName, { type: blob.type });
-  blobToDataURL(blob)
+  blobToDataURL(blob);
   return imageFile;
 }
 // Handle success payment response from Stripe
@@ -116,6 +116,19 @@ const usePaymentSuccessHandler = async (
   };
   const currentDate = new Date();
   currentDate.setDate(currentDate.getDate() + 2);
+  const today = new Date();
+  const deliveryMinDate = new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000); // Minimum delivery date (2 days from now)
+  const deliveryMaxDate = new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000); // Maximum delivery date (4 days from now)
+
+  // Format dates as DD-MM-YYYY
+  const formatDate = (date) => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+  const approxDeliDate = `between ${formatDate(deliveryMinDate)} to ${formatDate(deliveryMaxDate)}`;
+
   const storeDataInFirestore = async (Purchased3dData, userUID) => {
     try {
       console.log("sending data to firestore");
@@ -149,14 +162,14 @@ const usePaymentSuccessHandler = async (
   // Function to store data in Firestore
   const storeImageInFirestore = async (PurchasedImageData, userUID) => {
     try {
-      console.log('purchased image data', PurchasedImageData)
+      console.log("purchased image data", PurchasedImageData);
       // Initialize Firestore storage
       const storage = getStorage();
       // Loop through each image data object in PurchasedImageData
       await Promise.all(
         PurchasedImageData.map(async (imageData) => {
           const { id, imagefile } = imageData;
-          console.log('image file beforesending',imagefile);
+          console.log("image file beforesending", imagefile);
           // // Convert Blob to Uint8Array
           // const uint8Array = await blobToUint8Array(imagefile);
           // Convert Blob to image File
@@ -239,7 +252,7 @@ const usePaymentSuccessHandler = async (
             userPhone: userDetails.phone,
             purchasedItems,
             purchasedAt: formatDateTime(Date.now()),
-            approxDeliDate: "TBD",
+            approxDeliDate: approxDeliDate,
           };
           try {
             const documentId = `${userUID}`;

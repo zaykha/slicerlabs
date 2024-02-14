@@ -120,6 +120,10 @@ const cartSlice = createSlice({
         state.cartItems[itemIndex].model = newModel;
       }
     },
+    updateCartItem(state, action) {
+      const { updatedCartItems } = action.payload;
+      state.cartItems = updatedCartItems;
+    },
     deleteModel(state, action) {
       const modelIdToDelete = action.payload;
       state.cartItems = state.cartItems.filter((item) => item.id !== modelIdToDelete);
@@ -146,6 +150,7 @@ export const {
   updateDimensions,
   updatePrice,
   updateModel,
+  updateCartItem,
   deleteModel,
   resetCartState
 } = cartSlice.actions;

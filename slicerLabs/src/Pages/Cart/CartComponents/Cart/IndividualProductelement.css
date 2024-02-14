@@ -177,7 +177,7 @@
   position: absolute;
   width: 32px;
   right:10%;
-  top:10px;
+  top:20px;
   :hover{
     cursor: pointer;
   }

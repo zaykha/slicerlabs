@@ -307,7 +307,7 @@ const Dropfile = ({}) => {
         );
         await storeFileInDB(uploadedFile, modelId);
         const itemCountInIndexedDB = await countItemsInDB();
-        console.log("itemcount", itemCountInIndexedDB);
+        // console.log("itemcount", itemCountInIndexedDB);
         setFiletype(fileExtension);
 
         const reader = new FileReader();
@@ -349,10 +349,15 @@ const Dropfile = ({}) => {
                 fileContent,
                 (objData) => {
                   // console.log(objData);
-                  const material = new MeshNormalMaterial();
+                  // const material = new MeshNormalMaterial();
 
                   objData.traverse((child) => {
                     if (child instanceof Mesh) {
+                      const material = new THREE.MeshStandardMaterial({
+                        color: "#195375",
+                        roughness: 0.5, // Adjust roughness (0 = very smooth, 1 = very rough)
+                        metalness: 0.62, // Adjust metalness (0 = non-metallic, 1 = fully metallic)
+                      });
                       child.material = material;
                     }
                   });
@@ -447,7 +452,11 @@ const Dropfile = ({}) => {
                   // console.log(stlGeometry);
                   if (stlGeometry) {
                     // Create a mesh using the loaded geometry and a material
-                    const material = new THREE.MeshNormalMaterial();
+                    const material = new THREE.MeshStandardMaterial({
+                      color: "#195375",
+                      roughness: 0.5, // Adjust roughness (0 = very smooth, 1 = very rough)
+                      metalness: 0.62, // Adjust metalness (0 = non-metallic, 1 = fully metallic)
+                  });
                     const stlMesh = new THREE.Mesh(stlGeometry, material);
                     // Assign the mesh to the provided ref
                     meshRef.current = stlMesh;
@@ -634,7 +643,6 @@ const Dropfile = ({}) => {
           const raw = window.atob(parts[1]);
           const rawLength = raw.length;
           const uInt8Array = new Uint8Array(rawLength);
-      
 
           for (let i = 0; i < rawLength; ++i) {
             uInt8Array[i] = raw.charCodeAt(i);
@@ -1003,7 +1011,7 @@ const Dropfile = ({}) => {
       </div>
     );
   });
- 
+
   const ProgressBar = ({ LoadProgress }) => {
     return (
       <div>
@@ -1044,7 +1052,7 @@ const Dropfile = ({}) => {
       {cart.cartItems.length > 0 && !isLoading ? (
         <div style={{ display: "flex" }}>
           {/* <Carousel items={carouselItems} /> */}
-          <Carousel cart={cart} models={model} setModel={setModel}/>
+          <Carousel cart={cart} models={model} setModel={setModel} />
 
           {addingMoreModelLocal && (
             <div style={{ position: "absolute" }}>
@@ -1118,9 +1126,9 @@ const Dropfile = ({}) => {
         ))}
       </div> */}
 
-      <TocartCTABtn onClick={() => getAllImages()}>
+      {/* <TocartCTABtn onClick={() => getAllImages()}>
         show all images
-      </TocartCTABtn>
+      </TocartCTABtn> */}
     </>
   );
 };

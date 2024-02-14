@@ -29,6 +29,7 @@ import {
 } from "../../Pages/Login/LoginComponents/LoginForm/LoginFormelements";
 import {
   deleteModel,
+  updateCartItem,
   updateColor,
   updateMaterial,
   updatePrice,
@@ -38,6 +39,7 @@ import { deleteFileFromDB } from "../../indexedDBUtilis";
 import { deleteImageFromIndexDB, storeImage } from "../../indexedDBImageUtilis";
 import { doc, getDoc } from "firebase/firestore";
 import { ConfigCollection } from "../../firebase";
+import { MeshBasicMaterial } from "three";
 const StyledOuterDiv = styled.div`
   width: 100vw;
   padding: 30px 0;
@@ -372,17 +374,16 @@ const Carousel = ({ setModel }) => {
     dispatch(updateColor({ ProductId: id, newColor }));
   };
   const handleDelete = (tempModelId) => {
-    cart.cartItems.filter((item) => item.id !== tempModelId);
+    const filteredCartItems = cart.cartItems.filter((item) => item.id !== tempModelId);
     // Assuming setModel is the useState setter for your model state
     setModel((prevModels) =>
       prevModels.filter((model) => model.LocalID !== tempModelId)
     );
-    // setIsLoading(false);
-    // setProgress(0);
     dispatch(deleteModel(tempModelId));
     dispatch(decrementCartCount());
     deleteFileFromDB(tempModelId);
     deleteImageFromIndexDB(tempModelId);
+    dispatch(updateCartItem({ updatedCartItems: filteredCartItems }));
     // deleteAllRecordsFromDB();
   };
 
@@ -560,6 +561,7 @@ const Carousel = ({ setModel }) => {
                 <DropzoneFormcontainer style={{ width: "100%" }}>
                   <DropzoneContainer>
                     <Canvas
+                     key={individualModel.id}
                       ref={canvasRefs.current[index]}
                       width={"100%"}
                       height={"100%"}
@@ -573,25 +575,16 @@ const Carousel = ({ setModel }) => {
                       dpr={[1, 2]}
                       camera={{ fov: 45 }}
                     >
-                      {/* // onCreated={() => setTimeout(captureScreenshot, 2000)}
-                      // onCreated={() =>
-                      //   handleMainScreenShot(individualModel.id, index)
-                      // } */}
-                      <color attach="background" args={["rgba(2, 65, 94)"]} />
+                      <color attach="background" args={["#e3e3e3"]} />
                       <PresentationControls>
-                        <Stage environment={null}>
-                          {/* <Grid cellSize={3} infiniteGrid={true} /> */}
+                        <Stage environment={"studio"}>
                           <OrbitControls />
                           <ambientLight />
                           <pointLight position={[10, 10, 10]} />
-                          {/* <ModelSizeChecker model={individualModel.model} /> */}
-                          <meshBasicMaterial color="rgb(10, 20, 30)" />
-
                           <primitive
                             object={individualModel.model}
                             scale={0.01}
                           />
-                          {/* <CameraControls cameraPosition={cameraPosition} /> */}
                         </Stage>
                       </PresentationControls>
                     </Canvas>
@@ -808,13 +801,13 @@ const Carousel = ({ setModel }) => {
                     )}
                   </LoginContainer>
                 </LoginFromcontainer>
-                {imageUrls.length != 0 ? (
+                {/* {imageUrls.length != 0 ? (
                   imageUrls.map((url, index) => (
                     <img key={index} src={url} alt={`Screenshot ${index}`} />
                   ))
                 ) : (
                   <>not loaded</>
-                )}
+                )} */}
               </div>
             );
           })}

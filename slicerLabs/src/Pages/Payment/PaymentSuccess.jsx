@@ -234,9 +234,9 @@ const PaymentSuccess = () => {
             <TocartCTABtn onClick={() => handleRoute("DashBoard")}>
               Track Product
             </TocartCTABtn>
-            <TocartCTABtn onClick={() => getAllImages()}>
+            {/* <TocartCTABtn onClick={() => getAllImages()}>
               show all images
-            </TocartCTABtn>
+            </TocartCTABtn> */}
           </Tocartflexdiv>
         </>
       ) : (

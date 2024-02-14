@@ -384,14 +384,21 @@ export const DashBoard = () => {
                   return (
                     <InnerHeaderWrapper key={item.itemId}>
                       <InnerHeader>
-                        <InnerLayerP> {item.fileName}</InnerLayerP>
                         {matchingImage && (
                           <img
-                            style={{marginTop:'10px'}}
+                            style={{
+                              marginBottom: "10px",
+                              border: "1px solid #000D1D",
+                              width: "100%",
+                              height: "90px",
+                              objectFit: "cover",
+                              boxShadow:'3px 3px 3px #000D1D'
+                            }}
                             src={matchingImage.imageUrl}
                             alt={matchingImage.fileName}
                           />
                         )}
+                        <InnerLayerP> {item.fileName}</InnerLayerP>
                       </InnerHeader>
                       <InnerHeader>
                         <InnerLayerP>FDM Printing ({item.color})</InnerLayerP>

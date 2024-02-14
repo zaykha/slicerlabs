@@ -16,7 +16,12 @@ import {
   updatePrice,
 } from "../../../../ReduxStore/reducers/CartItemReducer";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Grid, OrbitControls, PresentationControls, Stage } from "@react-three/drei";
+import {
+  Grid,
+  OrbitControls,
+  PresentationControls,
+  Stage,
+} from "@react-three/drei";
 
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
@@ -151,8 +156,7 @@ const IndividualProduct = ({
   ]);
   const canvasRef = useRef();
   const userUIDInLocalStorage = localStorage.getItem("uid");
-  const userDetails =
-  useSelector((state) => state?.userDetails) ;
+  const userDetails = useSelector((state) => state?.userDetails);
   const [materialSettings, setMaterialSettings] = useState({
     printTimePerUnitVolume: {
       ABS: 0.05, // minutes/cm^3
@@ -197,7 +201,10 @@ const IndividualProduct = ({
   const fetchConfigSettings = async () => {
     setIsFetchingMSetting(true);
     try {
-      const configDocRef = doc(ConfigCollection,"irr8pVIaN4S4JjkMlEreZi8wC7G2"); // Replace with your collection and document IDs
+      const configDocRef = doc(
+        ConfigCollection,
+        "irr8pVIaN4S4JjkMlEreZi8wC7G2"
+      ); // Replace with your collection and document IDs
       const configDocSnapshot = await getDoc(configDocRef);
 
       if (configDocSnapshot.exists()) {
@@ -205,15 +212,14 @@ const IndividualProduct = ({
         // configDocSnapshot.forEach(doc => {
         //   const data = doc.data();
         // console.log(data);
-         
+
         // });
         setMaterialSettings(ConfigData);
         console.log(ConfigData);
-      }else{
-        console.log('fail to fetch calc func from firebase');
+      } else {
+        console.log("fail to fetch calc func from firebase");
         console.log(configDocSnapshot);
       }
-     
     } catch (error) {
       console.error("Error fetching configuration settings:", error);
     }
@@ -230,7 +236,7 @@ const IndividualProduct = ({
         "calculatePrice",
         calculatePriceString
       );
-        console.log(materialSettings)
+      console.log(materialSettings);
       // Now you have the parsed functions, you can use them as needed
       // For example, you can store them in state or use them directly.
       // setCalculatePriceFunction(
@@ -312,7 +318,7 @@ const IndividualProduct = ({
   //       console.log("Screenshot taken:", screenshotUrl);
   //     }
   //   };
-  
+
   //   captureScreenshot();
   // }, [canvasRef.current]);
 
@@ -327,31 +333,26 @@ const IndividualProduct = ({
         <div className="overlap">
           <div className="vertical-Division1">
             <div className="ezgif-wrapper">
-            <Canvas
-              style={{
-                width: "100%",
-                height: "100%",
-                position: "absolute",
-              }}
-              linear={"true"}
-              dpr={[1, 2]}
-              camera={{ fov: 45 }}
-            >
-             <color attach="background" args={["rgba(2, 65, 94)"]} />
-              <PresentationControls>
-                <Stage environment={null}>
-                  {/* <Grid cellSize={3} infiniteGrid={true} /> */}
-                  <OrbitControls />
-                  <ambientLight />
-                  <pointLight position={[10, 10, 10]} />
-                  {/* <ModelSizeChecker model={individualModel.model} /> */}
-                  <meshBasicMaterial color="rgb(10, 20, 30)" />
-
-                  <primitive object={model} scale={0.01} />
-                  {/* <CameraControls cameraPosition={cameraPosition} /> */}
-                </Stage>
-              </PresentationControls>
-            </Canvas>
+              <Canvas
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  position: "absolute",
+                }}
+                linear={"true"}
+                dpr={[1, 2]}
+                camera={{ fov: 45 }}
+              >
+                <color attach="background" args={["#e3e3e3"]} />
+                <PresentationControls>
+                  <Stage environment={"studio"}>
+                    <OrbitControls />
+                    <ambientLight />
+                    <pointLight position={[10, 10, 10]} />
+                    <primitive object={model} scale={0.01} />
+                  </Stage>
+                </PresentationControls>
+              </Canvas>
             </div>
           </div>
 
@@ -477,7 +478,6 @@ const IndividualProduct = ({
                   pointerEvents: "none", // Make it unclickable
                 }}
               />
-              
             </div>
           </div>
           {isFetchingMSetting ? (
