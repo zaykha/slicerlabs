@@ -13,6 +13,7 @@ import { LoginFromcontainer } from "../../Pages/Login/LoginComponents/LoginForm/
 import { InputelemSmall } from "../../Pages/Register/RegisterComponents/Registerformelement";
 import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
 import PriceCalculatorExplanation from "./PriceCalculatorExplanation";
+import { useSelector } from "react-redux";
 
 const ConfigPageContainer = styled.div`
   /* Your styling here */
