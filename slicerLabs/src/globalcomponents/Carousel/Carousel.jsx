@@ -162,6 +162,7 @@ export const TocartCTABtn1 = styled.div`
     border: 1px solid white;
   }
 `;
+
 const Carousel = ({ setModel }) => {
   const [currentItem, setCurrentItem] = useState(0);
   const cart = useSelector((state) => state.cartItems);
@@ -191,6 +192,7 @@ const Carousel = ({ setModel }) => {
     laborCost: 25,
     overheadCost: 5,
   });
+  const [imageUrls, setImageUrls] = useState([]);
   const calculatePriceString = localStorage.getItem("calculatePriceFunction");
   useEffect(() => {
     // Check if the currentItem is still valid after deletion
@@ -202,12 +204,14 @@ const Carousel = ({ setModel }) => {
   const [allRefsSet, setAllRefsSet] = useState(false);
   // const canvasRefs = useRef(
   //   Array.from({ length: cart.cartItems.length }, () => React.createRef())
-  // ); 
+  // );
   const canvasRefs = useRef([]);
   useEffect(() => {
     // Update canvasRefs to match the current number of items in the cart
-    canvasRefs.current = Array.from({ length: cart.cartItems.length }, () => React.createRef());
-    console.log(canvasRefs.current.length)
+    canvasRefs.current = Array.from({ length: cart.cartItems.length }, () =>
+      React.createRef()
+    );
+    console.log(canvasRefs.current.length);
   }, [cart.cartItems]);
   // useEffect(() => {
   //   if (!allRefsSet && canvasRefs.current.every(ref => ref && ref.current)) {
@@ -250,9 +254,10 @@ const Carousel = ({ setModel }) => {
 
   useEffect(() => {
     const captureScreenshots = async () => {
-      if (canvasRefs.current.every(ref => ref.current)) {
+      if (canvasRefs.current.every((ref) => ref.current)) {
         // All refs are set
-        console.log('All refs are set. Capturing screenshots...');
+        console.log("All refs are set. Capturing screenshots...");
+        const newImageUrls = [];
         for (let i = 0; i < canvasRefs.current.length; i++) {
           const ref = canvasRefs.current[i];
           const canvas = ref.current;
@@ -262,20 +267,51 @@ const Carousel = ({ setModel }) => {
               const blob = await captureScreenshot(itemId, i, canvas);
               console.log(`Screenshot captured for item ${itemId}:`, blob);
               // Do something with the blob
+              const dataURL = await blobToDataURL(blob);
+              newImageUrls.push(dataURL);
             } catch (error) {
-              console.error(`Error capturing screenshot for item ${itemId}:`, error);
+              console.error(
+                `Error capturing screenshot for item ${itemId}:`,
+                error
+              );
             }
           } else {
             console.error(`Canvas ref is not set for item ${i}.`);
           }
         }
+
+        setImageUrls((prevUrls) => [...prevUrls, ...newImageUrls]);
+        // console.log(newImageUrls)
       } else {
-        console.log('Not all refs are set yet.');
+        console.log("Not all refs are set yet.");
       }
     };
-  
-    captureScreenshots();
+
+    setTimeout(captureScreenshots, 2000);
   }, [cart, canvasRefs.current]);
+
+  // Function to convert blob to data URL
+  const blobToDataURL = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  // Function to display blob as image and add to state array
+  const displayBlobAsImage = async (blob) => {
+    try {
+      const dataURL = await blobToDataURL(blob);
+      setImageUrls((prevUrls) => [...prevUrls, dataURL]);
+    } catch (error) {
+      console.error("Error displaying blob as image:", error);
+    }
+  };
+
   const scrollLeft = () => {
     if (currentItem > 0) {
       setCurrentItem(currentItem - 1);
@@ -461,7 +497,6 @@ const Carousel = ({ setModel }) => {
       }
     });
   };
-
   const goToPage = (pageIndex) => {
     setCurrentItem(pageIndex);
   };
@@ -538,7 +573,7 @@ const Carousel = ({ setModel }) => {
                       dpr={[1, 2]}
                       camera={{ fov: 45 }}
                     >
-                       {/* // onCreated={() => setTimeout(captureScreenshot, 2000)}
+                      {/* // onCreated={() => setTimeout(captureScreenshot, 2000)}
                       // onCreated={() =>
                       //   handleMainScreenShot(individualModel.id, index)
                       // } */}
@@ -773,6 +808,13 @@ const Carousel = ({ setModel }) => {
                     )}
                   </LoginContainer>
                 </LoginFromcontainer>
+                {/*imageUrls.length != 0 ? (
+                  imageUrls.map((url, index) => (
+                    <img key={index} src={url} alt={`Screenshot ${index}`} />
+                  ))
+                ) : (
+                  <>not loaded</>
+                )*/}
               </div>
             );
           })}

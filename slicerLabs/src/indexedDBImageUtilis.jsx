@@ -50,7 +50,7 @@ export const storeImage = async (id, imagefile) => {
     };
 
     request.onerror = () => {
-      console.error("Error storing file in IndexedDB:", request.error);
+      // console.error("Error storing file in IndexedDB:", request.error);
       reject(request.error);
     };
   });
@@ -124,7 +124,7 @@ export const getAllImages = async () => {
 
     request.onsuccess = () => {
       const filesData = request.result;
-      console.log(filesData)
+      console.log(filesData);
       resolve(filesData);
     };
 
