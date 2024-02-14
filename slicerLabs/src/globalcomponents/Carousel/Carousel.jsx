@@ -808,13 +808,13 @@ const Carousel = ({ setModel }) => {
                     )}
                   </LoginContainer>
                 </LoginFromcontainer>
-                {/*imageUrls.length != 0 ? (
+                {imageUrls.length != 0 ? (
                   imageUrls.map((url, index) => (
                     <img key={index} src={url} alt={`Screenshot ${index}`} />
                   ))
                 ) : (
                   <>not loaded</>
-                )*/}
+                )}
               </div>
             );
           })}
