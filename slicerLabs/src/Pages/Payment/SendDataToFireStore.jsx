@@ -25,10 +25,22 @@ const blobToUint8Array = (blob) => {
     reader.readAsArrayBuffer(blob);
   });
 };
+const blobToDataURL = (blob) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataURL = reader.result;
+      console.log("Data URL:", dataURL); // Log the data URL
+      resolve(dataURL);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
 async function blobToImageFile(blob, fileName) {
   // Create a new File object from the Blob
   const imageFile = new File([blob], fileName, { type: blob.type });
-
+  blobToDataURL(blob)
   return imageFile;
 }
 // Handle success payment response from Stripe
