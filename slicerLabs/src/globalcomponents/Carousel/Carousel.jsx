@@ -199,35 +199,83 @@ const Carousel = ({ setModel }) => {
     }
     // console.log(addingMoreModelLocal);
   }, [currentItem, cart.length]);
-  const canvasRefs = useRef(
-    Array.from({ length: cart.cartItems.length }, () => React.createRef())
-  ); // useEffect for capturing screenshots
+  const [allRefsSet, setAllRefsSet] = useState(false);
+  // const canvasRefs = useRef(
+  //   Array.from({ length: cart.cartItems.length }, () => React.createRef())
+  // ); 
+  const canvasRefs = useRef([]);
   useEffect(() => {
-    // Access each ref individually and do something with it
-    canvasRefs.current.forEach((ref, index) => {
-      console.log(cart.cartItems.length);
-      if (ref && ref.current) {
-        console.log("1");
-        captureScreenshot(cart.cartItems[index].id, index, ref.current)
-          .then((blob) => {
-            // Do something with the blob
-            console.log(
-              `Screenshot captured for item ${cart.cartItems[index].id}:`,
-              blob
-            );
-            // You can call storeImage here if needed
-          })
-          .catch((error) => {
-            console.error(
-              `Error capturing screenshot for item ${index}:`,
-              error
-            );
-          });
+    // Update canvasRefs to match the current number of items in the cart
+    canvasRefs.current = Array.from({ length: cart.cartItems.length }, () => React.createRef());
+    console.log(canvasRefs.current.length)
+  }, [cart.cartItems]);
+  // useEffect(() => {
+  //   if (!allRefsSet && canvasRefs.current.every(ref => ref && ref.current)) {
+  //     console.log('allrefset triggered')
+  //     // All refs are set
+  //     setAllRefsSet(true);
+  //   }
+  // }, [canvasRefs.current, allRefsSet]);
+  // // useEffect for capturing screenshots
+  // useEffect(() => {
+  //   if (allRefsSet) {
+  //     // Access each ref individually and do something with it
+  //     canvasRefs.current.forEach((ref, index) => {
+  //       if (ref && ref.current) {
+  //         // Use a block statement to create a new scope for index
+  //         {
+  //           const currentIndex = index;
+  //           captureScreenshot(cart.cartItems[currentIndex].id, currentIndex, ref.current)
+  //             .then((blob) => {
+  //               // Do something with the blob
+  //               console.log(
+  //                 `Screenshot captured for item ${cart.cartItems[currentIndex].id}:`,
+  //                 blob
+  //               );
+  //               // You can call storeImage here if needed
+  //             })
+  //             .catch((error) => {
+  //               console.error(
+  //                 `Error capturing screenshot for item ${currentIndex}:`,
+  //                 error
+  //               );
+  //             });
+  //         }
+  //       } else {
+  //         console.error(`Canvas ref is not set for item ${index}.`);
+  //       }
+  //     });
+  //   }
+  // }, [canvasRefs.current, cart, allRefsSet]);
+
+  useEffect(() => {
+    const captureScreenshots = async () => {
+      if (canvasRefs.current.every(ref => ref.current)) {
+        // All refs are set
+        console.log('All refs are set. Capturing screenshots...');
+        for (let i = 0; i < canvasRefs.current.length; i++) {
+          const ref = canvasRefs.current[i];
+          const canvas = ref.current;
+          const itemId = cart.cartItems[i].id;
+          if (canvas) {
+            try {
+              const blob = await captureScreenshot(itemId, i, canvas);
+              console.log(`Screenshot captured for item ${itemId}:`, blob);
+              // Do something with the blob
+            } catch (error) {
+              console.error(`Error capturing screenshot for item ${itemId}:`, error);
+            }
+          } else {
+            console.error(`Canvas ref is not set for item ${i}.`);
+          }
+        }
       } else {
-        console.error(`Canvas ref is not set for item ${index}.`);
+        console.log('Not all refs are set yet.');
       }
-    });
-  }, [canvasRefs.current, cart.cartItems.length]);
+    };
+  
+    captureScreenshots();
+  }, [cart, canvasRefs.current]);
   const scrollLeft = () => {
     if (currentItem > 0) {
       setCurrentItem(currentItem - 1);
@@ -300,7 +348,6 @@ const Carousel = ({ setModel }) => {
     deleteFileFromDB(tempModelId);
     deleteImageFromIndexDB(tempModelId);
     // deleteAllRecordsFromDB();
-    // console.log(model.length);
   };
 
   const increaseQuantityAction = (ProductId) => {
@@ -471,9 +518,6 @@ const Carousel = ({ setModel }) => {
             const { material, color, quantity } = individualModel.options || {};
             const { width, height, depth } = individualModel.dimensions || {};
             const price = individualModel.pricePerUnit || 0;
-            // const getCanvasRef = (ref) => {
-            //   canvasRefs[index] = ref;
-            // };
             // console.log(`Item ${index}, Price: ${price}`);
             return (
               <div key={index} style={{ width: "100%", height: "auto" }}>
@@ -485,10 +529,6 @@ const Carousel = ({ setModel }) => {
                       width={"100%"}
                       height={"100%"}
                       linear={"true"}
-                      // onCreated={() => setTimeout(captureScreenshot, 2000)}
-                      // onCreated={() =>
-                      //   handleMainScreenShot(individualModel.id, index)
-                      // }
                       gl={{ preserveDrawingBuffer: true }}
                       style={{
                         width: "100%",
@@ -498,6 +538,10 @@ const Carousel = ({ setModel }) => {
                       dpr={[1, 2]}
                       camera={{ fov: 45 }}
                     >
+                       {/* // onCreated={() => setTimeout(captureScreenshot, 2000)}
+                      // onCreated={() =>
+                      //   handleMainScreenShot(individualModel.id, index)
+                      // } */}
                       <color attach="background" args={["rgba(2, 65, 94)"]} />
                       <PresentationControls>
                         <Stage environment={null}>
