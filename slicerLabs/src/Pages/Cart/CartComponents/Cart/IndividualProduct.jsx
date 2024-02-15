@@ -343,9 +343,9 @@ const IndividualProduct = ({
                 dpr={[1, 2]}
                 camera={{ fov: 45 }}
               >
-                <color attach="background" args={["#e3e3e3"]} />
+                <color attach="background" args={["#0f4863"]} />
                 <PresentationControls>
-                  <Stage environment={"studio"}>
+                  <Stage environment={"forest"}>
                     <OrbitControls />
                     <ambientLight />
                     <pointLight position={[10, 10, 10]} />

@@ -80,6 +80,7 @@ import {
   getImageById,
   storeImage,
 } from "../../../../indexedDBImageUtilis";
+import RotatingLoader from "../../../../globalcomponents/DropDown/RotatingLoader";
 async function blobToImageFile(blob, fileName) {
   // Create a new File object from the Blob
   const imageFile = new File([blob], fileName, { type: blob.type });
@@ -354,7 +355,7 @@ const Dropfile = ({}) => {
                   objData.traverse((child) => {
                     if (child instanceof Mesh) {
                       const material = new THREE.MeshStandardMaterial({
-                        color: "#195375",
+                        color: "#adadc9",
                         roughness: 0.5, // Adjust roughness (0 = very smooth, 1 = very rough)
                         metalness: 0.62, // Adjust metalness (0 = non-metallic, 1 = fully metallic)
                       });
@@ -381,6 +382,20 @@ const Dropfile = ({}) => {
                       dimensionsInMM.width <= printVolumeWidth &&
                       dimensionsInMM.depth <= printVolumeDepth
                     ) {
+                      // Check if any dimension is less than 1mm
+                      if (
+                        dimensionsInMM.width < 1 ||
+                        dimensionsInMM.depth < 1 ||
+                        dimensionsInMM.height < 1
+                      ) {
+                        // Prompt a message for small dimensions
+                        setError(
+                          `This design appears to be significantly smaller than the recommended dimensions for 3D printing, measuring less than 1 x 1 x 1 mm. If the intention is to create a small-scale object, we kindly request that you reach out to us directly for personalized assistance.`
+                        );
+                        setIsLoading(false);
+                        dispatch(addingMoreModels(false));
+                        return;
+                      }
                       // Model fits within print volume
                       dispatch(
                         addModel({
@@ -456,7 +471,7 @@ const Dropfile = ({}) => {
                       color: "#195375",
                       roughness: 0.5, // Adjust roughness (0 = very smooth, 1 = very rough)
                       metalness: 0.62, // Adjust metalness (0 = non-metallic, 1 = fully metallic)
-                  });
+                    });
                     const stlMesh = new THREE.Mesh(stlGeometry, material);
                     // Assign the mesh to the provided ref
                     meshRef.current = stlMesh;
@@ -481,6 +496,20 @@ const Dropfile = ({}) => {
                         dimensionsInMM.width <= printVolumeWidth &&
                         dimensionsInMM.depth <= printVolumeDepth
                       ) {
+                        // Check if any dimension is less than 1mm
+                        if (
+                          dimensionsInMM.width < 1 ||
+                          dimensionsInMM.depth < 1 ||
+                          dimensionsInMM.height < 1
+                        ) {
+                          // Prompt a message for small dimensions
+                          setError(
+                            `This design appears to be significantly smaller than the recommended dimensions for 3D printing, measuring less than 1 x 1 x 1 mm. If the intention is to create a small-scale object, we kindly request that you reach out to us directly for personalized assistance.`
+                          );
+                          setIsLoading(false);
+                          dispatch(addingMoreModels(false));
+                          return;
+                        }
                         // Model fits within print volume
                         setModel((prevModels) => [
                           ...prevModels,
@@ -1053,7 +1082,6 @@ const Dropfile = ({}) => {
         <div style={{ display: "flex" }}>
           {/* <Carousel items={carouselItems} /> */}
           <Carousel cart={cart} models={model} setModel={setModel} />
-
           {addingMoreModelLocal && (
             <div style={{ position: "absolute" }}>
               <DropzoneFormcontainer {...getRootProps()}>

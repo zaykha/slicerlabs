@@ -40,6 +40,8 @@ import { deleteImageFromIndexDB, storeImage } from "../../indexedDBImageUtilis";
 import { doc, getDoc } from "firebase/firestore";
 import { ConfigCollection } from "../../firebase";
 import { MeshBasicMaterial } from "three";
+import RotatingLoader from "../DropDown/RotatingLoader";
+import PriceTable from "../PriceTable/priceTable";
 const StyledOuterDiv = styled.div`
   width: 100vw;
   padding: 30px 0;
@@ -167,6 +169,7 @@ export const TocartCTABtn1 = styled.div`
 
 const Carousel = ({ setModel }) => {
   const [currentItem, setCurrentItem] = useState(0);
+  // const [isCanvasLoading, setIsCanvasLoading] = useState(true);
   const cart = useSelector((state) => state.cartItems);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -271,6 +274,7 @@ const Carousel = ({ setModel }) => {
               // Do something with the blob
               const dataURL = await blobToDataURL(blob);
               newImageUrls.push(dataURL);
+              // setIsCanvasLoading(false);
             } catch (error) {
               console.error(
                 `Error capturing screenshot for item ${itemId}:`,
@@ -374,17 +378,24 @@ const Carousel = ({ setModel }) => {
     dispatch(updateColor({ ProductId: id, newColor }));
   };
   const handleDelete = (tempModelId) => {
-    const filteredCartItems = cart.cartItems.filter((item) => item.id !== tempModelId);
+    const filteredCartItems = cart.cartItems.filter(
+      (item) => item.id !== tempModelId
+    );
     // Assuming setModel is the useState setter for your model state
     setModel((prevModels) =>
       prevModels.filter((model) => model.LocalID !== tempModelId)
     );
+    const nextItemIndex =
+      currentItem >= filteredCartItems.length
+        ? filteredCartItems.length - 1
+        : currentItem;
     dispatch(deleteModel(tempModelId));
     dispatch(decrementCartCount());
     deleteFileFromDB(tempModelId);
     deleteImageFromIndexDB(tempModelId);
     dispatch(updateCartItem({ updatedCartItems: filteredCartItems }));
     // deleteAllRecordsFromDB();
+    setCurrentItem(nextItemIndex);
   };
 
   const increaseQuantityAction = (ProductId) => {
@@ -550,7 +561,10 @@ const Carousel = ({ setModel }) => {
           {/* {items.map((item, index) => (
             <CarouselItem key={index}>{item}</CarouselItem>
           ))} */}
-          {cart.cartItems.map((individualModel, index) => {
+          {
+          // isCanvasLoading?
+          // <RotatingLoader/>:
+          cart.cartItems.map((individualModel, index) => {
             const { material, color, quantity } = individualModel.options || {};
             const { width, height, depth } = individualModel.dimensions || {};
             const price = individualModel.pricePerUnit || 0;
@@ -561,7 +575,7 @@ const Carousel = ({ setModel }) => {
                 <DropzoneFormcontainer style={{ width: "100%" }}>
                   <DropzoneContainer>
                     <Canvas
-                     key={individualModel.id}
+                      key={individualModel.id}
                       ref={canvasRefs.current[index]}
                       width={"100%"}
                       height={"100%"}
@@ -575,9 +589,9 @@ const Carousel = ({ setModel }) => {
                       dpr={[1, 2]}
                       camera={{ fov: 45 }}
                     >
-                      <color attach="background" args={["#e3e3e3"]} />
+                      <color attach="background" args={["#0f4863"]} />
                       <PresentationControls>
-                        <Stage environment={"studio"}>
+                        <Stage environment={"forest"}>
                           <OrbitControls />
                           <ambientLight />
                           <pointLight position={[10, 10, 10]} />
