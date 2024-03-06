@@ -207,7 +207,7 @@ function App() {
                           return; // Skip processing this item if file is not found
                         }
                 
-                        const fileExtension = currentFile.name.split('.').pop().toLowerCase();
+                        const fileExtension = item.fileName.split('.').pop().toLowerCase();
                 
                         const reader = new FileReader();
                         reader.onload = async () => {
