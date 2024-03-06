@@ -206,8 +206,8 @@ export const getFileById = async (id) => {
     const transaction = db.transaction(STORE_NAME, "readonly");
     const store = transaction.objectStore(STORE_NAME);
     const file = await store.get(id);
-    console.log(`file with ID ${id} retrieved successfully`, file);
-    return file;
+    console.log(`file with ID ${id} retrieved successfully`, file.result.file);
+    return file.result.file;
   } catch (error) {
     console.error("Error retrieving file by ID:", error);
     return null;
