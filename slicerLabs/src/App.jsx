@@ -211,7 +211,7 @@ function App() {
                             return; // Skip processing this item if file is not found
                           }
                           console.log("return promise", currentFile);
-                          if (typeof currentFile !== "Blob") {
+                          if (typeof currentFile.file !== "Blob") {
                             console.error(
                               `Data retrieved for item ID: ${item.itemId} is not a Blob object.`
                             );
@@ -220,7 +220,7 @@ function App() {
                             // }); // Adjust content type as needed
                             // currentFile.result.file = blob;
                           }
-                          console.log(currentFile);
+                          console.log(currentFile.file);
                           const fileExtension = item.fileName
                             .split(".")
                             .pop()
@@ -299,7 +299,7 @@ function App() {
                               URL.revokeObjectURL(reader.result);
                             }
                           };
-                          reader.readAsDataURL(currentFile); // Read the file into data URL
+                          reader.readAsDataURL(currentFile.file); // Read the file into data URL
                         // })
                         // .catch((error) => {
                         //   console.error(
