@@ -211,7 +211,7 @@ function App() {
                             return; // Skip processing this item if file is not found
                           }
                           console.log("return promise", currentFile);
-                          if (typeof currentFile.result.file !== "Blob") {
+                          if (typeof currentFile !== "Blob") {
                             console.error(
                               `Data retrieved for item ID: ${item.itemId} is not a Blob object.`
                             );
@@ -299,7 +299,7 @@ function App() {
                               URL.revokeObjectURL(reader.result);
                             }
                           };
-                          reader.readAsDataURL(currentFile.result.file); // Read the file into data URL
+                          reader.readAsDataURL(currentFile); // Read the file into data URL
                         // })
                         // .catch((error) => {
                         //   console.error(
