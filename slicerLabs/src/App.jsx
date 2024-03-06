@@ -198,56 +198,45 @@ function App() {
                 );
                 async function processPurchasedItems() {
                   const promises = [];
-                
+
                   for (const item of userPurchasedItems) {
-                    promises.push(getFileById(item.itemId)
-                      .then(async (currentFile) => {
-                        if (!currentFile) {
-                          console.error(`Failed to get file for item ID: ${item.itemId}`);
-                          return; // Skip processing this item if file is not found
-                        }
-                
-                        const fileExtension = item.fileName.split('.').pop().toLowerCase();
-                
-                        const reader = new FileReader();
-                        reader.onload = async () => {
-                          try {
-                            const fileContent = reader.result;
-                            const manager = new LoadingManager();
-                
-                            if (fileExtension === "obj") {
-                              const objLoader = new OBJLoader(manager);
-                              objLoader.load(fileContent, (objData) => {
-                                dispatch(
-                                  addModel({
-                                    id: item.itemId,
-                                    fileName: item.fileName,
-                                    model: objData,
-                                    dimensions: item.dimensions,
-                                    options: {
-                                      material: item.material,
-                                      color: item.color,
-                                      quantity: item.quantity,
-                                    },
-                                    pricePerUnit: item.pricePerUnit,
-                                  })
-                                );
-                              });
-                            } else if (fileExtension === "stl") {
-                              const stlLoader = new STLLoader();
-                              stlLoader.load(fileContent, (stlGeometry) => {
-                                if (stlGeometry) {
-                                  const material = new THREE.MeshStandardMaterial({
-                                    color: "#195375",
-                                    roughness: 0.5, // Adjust roughness (0 = very smooth, 1 = very rough)
-                                    metalness: 0.62, // Adjust metalness (0 = non-metallic, 1 = fully metallic)
-                                  });
-                                  const stlMesh = new THREE.Mesh(stlGeometry, material);
+                    promises.push(
+                      getFileById(item.itemId)
+                        .then(async (currentFile) => {
+                          if (!currentFile) {
+                            console.error(
+                              `Failed to get file for item ID: ${item.itemId}`
+                            );
+                            return; // Skip processing this item if file is not found
+                          }
+                          if (typeof currentFile !== "Blob") {
+                            console.error(
+                              `Data retrieved for item ID: ${item.itemId} is not a Blob object.`
+                            );
+                            const blob = new Blob([currentFile], {
+                              type: "application/octet-stream",
+                            }); // Adjust content type as needed
+                            currentFile = blob;
+                          }
+                          const fileExtension = item.fileName
+                            .split(".")
+                            .pop()
+                            .toLowerCase();
+
+                          const reader = new FileReader();
+                          reader.onload = async () => {
+                            try {
+                              const fileContent = reader.result;
+                              const manager = new LoadingManager();
+
+                              if (fileExtension === "obj") {
+                                const objLoader = new OBJLoader(manager);
+                                objLoader.load(fileContent, (objData) => {
                                   dispatch(
                                     addModel({
                                       id: item.itemId,
                                       fileName: item.fileName,
-                                      model: stlMesh, // Use stlMesh for STL files
+                                      model: objData,
                                       dimensions: item.dimensions,
                                       options: {
                                         material: item.material,
@@ -257,33 +246,72 @@ function App() {
                                       pricePerUnit: item.pricePerUnit,
                                     })
                                   );
-                                } else {
-                                  console.warn(`Failed to load STL geometry for item ID: ${item.itemId}`);
-                                }
-                              });
-                            } else {
-                              console.warn(`Skipping item ID: ${item.itemId}, unsupported file extension: ${fileExtension}`);
+                                });
+                              } else if (fileExtension === "stl") {
+                                const stlLoader = new STLLoader();
+                                stlLoader.load(fileContent, (stlGeometry) => {
+                                  if (stlGeometry) {
+                                    const material =
+                                      new THREE.MeshStandardMaterial({
+                                        color: "#195375",
+                                        roughness: 0.5, // Adjust roughness (0 = very smooth, 1 = very rough)
+                                        metalness: 0.62, // Adjust metalness (0 = non-metallic, 1 = fully metallic)
+                                      });
+                                    const stlMesh = new THREE.Mesh(
+                                      stlGeometry,
+                                      material
+                                    );
+                                    dispatch(
+                                      addModel({
+                                        id: item.itemId,
+                                        fileName: item.fileName,
+                                        model: stlMesh, // Use stlMesh for STL files
+                                        dimensions: item.dimensions,
+                                        options: {
+                                          material: item.material,
+                                          color: item.color,
+                                          quantity: item.quantity,
+                                        },
+                                        pricePerUnit: item.pricePerUnit,
+                                      })
+                                    );
+                                  } else {
+                                    console.warn(
+                                      `Failed to load STL geometry for item ID: ${item.itemId}`
+                                    );
+                                  }
+                                });
+                              } else {
+                                console.warn(
+                                  `Skipping item ID: ${item.itemId}, unsupported file extension: ${fileExtension}`
+                                );
+                              }
+                            } catch (error) {
+                              console.error(
+                                `Error processing item ID: ${item.itemId}`,
+                                error
+                              );
+                            } finally {
+                              // Optionally release memory after processing each file
+                              URL.revokeObjectURL(reader.result);
                             }
-                          } catch (error) {
-                            console.error(`Error processing item ID: ${item.itemId}`, error);
-                          } finally {
-                            // Optionally release memory after processing each file
-                            URL.revokeObjectURL(reader.result);
-                          }
-                        };
-                        reader.readAsDataURL(currentFile); // Read the file into data URL
-                      })
-                      .catch((error) => {
-                        console.error(`Error getting file for item ID: ${item.itemId}`, error);
-                      }));
+                          };
+                          reader.readAsDataURL(currentFile); // Read the file into data URL
+                        })
+                        .catch((error) => {
+                          console.error(
+                            `Error getting file for item ID: ${item.itemId}`,
+                            error
+                          );
+                        })
+                    );
                   }
-                
+
                   // Wait for all promises to resolve before continuing
                   await Promise.all(promises);
                 }
                 processPurchasedItems();
               }
-           
             } else {
               console.log("No such document!");
             }
