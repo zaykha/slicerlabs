@@ -426,7 +426,7 @@ const Cartpage = () => {
     console.log(cartItemsDetails);
     // Create an array to store items for validation
     let itemsForValidation = [];
-
+    let itemsForLocalStorage = [];
     // Add each item from cartItemsDetails to the validation array
     cartItemsDetails.forEach((item) => {
       const { material, color, quantity } = item.options;
@@ -442,10 +442,21 @@ const Cartpage = () => {
         dimensions,
         quantity, // Adjust the expected price based on quantity
         pricePerUnit,
-        itemModel,
         userUID: userUIDInLocalStorage,
         materialSettings,
       });
+      itemsForLocalStorage.push({
+        itemId,
+        fileName,
+        material,
+        color,
+        dimensions,
+        quantity, // Adjust the expected price based on quantity
+        pricePerUnit,
+        itemModel,
+        userUID: userUIDInLocalStorage,
+        materialSettings,
+      })
     });
     // console.log("itemsForValidation", itemsForValidation);
     // localStorage.setItem(
@@ -454,7 +465,7 @@ const Cartpage = () => {
     // );
     localStorage.setItem(
       "TempItemsDetailsStorage",
-      JSON.stringify(itemsForValidation)
+      JSON.stringify(itemsForLocalStorage)
     );
     //   useEffect(() => {
     //   console.log(userConfirmationPrompt);
