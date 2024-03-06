@@ -360,7 +360,7 @@ const Dropfile = ({}) => {
               objLoader.load(
                 fileContent,
                 (objData) => {
-                  // console.log(objData);
+                  console.log(objData);
                   // const material = new MeshNormalMaterial();
 
                   objData.traverse((child) => {

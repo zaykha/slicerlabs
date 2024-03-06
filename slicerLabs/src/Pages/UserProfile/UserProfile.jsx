@@ -126,7 +126,7 @@ export const DashBoard = () => {
         const userConcernsDoc = await getDoc(userConcernsRef);
         const existingConcerns = userConcernsDoc.data()?.concerns || [];
 
-        console.log(userConcernsDoc);
+        // console.log(userConcernsDoc);
         const ProductIssueData = [];
         // Loop through the snapshot and extract the data from each document
         existingConcerns.forEach((doc) => {

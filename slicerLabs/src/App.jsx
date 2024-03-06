@@ -43,7 +43,10 @@ import { DashBoard } from "./Pages/UserProfile/UserProfile";
 import usePaymentSuccessHandler from "./Pages/Payment/SendDataToFireStore";
 import TaskPage from "./AdminRelated/TaskPage/TaskPage";
 import { resetCartCount } from "./ReduxStore/actions/cartCountActions";
-import { addModel, resetCartState } from "./ReduxStore/reducers/CartItemReducer";
+import {
+  addModel,
+  resetCartState,
+} from "./ReduxStore/reducers/CartItemReducer";
 import { resetAddressDetails } from "./ReduxStore/reducers/MapServicesReducer";
 import { startAuthListener } from "./authListener";
 import TermsAndPolicies from "./Pages/Register/RegisterComponents/TermsAndPolicies";
@@ -57,7 +60,10 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import FAQ from "./Pages/FAQ/FAQ";
 import { getAllImages } from "./indexedDBImageUtilis";
-
+import { getFileById } from "./indexedDBUtilis";
+import { LoadingManager } from "three";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 function App() {
   // const [isOpen, setIsOpen] = useState(false);
 
@@ -190,23 +196,73 @@ function App() {
                   "user Purchased Items",
                   userPurchasedItems
                 );
-                userPurchasedItems.forEach(item => {
-                  dispatch(
-                    addModel({
-                      id: item.itemId,
-                      fileName: item.fileName,
-                      model: item.itemModel,
-                      dimensions: item.dimensions,
-                      options: {
-                        material: item.material,
-                        color: item.color,
-                        quantity: item.quantity,
-                      },
-                      pricePerUnit: item.pricePerUnit,
-                    })
-                  );
+                userPurchasedItems.forEach(async (item) => {
+                  const CurrentFile = await getFileById(item.itemId);
+                  const fileExtension = CurrentFile.name
+                    .split(".")
+                    .pop()
+                    .toLowerCase();
+
+                  const reader = new FileReader();
+
+                  reader.onload = async () => {
+                    try {
+                      const fileContent = reader.result;
+                      const manager = new LoadingManager();
+                      if (fileExtension === "obj") {
+                        const objLoader = new OBJLoader(manager);
+                        objLoader.load(fileContent, (objData) => {
+                          dispatch(
+                            addModel({
+                              id: item.itemId,
+                              fileName: item.fileName,
+                              model: objData,
+                              dimensions: item.dimensions,
+                              options: {
+                                material: item.material,
+                                color: item.color,
+                                quantity: item.quantity,
+                              },
+                              pricePerUnit: item.pricePerUnit,
+                            })
+                          );
+                        });
+                      } else if (fileExtension === "stl") {
+                        const stlLoader = new STLLoader();
+                        stlLoader.load(fileContent, (stlGeometry) => {
+                          // console.log(stlGeometry);
+                          if (stlGeometry) {
+                            // Create a mesh using the loaded geometry and a material
+                            const material = new THREE.MeshStandardMaterial({
+                              color: "#195375",
+                              roughness: 0.5, // Adjust roughness (0 = very smooth, 1 = very rough)
+                              metalness: 0.62, // Adjust metalness (0 = non-metallic, 1 = fully metallic)
+                            });
+                            const stlMesh = new THREE.Mesh(
+                              stlGeometry,
+                              material
+                            );
+                            dispatch(
+                              addModel({
+                                id: item.itemId,
+                                fileName: item.fileName,
+                                model: stlMesh,
+                                dimensions: item.dimensions,
+                                options: {
+                                  material: item.material,
+                                  color: item.color,
+                                  quantity: item.quantity,
+                                },
+                                pricePerUnit: item.pricePerUnit,
+                              })
+                            );
+                          }
+                        });
+                      }
+                    } catch {}
+                  };
                 });
-              
+
                 // dispatch(updateMaterial({ ProductId: id, newMaterial }));
                 // dispatch(updateColor({ ProductId: id, newColor }));
                 // updateQuantity(ProductId, newQuantity);

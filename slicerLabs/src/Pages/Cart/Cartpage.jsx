@@ -445,18 +445,6 @@ const Cartpage = () => {
         userUID: userUIDInLocalStorage,
         materialSettings,
       });
-      itemsForLocalStorage.push({
-        itemId,
-        fileName,
-        material,
-        color,
-        dimensions,
-        quantity, // Adjust the expected price based on quantity
-        pricePerUnit,
-        itemModel,
-        userUID: userUIDInLocalStorage,
-        materialSettings,
-      })
     });
     // console.log("itemsForValidation", itemsForValidation);
     // localStorage.setItem(
@@ -465,7 +453,7 @@ const Cartpage = () => {
     // );
     localStorage.setItem(
       "TempItemsDetailsStorage",
-      JSON.stringify(itemsForLocalStorage)
+      JSON.stringify(itemsForValidation)
     );
     //   useEffect(() => {
     //   console.log(userConfirmationPrompt);
