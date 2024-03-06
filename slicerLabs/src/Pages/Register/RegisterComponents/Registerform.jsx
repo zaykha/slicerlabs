@@ -49,8 +49,8 @@ const Registerform = () => {
   // const userDetailsInReg = useSelector((state) => state.userDetails);
   const userDetailsUnparsed = localStorage.getItem("userDetails");
   const userDetailsInReg =
-  useSelector((state) => state?.userDetails) ||
-  JSON.parse(userDetailsUnparsed);
+    useSelector((state) => state?.userDetails) ||
+    JSON.parse(userDetailsUnparsed);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isEmailValidating, setIsEmailValidating] = useState(false);
@@ -60,7 +60,7 @@ const Registerform = () => {
   const [passwordRepeatVisible, setPasswordRepeatVisible] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [formValues, setFormValues] = useState({
-    userName: "" ,
+    userName: "",
     password: "",
     passwordConfirm: "",
     occupation: "",
@@ -195,7 +195,7 @@ const Registerform = () => {
       const singaporeFlatNumberRegex = /^\d{1,3}[A-Za-z]?\-\d{1,3}[A-Za-z]?$/;
       const isValidFlatNumber = singaporeFlatNumberRegex.test(value);
       if (!isValidFlatNumber) {
-        return `Flat Number must be in a valid format. Examples: "123-456", "123A-456B", "1-2".`;
+        return `Flat Number must be in a valid format.`;
       }
     }
 
@@ -286,7 +286,7 @@ const Registerform = () => {
     const email = encodeURIComponent(formValues.email);
     try {
       const response = await fetch(
-        `${ServerConfig}/validate-email?email=${email}`,
+        `${ServerConfig}/validate-email?email=${email}`
         // `https://cerulean-hermit-crab-robe.cyclic.cloud/validate-email?email=${email}`
       );
       const data = await response.json();
@@ -380,8 +380,8 @@ const Registerform = () => {
         postalCode: formValues.postalCode,
         blkNumber: formValues.blkNumber,
         flatNumber: formValues.flatNumber,
-        displayFullAddress:formValues.displayFullAddress,
-        adminPrivileges:false
+        displayFullAddress: formValues.displayFullAddress,
+        adminPrivileges: false,
       };
 
       // Add the userDetails to the "users" collection in Firestore
@@ -667,11 +667,16 @@ const Registerform = () => {
               <Addressdiv>Please Type in a valid postal Code</Addressdiv>
             )}
           </Regflexdiv>
+
           {formErrors.flatNumberError && (
             <div style={{ color: "red", fontSize: "12px" }}>
               {formErrors.flatNumberError}
             </div>
           )}
+          <div style={{ color: "grey", fontSize: "12px" }}>
+            Examples format: "123-456", "123A-456B", "1-2".
+          </div>
+
           <LoginFlexdiv>
             <RememberMe
               type="checkbox"

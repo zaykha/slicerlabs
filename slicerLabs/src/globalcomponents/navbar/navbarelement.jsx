@@ -132,8 +132,10 @@ export const NavLinks = styled(LinkR)`
 
   display: flex;
   align-item: center;
+  justify-content: center;
   text-decoration: none;
   padding: 0 1rem;
+  margin: 5px;
   // height: 100%;
   cursor: pointer;
   text-align: center;
@@ -147,7 +149,7 @@ export const NavLinks = styled(LinkR)`
     border-bottom: 3px solid #fbae1a;
     background: #e6e6e6;
     border-radius: 11px;
-    padding: 3px 20px;
+    padding: 5px 0;
     color: #275e78;
     border: 1px solid #275e78;
     text-align: center;

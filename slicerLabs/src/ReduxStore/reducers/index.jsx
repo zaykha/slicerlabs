@@ -6,6 +6,7 @@ import CartItemReducer from './CartItemReducer';
 import PaymentStateReducer from './PaymentState';
 import AddressReducer from './MapServicesReducer';
 import addingMoreModelsReducer from './addingModelReduxer';
+import CurrentItemIndexReducer from './CurrentItemIndex';
 const rootReducer = combineReducers({
   userDetails: userDetailsReducer,
   authentication: authenticationReducer,
@@ -13,7 +14,8 @@ const rootReducer = combineReducers({
   cartItems: CartItemReducer,
   LocationStorage: AddressReducer,
   paymentState: PaymentStateReducer,
-  addingMoreModel: addingMoreModelsReducer
+  addingMoreModel: addingMoreModelsReducer,
+  currentItemIndex: CurrentItemIndexReducer
   // Add other reducers here if needed
 });
 

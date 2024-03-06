@@ -60,14 +60,21 @@ import {
   Tocartflexdiv,
 } from "../MaterialsOptions/MaterialsOptionselements";
 import ModelSizeChecker from "./ModelSizeChecker";
-import Carousel from "../../../../globalcomponents/Carousel/Carousel";
+import Carousel, {
+  ButtonContainer,
+  PageIndicator,
+  PageIndicatorplus,
+} from "../../../../globalcomponents/Carousel/Carousel";
 import { useNavigate } from "react-router-dom";
 import {
   LoginContainer,
   LoginFlexdiv,
   LoginFromcontainer,
 } from "../../../Login/LoginComponents/LoginForm/LoginFormelements";
-import { decrementCartCount } from "../../../../ReduxStore/actions/cartCountActions";
+import {
+  decrementCartCount,
+  setCurrentItemIndex,
+} from "../../../../ReduxStore/actions/cartCountActions";
 import { addingMoreModels } from "../../../../ReduxStore/actions/addingModel";
 import { doc, getDoc } from "firebase/firestore";
 import { ConfigCollection } from "../../../../firebase";
@@ -81,6 +88,7 @@ import {
   storeImage,
 } from "../../../../indexedDBImageUtilis";
 import RotatingLoader from "../../../../globalcomponents/DropDown/RotatingLoader";
+import { MdAdd, MdCheck } from "react-icons/md";
 async function blobToImageFile(blob, fileName) {
   // Create a new File object from the Blob
   const imageFile = new File([blob], fileName, { type: blob.type });
@@ -102,6 +110,9 @@ const Dropfile = ({}) => {
   const primitiveRef = useRef();
   const meshRef = useRef();
   const dispatch = useDispatch();
+  const currentItemIndex = useSelector(
+    (state) => state.currentItemIndex.currentItem
+  );
   const addingMoreModelLocal = useSelector(
     (state) => state.addingMoreModel.isAdding
   );
@@ -1083,7 +1094,35 @@ const Dropfile = ({}) => {
           {/* <Carousel items={carouselItems} /> */}
           <Carousel cart={cart} models={model} setModel={setModel} />
           {addingMoreModelLocal && (
-            <div style={{ position: "absolute" }}>
+            <div style={{ position: "absolute", paddingTop: "20px" }}>
+              <ButtonContainer>
+                {cart.cartItems.map((item, index) => (
+                  <PageIndicator
+                    key={index}
+                    active={index === currentItemIndex}
+                    onClick={() => {
+                      dispatch(addingMoreModels(false));
+                      dispatch(setCurrentItemIndex(index));
+                    }}
+                    priceNotZero={
+                      item.pricePerUnit !== 0 &&
+                      item.options.material !== "" &&
+                      item.options.color !== ""
+                    }
+                  >
+                    <MdCheck />
+                  </PageIndicator>
+                ))}
+                <PageIndicatorplus
+                  onClick={() => dispatch(addingMoreModels(true))}
+                  style={{
+                    cursor: "pointer",
+                    background: currentItemIndex === -1 ? "green" : "",
+                  }}
+                >
+                  <MdAdd />
+                </PageIndicatorplus>
+              </ButtonContainer>
               <DropzoneFormcontainer {...getRootProps()}>
                 <DropzoneContainer>
                   <input {...getInputProps()} />

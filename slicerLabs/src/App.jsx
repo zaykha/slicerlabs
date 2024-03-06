@@ -124,9 +124,10 @@ function App() {
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const successParam = queryParams.get("success");
+    const cancelParam = queryParams.get("cancel");
     if (!hasMountedRef.current) {
       const auth = getAuth();
-
+      // cancel_url: `https://slicerlabs.netlify.app/cart?returning_user_id=${userUID}`,
       // startAuthListener();
       fetchCalculatePriceFunction().then((calculatePriceFunction) => {
         // Handle the result here, you can set it in your component's state or do something else
@@ -162,6 +163,7 @@ function App() {
               console.log(
                 unparsedStoreditems,
                 successParam,
+                cancelParam,
                 window.location.search
               );
               if (successParam === "true") {
@@ -182,8 +184,13 @@ function App() {
                   );
                 }
                 getAllImages();
-              } else {
+              } else if (cancelParam === "true") {
                 console.log("successParam", successParam);
+                console.log(
+                  "Payment canceled",
+                  "user Purchased Items",
+                  userPurchasedItems
+                );
               }
             } else {
               console.log("No such document!");
