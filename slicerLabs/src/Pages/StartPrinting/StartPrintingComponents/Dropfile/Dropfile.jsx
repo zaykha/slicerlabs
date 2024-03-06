@@ -531,7 +531,7 @@ const Dropfile = ({}) => {
                         dispatch(
                           addModel({
                             id: modelId,
-                            fileName: acceptedFiles[0].name,
+                            fileName: uploadedFile.name,
                             model: stlMesh,
                             dimensions: dimensionsInMM,
                             options: {

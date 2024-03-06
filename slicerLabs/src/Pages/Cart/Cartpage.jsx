@@ -432,6 +432,7 @@ const Cartpage = () => {
       const { material, color, quantity } = item.options;
       const { dimensions, pricePerUnit } = item;
       const itemId = item.id;
+      const itemModel = item.model;
       const fileName = item.fileName;
       itemsForValidation.push({
         itemId,
@@ -441,6 +442,7 @@ const Cartpage = () => {
         dimensions,
         quantity, // Adjust the expected price based on quantity
         pricePerUnit,
+        itemModel,
         userUID: userUIDInLocalStorage,
         materialSettings,
       });

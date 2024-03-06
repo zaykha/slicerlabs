@@ -185,12 +185,31 @@ function App() {
                 }
                 getAllImages();
               } else if (cancelParam === "true") {
-                console.log("successParam", successParam);
                 console.log(
                   "Payment canceled",
                   "user Purchased Items",
                   userPurchasedItems
                 );
+                userPurchasedItems.forEach(item => {
+                  dispatch(
+                    addModel({
+                      id: item.itemId,
+                      fileName: item.fileName,
+                      model: item.model,
+                      dimensions: item.dimensions,
+                      options: {
+                        material: item.material,
+                        color: item.color,
+                        quantity: item.quantity,
+                      },
+                      pricePerUnit: item.pricePerUnit,
+                    })
+                  );
+                });
+              
+                // dispatch(updateMaterial({ ProductId: id, newMaterial }));
+                // dispatch(updateColor({ ProductId: id, newColor }));
+                // updateQuantity(ProductId, newQuantity);
               }
             } else {
               console.log("No such document!");
