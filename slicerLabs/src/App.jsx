@@ -209,15 +209,15 @@ function App() {
                             );
                             return; // Skip processing this item if file is not found
                           }
-                          console.log(currentFile.result);
+                          console.log("return promise", currentFile);
                           if (typeof currentFile.result.file !== "Blob") {
                             console.error(
                               `Data retrieved for item ID: ${item.itemId} is not a Blob object.`
                             );
-                            const blob = new Blob([currentFile], {
-                              type: "application/octet-stream",
-                            }); // Adjust content type as needed
-                            currentFile.result.file = blob;
+                            // const blob = new Blob([currentFile], {
+                            //   type: "application/octet-stream",
+                            // }); // Adjust content type as needed
+                            // currentFile.result.file = blob;
                           }
                           console.log(currentFile);
                           const fileExtension = item.fileName

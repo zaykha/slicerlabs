@@ -205,11 +205,33 @@ export const getFileById = async (id) => {
     const db = await openDB();
     const transaction = db.transaction(STORE_NAME, "readonly");
     const store = transaction.objectStore(STORE_NAME);
-    const file = await store.get(id);
-    console.log(`file with ID ${id} retrieved successfully`, file);
-    return file;
+
+    const request = store.get(id);
+
+    // Handle the request's success event to access the file data
+    request.onsuccess = (event) => {
+      const file = event.target.result;
+      console.log(`file with ID ${id} retrieved successfully`, file);
+
+      // Use the retrieved file here (within the onsuccess event handler)
+      // ... your code that uses the file ...
+    };
+
+    // Handle the request's error event if necessary (optional)
+    request.onerror = (event) => {
+      console.error("Error retrieving file by ID:", event.target.error);
+    };
+
+    // **Don't attempt to access the result outside the event handlers**
+
+    // Return the Promise object for asynchronous handling
+    return new Promise((resolve, reject) => {
+      // Resolve/reject the promise based on the request's events
+      request.onsuccess = (event) => resolve(event.target.result);
+      request.onerror = (event) => reject(event.target.error);
+    });
   } catch (error) {
-    console.error("Error retrieving file by ID:", error);
-    return null;
+    console.error("Error opening database:", error);
+    return null; // Or reject the promise with the error
   }
 };
