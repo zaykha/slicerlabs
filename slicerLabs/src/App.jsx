@@ -43,7 +43,7 @@ import { DashBoard } from "./Pages/UserProfile/UserProfile";
 import usePaymentSuccessHandler from "./Pages/Payment/SendDataToFireStore";
 import TaskPage from "./AdminRelated/TaskPage/TaskPage";
 import { resetCartCount } from "./ReduxStore/actions/cartCountActions";
-import { resetCartState } from "./ReduxStore/reducers/CartItemReducer";
+import { addModel, resetCartState } from "./ReduxStore/reducers/CartItemReducer";
 import { resetAddressDetails } from "./ReduxStore/reducers/MapServicesReducer";
 import { startAuthListener } from "./authListener";
 import TermsAndPolicies from "./Pages/Register/RegisterComponents/TermsAndPolicies";
