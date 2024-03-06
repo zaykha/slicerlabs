@@ -195,7 +195,7 @@ function App() {
                     addModel({
                       id: item.itemId,
                       fileName: item.fileName,
-                      model: item.model,
+                      model: item.itemModel,
                       dimensions: item.dimensions,
                       options: {
                         material: item.material,
