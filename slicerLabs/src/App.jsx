@@ -209,6 +209,7 @@ function App() {
                             );
                             return; // Skip processing this item if file is not found
                           }
+                          console.log(currentFile);
                           if (typeof currentFile !== "Blob") {
                             console.error(
                               `Data retrieved for item ID: ${item.itemId} is not a Blob object.`
