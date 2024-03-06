@@ -200,9 +200,10 @@ function App() {
                   const promises = [];
 
                   for (const item of userPurchasedItems) {
-                    promises.push(
-                      getFileById(item.itemId)
-                        .then(async (currentFile) => {
+                    // promises.push(
+                    //   getFileById(item.itemId)
+                    //     .then(async (currentFile) => {
+                      const currentFile = await getFileById(item.itemId);
                           if (!currentFile) {
                             console.error(
                               `Failed to get file for item ID: ${item.itemId}`
@@ -299,18 +300,18 @@ function App() {
                             }
                           };
                           reader.readAsDataURL(currentFile.result.file); // Read the file into data URL
-                        })
-                        .catch((error) => {
-                          console.error(
-                            `Error getting file for item ID: ${item.itemId}`,
-                            error
-                          );
-                        })
-                    );
+                        // })
+                        // .catch((error) => {
+                        //   console.error(
+                        //     `Error getting file for item ID: ${item.itemId}`,
+                        //     error
+                        //   );
+                        // })
+                    // );
                   }
 
                   // Wait for all promises to resolve before continuing
-                  await Promise.all(promises);
+                  // await Promise.all(promises);
                 }
                 processPurchasedItems();
               }
