@@ -47,7 +47,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { ConfigCollection } from "../../firebase";
 import { MeshBasicMaterial } from "three";
 import RotatingLoader from "../DropDown/RotatingLoader";
-import PriceTable from "../PriceTable/priceTable";
+import PriceTable, { getDiscountedPrice } from "../PriceTable/priceTable";
 const StyledOuterDiv = styled.div`
   width: 100vw;
   padding: 30px 0;
@@ -812,7 +812,8 @@ const Carousel = ({ setModel }) => {
                               <MinP>${price} </MinP>
                               <MinP>= </MinP>
                               <MinP>
-                                $ {(price * parseInt(quantity)).toFixed(2)}
+                                $ {(getDiscountedPrice(price,quantity)*quantity).toFixed(2)}
+                                {/* $ {(price * parseInt(quantity)).toFixed(2)} */}
                               </MinP>
                             </QtyDiv2>
                           </QtyFlexDiv>

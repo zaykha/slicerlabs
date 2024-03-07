@@ -1,5 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
-import cloneDeep from 'lodash/cloneDeep';
+import { createSlice } from "@reduxjs/toolkit";
+import cloneDeep from "lodash/cloneDeep";
 // Redux store
 const initialState = {
   cartItems: [],
@@ -7,37 +7,50 @@ const initialState = {
 };
 
 const cartSlice = createSlice({
-  name: 'cart',
+  name: "cart",
   initialState,
   reducers: {
     addModelToTempState(state, action) {
       state.tempModelId = action.payload;
     },
     addModel(state, action) {
-      const { id, fileName, model, dimensions, options, pricePerUnit } = action.payload; 
+      const { id, fileName, model, dimensions, options, pricePerUnit } =
+        action.payload;
       // const clonedModel = cloneDeep(model);
-      state.cartItems.push({
+      // state.cartItems.push({
+      //   id,
+      //   fileName,
+      //   model,
+      //   dimensions,
+      //   options,
+      //   pricePerUnit
+      // });
+      // state.tempModelId = id;
+      const newCartItem = {
         id,
         fileName,
-        model,
+        model, // Keep this field as is
         dimensions,
         options,
-        pricePerUnit
-      });
-      state.tempModelId = id;
+        pricePerUnit,
+      };
+      return {
+        ...state,
+        cartItems: [...state.cartItems, newCartItem],
+      };
     },
     addMaterialOptions(state, action) {
       const { checkID, options } = action.payload;
-    
-      const updatedCartItems = state.cartItems.map(item => {
+
+      const updatedCartItems = state.cartItems.map((item) => {
         if (item.id === checkID) {
-          console.log("found", options, checkID, item.id)
+          console.log("found", options, checkID, item.id);
           return {
             ...item,
-            options: options
+            options: options,
           };
         }
-        console.log("not found")
+        console.log("not found");
         return item;
       });
       // console.log(updatedCartItems)
@@ -111,14 +124,26 @@ const cartSlice = createSlice({
         state.cartItems[itemIndex].pricePerUnit = newPrice;
       }
     },
-    updateModel(state, action){
+    updateModel(state, action) {
       const { ProductId, newModel } = action.payload;
       const itemIndex = state.cartItems.findIndex(
         (item) => item.id === ProductId
       );
+      // if (itemIndex !== -1) {
+      //   state.cartItems[itemIndex].model = newModel;
+      // }
       if (itemIndex !== -1) {
-        state.cartItems[itemIndex].model = newModel;
+        const updatedCartItems = [...state.cartItems];
+        updatedCartItems[itemIndex] = {
+          ...updatedCartItems[itemIndex],
+          model: newModel,
+        };
+        return {
+          ...state,
+          cartItems: updatedCartItems,
+        };
       }
+      return state;
     },
     updateCartItem(state, action) {
       const { updatedCartItems } = action.payload;
@@ -126,10 +151,12 @@ const cartSlice = createSlice({
     },
     deleteModel(state, action) {
       const modelIdToDelete = action.payload;
-      state.cartItems = state.cartItems.filter((item) => item.id !== modelIdToDelete);
+      state.cartItems = state.cartItems.filter(
+        (item) => item.id !== modelIdToDelete
+      );
       // if (state.tempModelId === modelIdToDelete) {
       //   state.tempModelId = null;
-      // } 
+      // }
     },
     resetCartState(state) {
       return initialState; // Reset the state to the initial value
@@ -152,6 +179,6 @@ export const {
   updateModel,
   updateCartItem,
   deleteModel,
-  resetCartState
+  resetCartState,
 } = cartSlice.actions;
 export default cartSlice.reducer;
