@@ -48,21 +48,21 @@ export function getDiscountedPrice(initialPrice, quantity) {
     { threshold: 5, discount: 0.03 }, // 3% discount for quantities 5-9
     { threshold: 10, discount: 0.04 }, // 4% discount for quantities 10-49
     { threshold: 50, discount: 0.156 }, // 15.6% discount for quantities 50-99
-    { threshold: 100, discount: 0.0139 }, // 1.39% discount for quantities 100 and above
+    { threshold: 100, discount: 0.189 }, // 1.39% discount for quantities 100 and above
+    { threshold: 1000000, discount: 0.191 },
   ];
 
-  // Find the applicable discount tier
   const applicableDiscount = quantityDiscounts.find(
-    (discount) => quantity >= discount.threshold
-  );
-  console.log(
-    "discount",
-    applicableDiscount,
-    "quantity",
-    quantity,
-    "initialPrice",
-    initialPrice
-  );
+    discount => quantity <= discount.threshold
+  ); // Changed to <= for inclusive discounts
+  // console.log(
+  //   "discount",
+  //   applicableDiscount,
+  //   "quantity",
+  //   quantity,
+  //   "initialPrice",
+  //   initialPrice
+  // );
   // Calculate discounted price based on initial price and discount
   const discountAmount = initialPrice * applicableDiscount.discount;
   const discountedPrice = initialPrice - discountAmount;
@@ -161,7 +161,7 @@ function PriceTable({ initialPrice, individualModel }) {
   const prices = quantities.map((quantity) => ({
     quantity,
     unitPrice: getDiscountedPrice(initialPrice, quantity),
-    totalPrice: initialPrice * quantity,
+    totalPrice: getDiscountedPrice(initialPrice, quantity) * quantity,
   }));
 
   // Handler for row click
@@ -173,12 +173,12 @@ function PriceTable({ initialPrice, individualModel }) {
         newQuantity: quantity,
       })
     );
-    dispatch(
-      updatePrice({
-        ProductId: individualModel.id,
-        newPrice: prices[index].unitPrice,
-      })
-    );
+    // dispatch(
+    //   updatePrice({
+    //     ProductId: individualModel.id,
+    //     newPrice: prices[index].unitPrice,
+    //   })
+    // );
   };
 
   return (

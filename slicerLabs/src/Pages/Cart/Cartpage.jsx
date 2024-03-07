@@ -65,7 +65,11 @@ import { doc, getDoc } from "firebase/firestore";
 import RotatingLoader from "../../globalcomponents/DropDown/RotatingLoader";
 import { decrementCartCount } from "../../ReduxStore/actions/cartCountActions";
 import ConfirmationPrompt from "../../globalcomponents/prompt/ConfirmPrompt";
-import { deleteAllImages, deleteImageFromIndexDB } from "../../indexedDBImageUtilis";
+import {
+  deleteAllImages,
+  deleteImageFromIndexDB,
+} from "../../indexedDBImageUtilis";
+import { getDiscountedPrice } from "../../globalcomponents/PriceTable/priceTable";
 
 const ProgressBar = ({ step }) => {
   return (
@@ -159,155 +163,18 @@ const Cartpage = () => {
   const lat1 = parseFloat(startLat);
   const lon1 = parseFloat(startLon);
 
-  // useEffect(() => {
-  //   // Function to fetch data from IndexedDB
-  //   const fetchFilesFromIndexedDB = async () => {
-  //     try {
-  //       // Get all files from IndexedDB
-  //       const filesFromDB = await getAllFilesFromDB();
-  //       console.log("collected", filesFromDB);
-  //       processFilesFromIndexedDB(filesFromDB);
-  //     } catch (error) {
-  //       console.error("Error getting files from IndexedDB:", error);
-  //     }
-  //   };
-
-  //   const processFilesFromIndexedDB = (filesFromDB) => {
-  //     countItemsInDB()
-  //     .then((count) => {
-  //       if (count>0){
-  //         filesFromDB.map((file) => {
-  //           const fileExtension = file.file.name.split(".").pop().toLowerCase();
-  //           console.log("filerendered to processFileFunction",file)
-  //           const reader = new FileReader();
-  //           reader.onload = async () => {
-  //             try {
-  //               const fileContent = reader.result;
-  //               const manager = new LoadingManager();
-  //               if (fileExtension === "obj") {
-  //                 const objLoader = new OBJLoader(manager);
-  //                 objLoader.load(
-  //                   fileContent,
-  //                   (objData) => {
-  //                     setRenderedObjects((prevRenderedObjects) => [
-  //                       ...prevRenderedObjects,
-  //                       {
-  //                         objData,
-  //                         id:file.id
-  //                       }
-  //                     ]);
-  //                   },
-
-  //                   // undefined,
-  //                   function (xhr) {
-  //                     console.log("loading");
-  //                   },
-  //                   // onProgress,
-  //                   (error) => {
-  //                     console.log("An error happened", error);
-  //                   }
-  //                 );
-  //               } else if (fileExtension === "stl") {
-  //                 const stlLoader = new STLLoader();
-  //                 const stlData = stlLoader.loadAsync(file);
-  //               } else {
-  //                 console.log(
-  //                   "Invalid file type. Please upload only .stl and .obj files."
-  //                 );
-  //               }
-  //             } catch (error) {
-  //               console.log(error);
-  //             }
-  //           };
-  //           reader.readAsDataURL(file.file);
-  //         });
-  //       }
-  //     })
-  //     .catch((error) => console.error("Error counting items:", error));
-
-  //   };
-
-  //   setShouldFetchData(false);
-  //   // }
-  //   // Fetch files from IndexedDB when the component mounts or when coming from the Stripe page
-  //   if (fetchDataRef.current) {
-  //     fetchFilesFromIndexedDB();
-  //     // After fetching data, set shouldFetchData to false to prevent re-fetching on re-renders
-  //     fetchDataRef.current = false;
-
-  //   }
-  //   countItemsInDB()
-  //     .then((count) => console.log("indexedDb Count is ", count))
-  //     .catch((error) => console.error("Error counting items:", error));
-  // }, [fetchDataRef]);
-
   useEffect(() => {
     const totalPrice = cartItemsDetails.reduce(
-      (total, item) => total + item.pricePerUnit * item.options.quantity,
+      (total, item) =>
+        total +(getDiscountedPrice(item.pricePerUnit, item.options.quantity) *item.options.quantity),
       0
     );
-    console.log(cartItemsDetails);
+
+    // console.log(cartItemsDetails);
     setTTLPriceBeforeRouting(totalPrice);
-    console.log("totalPrice:", TTLPriceBeforeRouting);
+    // console.log("totalPrice:", TTLPriceBeforeRouting);
   }, [cartItemsDetails]);
 
-  // useEffect(() => {
-  //   if (endCoordinates) {
-  //     const [endLat, endLon] = endCoordinates.split(",");
-  //     try {
-  //       const distance = calculateDistance(lat1, lon1, endLat, endLon);
-  //       console.log("Distance between the addresses:", distance, "km");
-  //     } catch (error) {
-  //       console.error(error.message);
-  //     }
-  //   } else {
-  //     console.log("endCoordinates not ready");
-  //   }
-  // }, [endCoordinates]);
-  // const fetchConfigSettings = async () => {
-  //   setIsFetchingMSetting(true);
-  //   try {
-  //     const auth = getAuth();
-  //     const user = auth.currentUser;
-  //     // Check if the user is logged in
-  //     if (!user) {
-  //       // User is not logged in, prompt them to log in and redirect to the login page
-  //       // const confirmLogin = window.confirm(
-  //       //   "Please log in or create an account to proceed to payment."
-  //       // );
-  //       setErrorHandling({
-  //         state: true,
-  //         header: "Confirmation Needed",
-  //         message:
-  //           "Please log in or create an account to proceed to payment.",
-  //       });
-
-  //       // if (confirmLogin) {
-  //       //   navigate("/login"); // Redirect to the login page
-  //       // }
-  //       return; // Stop the function if the user is not logged in
-  //     }
-  //     const configDocRef = doc(ConfigCollection, userUIDInLocalStorage); // Replace with your collection and document IDs
-  //     const configDocSnapshot = await getDoc(configDocRef);
-
-  //     if (configDocSnapshot.exists()) {
-  //       const data = configDocSnapshot.data();
-  //       setMaterialSettings(data);
-  //     }
-  //     console.log(materialSettings);
-  //   } catch (error) {
-  //     console.error("Error fetching configuration settings:", error);
-  //   }
-  //   setIsFetchingMSetting(false);
-  // };
-  // useEffect(() => {
-  //   fetchConfigSettings();
-  // }, []);
-  // useEffect(() => {
-  //   if (AddressDetails) {
-  //     setEndCoordinates(AddressDetails);
-  //   }
-  // }, [AddressDetails]);
   const handleRemoveItem = (modelIdToDelete) => {
     dispatch(deleteModel(modelIdToDelete));
     dispatch(decrementCartCount());
@@ -409,8 +276,7 @@ const Cartpage = () => {
       setErrorHandling({
         state: true,
         header: "Confirmation Needed",
-        message:
-          "Please log in or create an account to proceed to payment.",
+        message: "Please log in or create an account to proceed to payment.",
       });
       setIsProceedingToPayment(false);
       // if (confirmLogin) {
@@ -612,6 +478,7 @@ const Cartpage = () => {
               quantity={item.options.quantity}
               price={item.pricePerUnit}
               onDelete={handleRemoveItem}
+              item={item}
               setuserConfirmationPrompt={setuserConfirmationPrompt}
             />
           ))
@@ -682,7 +549,7 @@ const Cartpage = () => {
               ...prev,
               state: false,
             }));
-            console.log('closing');
+            console.log("closing");
           }}
           onConfirm={() => {
             setConfirmationHandling((prev) => ({

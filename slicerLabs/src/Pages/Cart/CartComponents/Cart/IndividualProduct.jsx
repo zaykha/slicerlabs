@@ -34,6 +34,9 @@ import ConfirmationPrompt from "../../../../globalcomponents/prompt/Confirmation
 import styled from "styled-components";
 import ModelSizeChecker from "../../../StartPrinting/StartPrintingComponents/Dropfile/ModelSizeChecker";
 import html2canvas from "html2canvas";
+import PriceTable, {
+  getDiscountedPrice,
+} from "../../../../globalcomponents/PriceTable/priceTable";
 const Box = styled.div`
   background-color: transparent;
   display: flex;
@@ -103,8 +106,10 @@ const Rectangle = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 10px;
   :hover {
     cursor: pointer;
+    border: 1px solid ${({ borderColor }) => borderColor || "#000000"};
   }
 `;
 
@@ -126,9 +131,10 @@ const Input = styled.input`
 
 const Flexdiv = styled.div`
   display: flex;
-  height: 30px;
+  margin-top: 20px;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
+  gap: 20px;
   color: white;
 `;
 const IndividualProduct = ({
@@ -143,6 +149,7 @@ const IndividualProduct = ({
   quantity,
   price,
   onDelete,
+  item,
   setuserConfirmationPrompt,
 }) => {
   const [currentQuantity, setCurrentQuantity] = useState(quantity);
@@ -309,6 +316,8 @@ const IndividualProduct = ({
       onDelete(tempID);
     }
   };
+
+  
   // useEffect(() => {
   //   const captureScreenshot = async () => {
   //     if (canvasRef.current) {
@@ -356,33 +365,20 @@ const IndividualProduct = ({
             </div>
           </div>
 
-          <div className="vertical-Division1">
-            <h1 className="text-wrapper">ITEM {index}</h1>
+          <VerticalDivision>
+            <TextWrapper>Item {index}</TextWrapper>
+            <Flexdiv>
+              <Rectangle onClick={() => increaseQuantityAction(tempID)}>
+                +
+              </Rectangle>
+              <h3>{quantity}</h3>
+              <Rectangle onClick={() => decreaseQuantityAction(tempID)}>
+                -
+              </Rectangle>
+            </Flexdiv>
+          </VerticalDivision>
 
-            <div className="group-2">
-              <div className="overlap-group-wrapper">
-                <div
-                  className="overlap-group-3"
-                  onClick={() => increaseQuantityAction(tempID)}
-                >
-                  <div className="rectangle-2">
-                    <div className="text-wrapper-7">+</div>
-                  </div>
-                </div>
-                <div className="text-wrapper-6">{quantity}</div>
-
-                <div
-                  className="overlap-2"
-                  onClick={() => decreaseQuantityAction(tempID)}
-                >
-                  <div className="rectangle-3">
-                    <div className="text-wrapper-8">-</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+          <PriceTable initialPrice={price} individualModel={item} />
           <div className="vertical-Division2">
             <Mdropdownlabel htmlFor="material">Materials</Mdropdownlabel>
             <MOdropdown value={material} onChange={handleMaterialChange}>
@@ -392,7 +388,7 @@ const IndividualProduct = ({
               </Moption>
               <Moption value="PLA">Polylactic Acid (PLA)</Moption>
               <Moption value="TPU">Thermoplastic Polyurethane (TPU)</Moption>
-              <Moption value="Nylon">Nylon</Moption>
+              <Moption value="NYLON">Nylon</Moption>
               <Moption value="PETG">
                 Polyethylene Terephthalate Glycol (PETG)
               </Moption>
@@ -487,7 +483,9 @@ const IndividualProduct = ({
               <div className="div">Total :</div>
               <div className="overlap-group">
                 <div className="text-wrapper-3">SGD</div>
-                <div className="text-wrapper-2">{totalPrice}</div>
+                <div className="text-wrapper-2">
+                  {(getDiscountedPrice(price, quantity) * quantity).toFixed(2)}
+                </div>
               </div>
             </div>
           )}
