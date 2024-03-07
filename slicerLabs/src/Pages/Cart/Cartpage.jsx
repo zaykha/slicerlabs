@@ -307,7 +307,7 @@ const Cartpage = () => {
         color,
         dimensions,
         quantity, // Adjust the expected price based on quantity
-        pricePerUnit,
+        pricePerUnit:(getDiscountedPrice(pricePerUnit,quantity)*quantity).toFixed(2),
         userUID: userUIDInLocalStorage,
         materialSettings,
       });
