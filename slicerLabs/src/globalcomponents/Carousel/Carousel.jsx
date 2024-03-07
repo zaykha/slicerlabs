@@ -809,7 +809,7 @@ const Carousel = ({ setModel }) => {
                             </QtyDiv>
                             <QtyDiv2>
                               <MinP>x </MinP>
-                              <MinP>${price} </MinP>
+                              <MinP>${getDiscountedPrice(price,quantity)} </MinP>
                               <MinP>= </MinP>
                               <MinP>
                                 $ {(getDiscountedPrice(price,quantity)*quantity).toFixed(2)}

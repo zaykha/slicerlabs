@@ -132,6 +132,7 @@ const Input = styled.input`
 const Flexdiv = styled.div`
   display: flex;
   margin-top: 20px;
+  margin-bottom: 20px;
   justify-content: center;
   align-items: center;
   gap: 20px;
@@ -317,7 +318,6 @@ const IndividualProduct = ({
     }
   };
 
-  
   // useEffect(() => {
   //   const captureScreenshot = async () => {
   //     if (canvasRef.current) {
@@ -376,6 +376,10 @@ const IndividualProduct = ({
                 -
               </Rectangle>
             </Flexdiv>
+         
+              <TextWrapper>Price Per Unit:</TextWrapper>
+              <TextWrapper>{getDiscountedPrice(price, quantity)}</TextWrapper>
+          
           </VerticalDivision>
 
           <PriceTable initialPrice={price} individualModel={item} />

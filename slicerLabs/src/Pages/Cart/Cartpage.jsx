@@ -252,30 +252,30 @@ const Cartpage = () => {
   };
   // const stripe = loadStripe('pk_test_51NXRyMLJRenTchxdZh6X0oIQths7aa6kIDlyPzR0tAtoRaFXu3pCEv8T65UpKuWFWu9N1oyUwjQAzH4g9vqTLBn000DhgRovlf');
   // const totalAmountInCents = Math.round(TTLPriceBeforeRouting * 100); // Convert dollars to cents
-  // const handleConfirmation = () => {
-  //   let itemsForValidation = [];
-  //   // Perform the delete action here
-  //   cartItemsDetails.forEach((item) => {
-  //     const { material, color, quantity } = item.options;
-  //     const { dimensions, pricePerUnit } = item;
-  //     const itemId = item.id;
-  //     const itemModel = item.model;
-  //     const fileName = item.fileName;
-  //     itemsForValidation.push({
-  //       itemId,
-  //       fileName,
-  //       material,
-  //       color,
-  //       dimensions,
-  //       quantity, // Adjust the expected price based on quantity
-  //       pricePerUnit:(getDiscountedPrice(pricePerUnit,quantity)*quantity).toFixed(2),
-  //       userUID: userUIDInLocalStorage,
-  //       materialSettings,
-  //     });
-  //   });
-  //   console.log("itemsForValidation", itemsForValidation);
-  //   // setShowPrompt(false);
-  // };
+  const handleConfirmation = () => {
+    let itemsForValidation = [];
+    // Perform the delete action here
+    cartItemsDetails.forEach((item) => {
+      const { material, color, quantity } = item.options;
+      const { dimensions, pricePerUnit } = item;
+      const itemId = item.id;
+      const itemModel = item.model;
+      const fileName = item.fileName;
+      itemsForValidation.push({
+        itemId,
+        fileName,
+        material,
+        color,
+        dimensions,
+        quantity, // Adjust the expected price based on quantity
+        pricePerUnit:getDiscountedPrice(pricePerUnit,quantity),
+        userUID: userUIDInLocalStorage,
+        materialSettings,
+      });
+    });
+    console.log("itemsForValidation", itemsForValidation);
+    // setShowPrompt(false);
+  };
   const handleProceedToPayment = async () => {
     setIsProceedingToPayment(true);
     const auth = getAuth();
@@ -327,7 +327,7 @@ const Cartpage = () => {
         color,
         dimensions,
         quantity, // Adjust the expected price based on quantity
-        pricePerUnit:(getDiscountedPrice(pricePerUnit,quantity)*quantity).toFixed(2),
+        pricePerUnit:getDiscountedPrice(pricePerUnit,quantity),
         userUID: userUIDInLocalStorage,
         materialSettings,
       });

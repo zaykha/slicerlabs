@@ -45,8 +45,8 @@ export function getDiscountedPrice(initialPrice, quantity) {
   const quantityDiscounts = [
     { threshold: 1, discount: 0 }, // No discount for quantity 1
     { threshold: 2, discount: 0.05 }, // 5% discount for quantities 2-4
-    { threshold: 5, discount: 0.03 }, // 3% discount for quantities 5-9
-    { threshold: 10, discount: 0.04 }, // 4% discount for quantities 10-49
+    { threshold: 5, discount: 0.06 }, // 3% discount for quantities 5-9
+    { threshold: 10, discount: 0.09 }, // 4% discount for quantities 10-49
     { threshold: 50, discount: 0.156 }, // 15.6% discount for quantities 50-99
     { threshold: 100, discount: 0.189 }, // 1.39% discount for quantities 100 and above
     { threshold: 1000000, discount: 0.191 },
