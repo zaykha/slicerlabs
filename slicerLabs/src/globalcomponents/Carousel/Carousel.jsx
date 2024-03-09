@@ -62,7 +62,7 @@ const CarouselContainer = styled.div`
 
   width: 773px;
   margin: 40px auto;
-  height: auto; /* Set the desired height of your carousel */
+  height: auto; 
   //   border: 1px solid #ccc;
   // padding-bottom: 40px;
   padding: 20px 0;
@@ -95,10 +95,10 @@ export const PageIndicator = styled.div`
   background-color: ${(props) =>
     props.active
       ? props.priceNotZero
-        ? "rgba(255, 255, 255, 0.15)"
-        : "rgba(255, 255, 255, 0.4)"
+        ? "rgba(72, 178, 229, 0.8)"
+        : "rgba(72, 178, 229, 0.8)"
       : "transparent"};
-  border: 1px solid ${(props) => (props.priceNotZero ? "green" : "#636363")};
+  border: 1px solid ${(props) => (props.priceNotZero ? "white" : "#636363")};
   border-radius: 50%;
   margin: 0 5px;
   cursor: pointer;
@@ -108,7 +108,7 @@ export const PageIndicator = styled.div`
   position: relative;
 
   svg {
-    color: green;
+    color: white;
     display: ${(props) => (props.priceNotZero ? "block" : "none")};
   }
 `;

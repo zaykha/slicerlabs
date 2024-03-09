@@ -479,7 +479,7 @@ const Dropfile = ({}) => {
                   if (stlGeometry) {
                     // Create a mesh using the loaded geometry and a material
                     const material = new THREE.MeshStandardMaterial({
-                      color: "#195375",
+                      color: "#adadc9",
                       roughness: 0.5, // Adjust roughness (0 = very smooth, 1 = very rough)
                       metalness: 0.62, // Adjust metalness (0 = non-metallic, 1 = fully metallic)
                     });
