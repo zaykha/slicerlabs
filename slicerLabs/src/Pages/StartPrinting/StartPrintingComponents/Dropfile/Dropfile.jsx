@@ -430,7 +430,9 @@ const Dropfile = ({}) => {
                         -7.726866370752757, 7.241928986275022,
                         -8.091348270643504,
                       ]);
-
+                      cart.cartItems.length !== 0
+                        ? dispatch(setCurrentItemIndex(cart.cartItems.length))
+                        : null;
                       setIsLoading(false);
                       dispatch(addingMoreModels(false));
                       return true;
@@ -1117,7 +1119,8 @@ const Dropfile = ({}) => {
                   onClick={() => dispatch(addingMoreModels(true))}
                   style={{
                     cursor: "pointer",
-                    background: currentItemIndex === -1 ? "green" : "",
+                    background:
+                      currentItemIndex === -1 ? "rgba(72, 178, 229, 0.8)" : "",
                   }}
                 >
                   <MdAdd />

@@ -115,8 +115,8 @@ export const PageIndicator = styled.div`
 export const PageIndicatorplus = styled.div`
   width: 20px;
   height: 20px;
-  background-color: rgba(255, 255, 255, 0.25);
-  border: 1px solid #636363;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid white;
   border-radius: 50%;
   margin: 0 5px;
   cursor: pointer;
@@ -125,7 +125,7 @@ export const PageIndicatorplus = styled.div`
   justify-content: center;
   position: relative;
   svg {
-    color: lightblue;
+    color: white;
     display: "block";
   }
 `;
