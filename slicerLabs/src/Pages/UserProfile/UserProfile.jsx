@@ -443,7 +443,7 @@ export const DashBoard = () => {
                       </InnerHeader>
                       <InnerHeader>{item.status}</InnerHeader>
                       <InnerHeaderLeft>
-                        SGD {item.pricePerUnit.toFixed(2)}
+                        SGD {(item.pricePerUnit*item.quantity).toFixed(2)}
                       </InnerHeaderLeft>
                     </InnerHeaderWrapper>
                   );
@@ -527,7 +527,7 @@ export const DashBoard = () => {
                       </InnerHeader>
                       <InnerHeader>{item.status}</InnerHeader>
                       <InnerHeaderLeft>
-                        SGD {item.pricePerUnit.toFixed(2)}
+                        SGD {(item.pricePerUnit*item.quantity).toFixed(2)}
                       </InnerHeaderLeft>
                     </InnerHeaderWrapper>
                   );
