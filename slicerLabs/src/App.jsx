@@ -59,8 +59,8 @@ import SplashScreen from "./globalcomponents/DropDown/SplashScreen";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import FAQ from "./Pages/FAQ/FAQ";
-import { getAllImages } from "./indexedDBImageUtilis";
-import { getFileById } from "./indexedDBUtilis";
+import { deleteAllImages, getAllImages } from "./indexedDBImageUtilis";
+import { deleteAllRecordsFromDB, getFileById } from "./indexedDBUtilis";
 import { LoadingManager } from "three";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
@@ -314,6 +314,11 @@ function App() {
                   // await Promise.all(promises);
                 }
                 processPurchasedItems();
+              }else{
+                deleteAllRecordsFromDB();
+                deleteAllImages();
+                localStorage.removeItem("TempItemsDetailsStorage");
+                console.log('entered with no redirect')
               }
             } else {
               console.log("No such document!");
